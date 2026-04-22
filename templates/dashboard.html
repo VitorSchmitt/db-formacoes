@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<h1>Dashboard</h1>
+
+<h2>Total de Participações: <span id="total"></span></h2>
+
+<div id="g1"></div>
+<div id="g2"></div>
+<div id="g3"></div>
+
+<script>
+async function carregar() {
+
+    let res = await fetch("/api/dashboard");
+    let data = await res.json();
+
+    document.getElementById("total").innerText = data.total;
+
+    Plotly.newPlot("g1", [{
+        x: data.lotacao.map(x => x.lotacao),
+        y: data.lotacao.map(x => x.qtd),
+        type: "bar"
+    }], {title: "Por Lotação"});
+
+    Plotly.newPlot("g2", [{
+        x: data.curso.map(x => x.formacao),
+        y: data.curso.map(x => x.qtd),
+        type: "bar"
+    }], {title: "Por Curso"});
+
+    Plotly.newPlot("g3", [{
+        x: data.periodo.map(x => x.mes),
+        y: data.periodo.map(x => x.qtd),
+        type: "scatter"
+    }], {title: "Por Período"});
+}
+
+carregar();
+</script>
+
+</body>
+</html>

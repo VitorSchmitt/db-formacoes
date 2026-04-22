@@ -8,8 +8,6 @@ class Servidor(Base):
     matricula = Column(String, primary_key=True)
     nome = Column(String)
     cargo = Column(String)
-    data_admissao = Column(Date)
-
 
 class Formacao(Base):
     __tablename__ = "formacao"

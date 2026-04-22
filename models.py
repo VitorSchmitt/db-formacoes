@@ -13,8 +13,7 @@ class Formacao(Base):
     __tablename__ = "formacao"
 
     id = Column(Integer, primary_key=True)
-    descricao = Column(String)
-    data_inicio = Column(Date)
+    descricao = Column(String)    
     data_termino = Column(Date)
     tipo = Column(String)
     classificacao = Column(String)

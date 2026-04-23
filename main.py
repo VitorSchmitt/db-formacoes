@@ -5,8 +5,12 @@ from sqlalchemy.orm import Session
 
 import models
 from database import get_db
-
+import os
 import pandas as pd
+
+print("DIR ATUAL:", os.getcwd())
+print("ARQUIVOS:", os.listdir())
+print("TEMPLATES EXISTE?", os.path.exists("templates"))
 
 app = FastAPI()
 

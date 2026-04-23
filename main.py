@@ -57,13 +57,20 @@ def api_dashboard(db: Session = Depends(get_db)):
 
     if df.empty:
         return {"lotacao": [], "curso": [], "periodo": [], "total": 0}
-
-    df["data"] = pd.to_datetime(df["data"])
-    df["mes"] = df["data"].dt.to_period("M").astype(str)
-
+    
+    # garantir tipos simples
+    df["formacao"] = df["formacao"].astype(str)
+    df["lotacao"] = df["lotacao"].astype(str)
+    
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
+    df["mes"] = df["data"].dt.strftime("%Y-%m")
+    
+    # remover linhas inválidas
+    df = df.dropna(subset=["mes"])
+    
     return {
-        "lotacao": df.groupby("lotacao").size().reset_index(name="qtd").to_dict("records"),
-        "curso": df.groupby("formacao").size().reset_index(name="qtd").to_dict("records"),
-        "periodo": df.groupby("mes").size().reset_index(name="qtd").to_dict("records"),
-        "total": len(df)
+        "lotacao": df.groupby("lotacao")["lotacao"].count().reset_index(name="qtd").to_dict(orient="records"),
+        "curso": df.groupby("formacao")["formacao"].count().reset_index(name="qtd").to_dict(orient="records"),
+        "periodo": df.groupby("mes")["mes"].count().reset_index(name="qtd").to_dict(orient="records"),
+        "total": int(len(df))
     }

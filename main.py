@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,14 @@ templates = Jinja2Templates(directory="templates")
 
 
 # =========================
+# ROTA INICIAL (NOVA)
+# =========================
+@app.get("/")
+def home():
+    return RedirectResponse(url="/web/dashboard")
+
+
+# =========================
 # PÁGINA DASHBOARD
 # =========================
 @app.get("/web/dashboard", response_class=HTMLResponse)
@@ -22,7 +30,15 @@ def dashboard(request: Request):
 
 
 # =========================
-# API DADOS DASHBOARD
+# NOVA PÁGINA (MENU)
+# =========================
+@app.get("/web/formacoes", response_class=HTMLResponse)
+def formacoes(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+# =========================
+# API DADOS DASHBOARD (NÃO MUDOU)
 # =========================
 @app.get("/api/dashboard")
 def api_dashboard(db: Session = Depends(get_db)):

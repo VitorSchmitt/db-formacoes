@@ -9,13 +9,13 @@ class Servidor(Base):
     nome = Column(String)
     cargo = Column(String)
     data_registro = Column(Date)
-tipo_modalidade_enum = ENUM(
+tipo_modalidade = ENUM(
     "presencial", "online", "hibrido",
     name="tipo_modalidade",
     create_type=False  # importante: já existe no banco
 )
 
-tipo_eixo_enum = ENUM(
+tipo_eixo = ENUM(
     "Ambientação Institucional/Formação Inicial", "Gestão do Trabalho/Saúde Mental e Bem Estar", "Qualificação da Prática Socioeducativa Temas Transversais",
     name="tipo_eixo",
     create_type=False
@@ -27,8 +27,8 @@ class Formacao(Base):
     descricao = Column(String, nullable=True)
     data_termino = Column(Date, nullable=True)
     carga_horaria = Column(Integer, nullable=True)
-    modalidade = Column(tipo_modalidade_enum, nullable=True)
-    eixo = Column(tipo_eixo_enum, nullable=True)
+    modalidade = Column(tipo_modalidade, nullable=True)
+    eixo = Column(tipo_eixo, nullable=True)
 
 class Lotacao(Base):
     __tablename__ = "lotacao"

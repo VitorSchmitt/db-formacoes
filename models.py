@@ -9,36 +9,40 @@ class Servidor(Base):
     nome = Column(String)
     cargo = Column(String)
     data_registro = Column(Date)
+tipo_modalidade_enum = ENUM(
+    "presencial", "online", "hibrido",
+    name="tipo_modalidade",
+    create_type=False  # importante: já existe no banco
+)
+
+tipo_eixo_enum = ENUM(
+    "Ambientação Institucional/Formação Inicial", "Gestão do Trabalho/Saúde Mental e Bem Estar", "Qualificação da Prática Socioeducativa Temas Transversais",
+    name="tipo_eixo",
+    create_type=False
+)
+
 class Formacao(Base):
     __tablename__ = "formacao"
-
-    id = Column(Integer, primary_key=True)
-    descricao = Column(String)    
-    data_termino = Column(Date)
-    tipo = Column(String)
-    classificacao = Column(String)
-    carga_horaria = Column(Integer)
-
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String, nullable=True)
+    data_termino = Column(Date, nullable=True)
+    carga_horaria = Column(Integer, nullable=True)
+    modalidade = Column(tipo_modalidade_enum, nullable=True)
+    eixo = Column(tipo_eixo_enum, nullable=True)
 
 class Lotacao(Base):
     __tablename__ = "lotacao"
-
     id = Column(Integer, primary_key=True)
     descricao = Column(String)
     tipo = Column(String)
-
-
+    
 class Participacao(Base):
     __tablename__ = "participacao"
-
-    id = Column(Integer, primary_key=True)
-
-    matricula = Column(String, ForeignKey("servidor.matricula"))
-    formacao_id = Column(Integer, ForeignKey("formacao.id"))
-    lotacao_id = Column(Integer, ForeignKey("lotacao.id"))
-
+    id = Column(Integer, primary_key=True, index=True)
+    matricula = Column(String, ForeignKey("servidor.matricula"), nullable=True)
+    formacao_id = Column(Integer, ForeignKey("formacao.id"), nullable=True)
+    lotacao_id = Column(Integer, ForeignKey("lotacao.id"), nullable=True)
     aproveitamento = Column(String)
-
-    servidor = relationship("Servidor")
-    formacao = relationship("Formacao")
-    lotacao = relationship("Lotacao")
+    servidor = relationship("Servidor", lazy="joined")
+    formacao = relationship("Formacao", lazy="joined")
+    lotacao = relationship("Lotacao", lazy="joined")

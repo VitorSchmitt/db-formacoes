@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+from sqlalchemy.dialects.postgresql import ENUM
 
 class Servidor(Base):
     __tablename__ = "servidor"

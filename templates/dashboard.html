@@ -1,22 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Dashboard</h1>
+{% block content %}
 
-<h2>Total de Participações: <span id="total"></span></h2>
+<h2>Dashboard</h2>
 
-<div id="g1"></div>
-<div id="g2"></div>
-<div id="g3"></div>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5>Total</h5>
+                <h2 id="total"></h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div id="g1"></div>
+    </div>
+    <div class="col-md-6">
+        <div id="g2"></div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div id="g3"></div>
+    </div>
+</div>
 
 <script>
 async function carregar() {
-
     let res = await fetch("/api/dashboard");
     let data = await res.json();
 
@@ -44,5 +59,4 @@ async function carregar() {
 carregar();
 </script>
 
-</body>
-</html>
+{% endblock %}

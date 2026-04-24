@@ -44,38 +44,58 @@ def formacoes(request: Request):
 # =========================
 # API DADOS DASHBOARD (NÃO MUDOU)
 # =========================
+from fastapi import Query
+
 @app.get("/api/dashboard")
-def api_dashboard(db: Session = Depends(get_db)):
-    try:
-        dados = db.query(models.Participacao).all()
+def api_dashboard(
+    db: Session = Depends(get_db),
+    mes_inicio: str = Query(None),
+    mes_fim: str = Query(None),
+    lotacao: str = Query(None),
+    curso: str = Query(None)
+):
 
-        lista = []
-        for p in dados:
-            lista.append({
-                "formacao": p.formacao.descricao if p.formacao else "Sem curso",
-                "lotacao": p.lotacao.descricao if p.lotacao else "Sem lotação",
-                "data": p.formacao.data_termino if p.formacao else None
-            })
+    dados = db.query(models.Participacao).all()
 
-        df = pd.DataFrame(lista)
+    lista = []
+    for p in dados:
+        lista.append({
+            "formacao": p.formacao.descricao if p.formacao else "",
+            "lotacao": p.lotacao.descricao if p.lotacao else "",
+            "data": p.formacao.data_termino if p.formacao else None
+        })
 
-        if df.empty:
-            return {"lotacao": [], "curso": [], "periodo": [], "total": 0}
+    df = pd.DataFrame(lista)
 
-        df["formacao"] = df["formacao"].astype(str)
-        df["lotacao"] = df["lotacao"].astype(str)
+    if df.empty:
+        return {"lotacao": [], "curso": [], "periodo": [], "total": 0}
 
-        df["data"] = pd.to_datetime(df["data"], errors="coerce")
-        df["mes"] = df["data"].dt.strftime("%Y-%m")
+    # 🔹 tratar data
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
+    df = df.dropna(subset=["data"])
 
-        df = df.dropna(subset=["mes"])
+    # 🔹 criar ANO-MÊS (padrão BI)
+    df["mes"] = df["data"].dt.strftime("%Y-%m")
 
-        return {
-            "lotacao": df.groupby("lotacao").size().reset_index(name="qtd").to_dict("records"),
-            "curso": df.groupby("formacao").size().reset_index(name="qtd").to_dict("records"),
-            "periodo": df.groupby("mes").size().reset_index(name="qtd").to_dict("records"),
-            "total": int(len(df))
-        }
+    # 🔹 FILTROS POR MÊS
+    if mes_inicio:
+        df = df[df["mes"] >= mes_inicio]
 
-    except Exception as e:
-        return {"erro": str(e)}
+    if mes_fim:
+        df = df[df["mes"] <= mes_fim]
+
+    if lotacao:
+        df = df[df["lotacao"] == lotacao]
+
+    if curso:
+        df = df[df["formacao"] == curso]
+
+    return {
+        "lotacao": df.groupby("lotacao")["lotacao"].count().reset_index(name="qtd").to_dict(orient="records"),
+        "curso": df.groupby("formacao")["formacao"].count().reset_index(name="qtd").to_dict(orient="records"),
+        "periodo": df.groupby("mes")["mes"].count().reset_index(name="qtd").to_dict(orient="records"),
+        "total": int(len(df)),
+        "lista_lotacao": sorted(df["lotacao"].unique().tolist()),
+        "lista_curso": sorted(df["formacao"].unique().tolist()),
+        "lista_meses": sorted(df["mes"].unique().tolist())
+    }

@@ -1,101 +1,101 @@
-from fastapi import FastAPI, Depends, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Request, Query
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-
-import models
-from database import get_db
-import os
-import pandas as pd
-
-print("DIR ATUAL:", os.getcwd())
-print("ARQUIVOS:", os.listdir())
-print("TEMPLATES EXISTE?", os.path.exists("templates"))
+from sqlalchemy import func
+from database import SessionLocal
+from models import Participacao, Formacao, Lotacao
 
 app = FastAPI()
-
 templates = Jinja2Templates(directory="templates")
 
 
-# =========================
-# ROTA INICIAL (NOVA)
-# =========================
+# ===============================
+# WEB
+# ===============================
 @app.get("/")
 def home():
-    return RedirectResponse(url="/web/dashboard")
+    return {"ok": True}
 
 
-# =========================
-# PÁGINA DASHBOARD
-# =========================
-@app.get("/web/dashboard", response_class=HTMLResponse)
+@app.get("/web/dashboard")
 def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
-# =========================
-# NOVA PÁGINA (MENU)
-# =========================
-@app.get("/web/formacoes", response_class=HTMLResponse)
-def formacoes(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
-
-# =========================
-# API DADOS DASHBOARD (NÃO MUDOU)
-# =========================
-from fastapi import Query
-
+# ===============================
+# API
+# ===============================
 @app.get("/api/dashboard")
 def api_dashboard(
-    db: Session = Depends(get_db),
     mes_inicio: str = Query(None),
     mes_fim: str = Query(None),
     lotacao: str = Query(None),
-    curso: str = Query(None)
+    curso: str = Query(None),
 ):
+    db: Session = SessionLocal()
 
-    dados = db.query(models.Participacao).all()
+    try:
+        query = db.query(Participacao).join(Formacao).join(Lotacao)
 
-    lista = []
-    for p in dados:
-        lista.append({
-            "formacao": p.formacao.descricao if p.formacao else "",
-            "lotacao": p.lotacao.descricao if p.lotacao else "",
-            "data": p.formacao.data_termino if p.formacao else None
-        })
+        # 🔎 FILTROS
+        if mes_inicio:
+            query = query.filter(
+                func.to_char(Formacao.data_termino, "YYYY-MM") >= mes_inicio
+            )
 
-    df = pd.DataFrame(lista)
+        if mes_fim:
+            query = query.filter(
+                func.to_char(Formacao.data_termino, "YYYY-MM") <= mes_fim
+            )
 
-    if df.empty:
-        return {"lotacao": [], "curso": [], "periodo": [], "total": 0}
+        if lotacao:
+            query = query.filter(Lotacao.descricao == lotacao)
 
-    # 🔹 tratar data
-    df["data"] = pd.to_datetime(df["data"], errors="coerce")
-    df = df.dropna(subset=["data"])
+        if curso:
+            query = query.filter(Formacao.descricao == curso)
 
-    # 🔹 criar ANO-MÊS (padrão BI)
-    df["mes"] = df["data"].dt.strftime("%Y-%m")
+        total = query.count()
 
-    # 🔹 FILTROS POR MÊS
-    if mes_inicio:
-        df = df[df["mes"] >= mes_inicio]
+        # 📊 POR LOTAÇÃO
+        lotacao_data = (
+            query.with_entities(
+                func.trim(Lotacao.descricao),
+                func.count()
+            )
+            .group_by(Lotacao.descricao)
+            .all()
+        )
 
-    if mes_fim:
-        df = df[df["mes"] <= mes_fim]
+        # 📊 POR CURSO
+        curso_data = (
+            query.with_entities(
+                func.trim(Formacao.descricao),
+                func.count()
+            )
+            .group_by(Formacao.descricao)
+            .all()
+        )
 
-    if lotacao:
-        df = df[df["lotacao"] == lotacao]
+        # 📊 POR PERÍODO
+        periodo_data = (
+            query.with_entities(
+                func.to_char(Formacao.data_termino, "YYYY-MM"),
+                func.count()
+            )
+            .group_by(func.to_char(Formacao.data_termino, "YYYY-MM"))
+            .order_by(func.to_char(Formacao.data_termino, "YYYY-MM"))
+            .all()
+        )
 
-    if curso:
-        df = df[df["formacao"] == curso]
+        return {
+            "total": total,
+            "lotacao": [{"lotacao": l[0], "qtd": l[1]} for l in lotacao_data],
+            "curso": [{"formacao": c[0], "qtd": c[1]} for c in curso_data],
+            "periodo": [{"mes": p[0], "qtd": p[1]} for p in periodo_data],
+        }
 
-    return {
-        "lotacao": df.groupby("lotacao")["lotacao"].count().reset_index(name="qtd").to_dict(orient="records"),
-        "curso": df.groupby("formacao")["formacao"].count().reset_index(name="qtd").to_dict(orient="records"),
-        "periodo": df.groupby("mes")["mes"].count().reset_index(name="qtd").to_dict(orient="records"),
-        "total": int(len(df)),
-        "lista_lotacao": sorted(df["lotacao"].unique().tolist()),
-        "lista_curso": sorted(df["formacao"].unique().tolist()),
-        "lista_meses": sorted(df["mes"].unique().tolist())
-    }
+    except Exception as e:
+        return {"erro": str(e)}
+
+    finally:
+        db.close()

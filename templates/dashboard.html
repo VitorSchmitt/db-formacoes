@@ -2,7 +2,13 @@
 
 {% block content %}
 
-<h2>📊 Dashboard de Formações</h2>
+<h2 class="mb-3">📊 Dashboard de Formações</h2>
+
+<!-- ALERTA ERRO -->
+<div id="erro" class="alert alert-danger" style="display:none"></div>
+
+<!-- LOADING -->
+<div id="loading" style="display:none; font-weight:bold;">Carregando...</div>
 
 <!-- FILTROS -->
 <div class="row mb-3">
@@ -18,8 +24,11 @@
     <div class="col-md-3">
         <select id="filtroCurso" class="form-control"></select>
     </div>
-    <div class="col-md-2">
-        <button onclick="carregar()" class="btn btn-dark w-100">Filtrar</button>
+    <div class="col-md-1">
+        <button onclick="carregar()" class="btn btn-dark w-100">OK</button>
+    </div>
+    <div class="col-md-1">
+        <button onclick="limparFiltros()" class="btn btn-secondary w-100">⟲</button>
     </div>
 </div>
 
@@ -28,7 +37,7 @@
     <div class="col-md-3">
         <div class="card text-white bg-primary text-center">
             <div class="card-body">
-                <h5>Total Participações</h5>
+                <h6>Total</h6>
                 <h2 id="total"></h2>
             </div>
         </div>
@@ -37,7 +46,7 @@
     <div class="col-md-3">
         <div class="card text-white bg-success text-center">
             <div class="card-body">
-                <h5>Total Cursos</h5>
+                <h6>Cursos</h6>
                 <h2 id="totalCursos"></h2>
             </div>
         </div>
@@ -46,7 +55,7 @@
     <div class="col-md-3">
         <div class="card text-dark bg-warning text-center">
             <div class="card-body">
-                <h5>Total Lotações</h5>
+                <h6>Lotações</h6>
                 <h2 id="totalLotacoes"></h2>
             </div>
         </div>
@@ -55,7 +64,7 @@
     <div class="col-md-3">
         <div class="card text-white bg-dark text-center">
             <div class="card-body">
-                <h5>Média Mensal</h5>
+                <h6>Média Mensal</h6>
                 <h2 id="media"></h2>
             </div>
         </div>
@@ -73,84 +82,195 @@
 </div>
 
 <script>
+
+// ===============================
+// ESTADO GLOBAL
+// ===============================
+let filtros = {
+    mes_inicio: "",
+    mes_fim: "",
+    lotacao: "",
+    curso: ""
+};
+
+// ===============================
+// CARREGAR DADOS
+// ===============================
 async function carregar() {
 
-    let mes_inicio = document.getElementById("mes_inicio").value;
-    let mes_fim = document.getElementById("mes_fim").value;
-    let lotacao = document.getElementById("filtroLotacao").value;
-    let curso = document.getElementById("filtroCurso").value;
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("erro").style.display = "none";
 
-    let url = `/api/dashboard?mes_inicio=${mes_inicio}&mes_fim=${mes_fim}&lotacao=${lotacao}&curso=${curso}`;
+    let url = `/api/dashboard?mes_inicio=${filtros.mes_inicio}&mes_fim=${filtros.mes_fim}&lotacao=${filtros.lotacao}&curso=${filtros.curso}`;
 
     let res = await fetch(url);
     let data = await res.json();
 
+    document.getElementById("loading").style.display = "none";
+
     if (data.erro) {
-        alert(data.erro);
+        let div = document.getElementById("erro");
+        div.innerText = data.erro;
+        div.style.display = "block";
         return;
     }
 
-    // CARDS
+    atualizarCards(data);
+    preencherFiltros(data);
+    montarGraficos(data);
+}
+
+// ===============================
+// CARDS
+// ===============================
+function atualizarCards(data) {
+
     document.getElementById("total").innerText = data.total;
     document.getElementById("totalCursos").innerText = data.curso.length;
     document.getElementById("totalLotacoes").innerText = data.lotacao.length;
 
     let soma = data.periodo.reduce((acc, x) => acc + x.qtd, 0);
-    let media = soma / data.periodo.length || 0;
+    let media = soma / (data.periodo.length || 1);
+
     document.getElementById("media").innerText = media.toFixed(1);
-
-    // FILTROS
-    preencherFiltros(data);
-
-    // TOP 10
-    let lotTop = data.lotacao.sort((a,b)=>b.qtd-a.qtd).slice(0,10);
-    let cursoTop = data.curso.sort((a,b)=>b.qtd-a.qtd).slice(0,10);
-
-    // GRÁFICOS
-    Plotly.newPlot("g1", [{
-        x: lotTop.map(x => x.lotacao),
-        y: lotTop.map(x => x.qtd),
-        type: "bar"
-    }], {title: "Top 10 Lotações"});
-
-    Plotly.newPlot("g2", [{
-        x: cursoTop.map(x => x.formacao),
-        y: cursoTop.map(x => x.qtd),
-        type: "bar"
-    }], {title: "Top 10 Cursos"});
-
-    Plotly.newPlot("g3", [{
-        x: data.periodo.map(x => x.mes),
-        y: data.periodo.map(x => x.qtd),
-        type: "scatter"
-    }], {title: "Participações por Mês"});
 }
 
-
+// ===============================
+// FILTROS (SELECT)
+// ===============================
 function preencherFiltros(data) {
+
     let selectLotacao = document.getElementById("filtroLotacao");
     let selectCurso = document.getElementById("filtroCurso");
+
+    let atualLot = filtros.lotacao;
+    let atualCurso = filtros.curso;
 
     selectLotacao.innerHTML = '<option value="">Todas Lotações</option>';
     selectCurso.innerHTML = '<option value="">Todos Cursos</option>';
 
     data.lotacao.forEach(item => {
-        let opt = document.createElement("option");
-        opt.value = item.lotacao.trim();
-        opt.text = item.lotacao.trim();
-        selectLotacao.appendChild(opt);
+        let val = item.lotacao.trim();
+        let opt = new Option(val, val);
+        if (val === atualLot) opt.selected = true;
+        selectLotacao.add(opt);
     });
 
     data.curso.forEach(item => {
-        let opt = document.createElement("option");
-        opt.value = item.formacao.trim();
-        opt.text = item.formacao.trim();
-        selectCurso.appendChild(opt);
+        let val = item.formacao.trim();
+        let opt = new Option(val, val);
+        if (val === atualCurso) opt.selected = true;
+        selectCurso.add(opt);
     });
+}
+
+// ===============================
+// GRÁFICOS
+// ===============================
+function montarGraficos(data) {
+
+    let lotTop = data.lotacao.sort((a,b)=>b.qtd-a.qtd).slice(0,10);
+    let cursoTop = data.curso.sort((a,b)=>b.qtd-a.qtd).slice(0,10);
+
+    // LOTAÇÃO
+    Plotly.react("g1", [{
+        x: lotTop.map(x => x.lotacao),
+        y: lotTop.map(x => x.qtd),
+        type: "bar",
+        marker: {
+            color: lotTop.map(x =>
+                x.lotacao === filtros.lotacao ? "red" : "#007bff"
+            )
+        }
+    }], {title: "Top Lotações"});
+
+    document.getElementById("g1").onclick = (d) => {
+        let ponto = d.target.__data__;
+    };
+
+    document.getElementById("g1").on('plotly_click', function(d) {
+        let valor = d.points[0].x;
+        filtros.lotacao = (filtros.lotacao === valor) ? "" : valor;
+        carregar();
+    });
+
+    // CURSO
+    Plotly.react("g2", [{
+        x: cursoTop.map(x => x.formacao),
+        y: cursoTop.map(x => x.qtd),
+        type: "bar",
+        marker: {
+            color: cursoTop.map(x =>
+                x.formacao === filtros.curso ? "red" : "#28a745"
+            )
+        }
+    }], {title: "Top Cursos"});
+
+    document.getElementById("g2").on('plotly_click', function(d) {
+        let valor = d.points[0].x;
+        filtros.curso = (filtros.curso === valor) ? "" : valor;
+        carregar();
+    });
+
+    // PERÍODO
+    Plotly.react("g3", [{
+        x: data.periodo.map(x => x.mes),
+        y: data.periodo.map(x => x.qtd),
+        type: "scatter"
+    }], {title: "Participações por Mês"});
+
+    document.getElementById("g3").on('plotly_click', function(d) {
+        let mes = d.points[0].x;
+        filtros.mes_inicio = mes;
+        filtros.mes_fim = mes;
+        carregar();
+    });
+}
+
+// ===============================
+// EVENTOS INPUT
+// ===============================
+document.getElementById("filtroLotacao").addEventListener("change", e => {
+    filtros.lotacao = e.target.value;
+    carregar();
+});
+
+document.getElementById("filtroCurso").addEventListener("change", e => {
+    filtros.curso = e.target.value;
+    carregar();
+});
+
+document.getElementById("mes_inicio").addEventListener("change", e => {
+    filtros.mes_inicio = e.target.value;
+});
+
+document.getElementById("mes_fim").addEventListener("change", e => {
+    filtros.mes_fim = e.target.value;
+});
+
+// ===============================
+// LIMPAR FILTROS
+// ===============================
+function limparFiltros() {
+
+    filtros = {
+        mes_inicio: "",
+        mes_fim: "",
+        lotacao: "",
+        curso: ""
+    };
+
+    document.getElementById("mes_inicio").value = "";
+    document.getElementById("mes_fim").value = "";
+    document.getElementById("filtroLotacao").value = "";
+    document.getElementById("filtroCurso").value = "";
+
+    carregar();
 }
 
 // INIT
 carregar();
+
 </script>
 
 {% endblock %}

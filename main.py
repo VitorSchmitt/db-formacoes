@@ -54,7 +54,7 @@ def api_dashboard(db: Session = Depends(get_db)):
         lista.append({
             "formacao": p.formacao.descricao if p.formacao else "",
             "lotacao": p.lotacao.descricao if p.lotacao else "",
-            "data": p.formacao.data_inicio if p.formacao else None
+            "data": p.formacao.data_termino if p.formacao else None
         })
 
     df = pd.DataFrame(lista)

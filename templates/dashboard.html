@@ -2,58 +2,195 @@
 
 {% block content %}
 
-<h2>Dashboard</h2>
+<h2 class="mb-4">📊 Dashboard de Formações</h2>
 
+<!-- 🔹 FILTROS -->
 <div class="row mb-4">
+
+    <div class="col-md-2">
+        <select id="mes_inicio" class="form-control"></select>
+    </div>
+
+    <div class="col-md-2">
+        <select id="mes_fim" class="form-control"></select>
+    </div>
+
     <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5>Total</h5>
+        <select id="filtro_lotacao" class="form-control">
+            <option value="">Todas Lotações</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select id="filtro_curso" class="form-control">
+            <option value="">Todos Cursos</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-dark w-100" onclick="carregar()">Filtrar</button>
+    </div>
+
+</div>
+
+<!-- 🔹 CARDS KPI -->
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card kpi-card bg-primary text-white">
+            <div class="card-body text-center">
+                <h6>Total de Participações</h6>
                 <h2 id="total"></h2>
             </div>
         </div>
     </div>
+
+    <div class="col-md-3">
+        <div class="card kpi-card bg-success text-white">
+            <div class="card-body text-center">
+                <h6>Total de Cursos</h6>
+                <h2 id="totalCursos"></h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card kpi-card bg-warning text-white">
+            <div class="card-body text-center">
+                <h6>Total de Lotações</h6>
+                <h2 id="totalLotacoes"></h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card kpi-card bg-dark text-white">
+            <div class="card-body text-center">
+                <h6>Média por Mês</h6>
+                <h2 id="mediaMes"></h2>
+            </div>
+        </div>
+    </div>
+
 </div>
 
+<!-- 🔹 GRÁFICOS -->
 <div class="row">
+
     <div class="col-md-6">
-        <div id="g1"></div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="g1"></div>
+            </div>
+        </div>
     </div>
+
     <div class="col-md-6">
-        <div id="g2"></div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="g2"></div>
+            </div>
+        </div>
     </div>
+
 </div>
 
 <div class="row mt-4">
+
     <div class="col-md-12">
-        <div id="g3"></div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="g3"></div>
+            </div>
+        </div>
     </div>
+
 </div>
 
+<!-- 🔹 ESTILO -->
+<style>
+.kpi-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card {
+    border-radius: 12px;
+}
+
+select {
+    border-radius: 8px;
+}
+</style>
+
+<!-- 🔹 SCRIPT -->
 <script>
 async function carregar() {
-    let res = await fetch("/api/dashboard");
+
+    let mes_inicio = document.getElementById("mes_inicio").value;
+    let mes_fim = document.getElementById("mes_fim").value;
+    let lotacao = document.getElementById("filtro_lotacao").value;
+    let curso = document.getElementById("filtro_curso").value;
+
+    let url = `/api/dashboard?mes_inicio=${mes_inicio}&mes_fim=${mes_fim}&lotacao=${lotacao}&curso=${curso}`;
+
+    let res = await fetch(url);
     let data = await res.json();
 
+    // 🔹 KPIs
     document.getElementById("total").innerText = data.total;
+    document.getElementById("totalCursos").innerText = data.curso.length;
+    document.getElementById("totalLotacoes").innerText = data.lotacao.length;
 
+    let media = data.periodo.length > 0 ? (data.total / data.periodo.length).toFixed(1) : 0;
+    document.getElementById("mediaMes").innerText = media;
+
+    // 🔹 preencher filtros (uma vez)
+    if (document.getElementById("mes_inicio").options.length === 0) {
+
+        data.lista_meses.forEach(m => {
+            document.getElementById("mes_inicio").add(new Option(m, m));
+            document.getElementById("mes_fim").add(new Option(m, m));
+        });
+
+        data.lista_lotacao.forEach(l => {
+            document.getElementById("filtro_lotacao").add(new Option(l, l));
+        });
+
+        data.lista_curso.forEach(c => {
+            document.getElementById("filtro_curso").add(new Option(c, c));
+        });
+    }
+
+    // 🔹 GRÁFICO LOTAÇÃO
     Plotly.newPlot("g1", [{
         x: data.lotacao.map(x => x.lotacao),
         y: data.lotacao.map(x => x.qtd),
         type: "bar"
-    }], {title: "Por Lotação"});
+    }], {
+        title: "Participações por Lotação"
+    });
 
+    // 🔹 GRÁFICO CURSOS
     Plotly.newPlot("g2", [{
         x: data.curso.map(x => x.formacao),
         y: data.curso.map(x => x.qtd),
         type: "bar"
-    }], {title: "Por Curso"});
+    }], {
+        title: "Participações por Curso"
+    });
 
+    // 🔹 GRÁFICO TEMPO
     Plotly.newPlot("g3", [{
         x: data.periodo.map(x => x.mes),
         y: data.periodo.map(x => x.qtd),
         type: "scatter"
-    }], {title: "Por Período"});
+    }], {
+        title: "Evolução no Tempo",
+        showlegend: false
+    });
+
 }
 
 carregar();

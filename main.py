@@ -46,35 +46,36 @@ def formacoes(request: Request):
 # =========================
 @app.get("/api/dashboard")
 def api_dashboard(db: Session = Depends(get_db)):
+    try:
+        dados = db.query(models.Participacao).all()
 
-    dados = db.query(models.Participacao).all()
+        lista = []
+        for p in dados:
+            lista.append({
+                "formacao": p.formacao.descricao if p.formacao else "Sem curso",
+                "lotacao": p.lotacao.descricao if p.lotacao else "Sem lotação",
+                "data": p.formacao.data_termino if p.formacao else None
+            })
 
-    lista = []
-    for p in dados:
-        lista.append({
-            "formacao": p.formacao.descricao if p.formacao else "",
-            "lotacao": p.lotacao.descricao if p.lotacao else "",
-            "data": p.formacao.data_termino if p.formacao else None
-        })
+        df = pd.DataFrame(lista)
 
-    df = pd.DataFrame(lista)
+        if df.empty:
+            return {"lotacao": [], "curso": [], "periodo": [], "total": 0}
 
-    if df.empty:
-        return {"lotacao": [], "curso": [], "periodo": [], "total": 0}
-    
-    # garantir tipos simples
-    df["formacao"] = df["formacao"].astype(str)
-    df["lotacao"] = df["lotacao"].astype(str)
-    
-    df["data"] = pd.to_datetime(df["data"], errors="coerce")
-    df["mes"] = df["data"].dt.strftime("%Y-%m")
-    
-    # remover linhas inválidas
-    df = df.dropna(subset=["mes"])
-    
-    return {
-        "lotacao": df.groupby("lotacao")["lotacao"].count().reset_index(name="qtd").to_dict(orient="records"),
-        "curso": df.groupby("formacao")["formacao"].count().reset_index(name="qtd").to_dict(orient="records"),
-        "periodo": df.groupby("mes")["mes"].count().reset_index(name="qtd").to_dict(orient="records"),
-        "total": int(len(df))
-    }
+        df["formacao"] = df["formacao"].astype(str)
+        df["lotacao"] = df["lotacao"].astype(str)
+
+        df["data"] = pd.to_datetime(df["data"], errors="coerce")
+        df["mes"] = df["data"].dt.strftime("%Y-%m")
+
+        df = df.dropna(subset=["mes"])
+
+        return {
+            "lotacao": df.groupby("lotacao").size().reset_index(name="qtd").to_dict("records"),
+            "curso": df.groupby("formacao").size().reset_index(name="qtd").to_dict("records"),
+            "periodo": df.groupby("mes").size().reset_index(name="qtd").to_dict("records"),
+            "total": int(len(df))
+        }
+
+    except Exception as e:
+        return {"erro": str(e)}

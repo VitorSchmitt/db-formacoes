@@ -34,11 +34,10 @@
 
 <table class="table table-striped">
     <thead>
-        <tr>
-            <th>ID</th>
+        <tr>            
             <th>Descrição</th>
             <th>Data</th>
-            <th>Modalidade</th>
+            <th>eixo</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -77,14 +76,12 @@ async function carregarTabela() {
 
     data.forEach(f => {
         html += `
-        <tr>
-            <td>${f.id}</td>
+        <tr>            
             <td>${f.descricao}</td>
             <td>${f.data_termino || ""}</td>
-            <td>${f.modalidade || ""}</td>
+            <td>${f.eixo || ""}</td>
             <td>
-                <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>Editar</button>
-                <button class="btn btn-sm btn-danger" onclick='deletar(${f.id})'>Excluir</button>
+                <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>Editar</button>               
             </td>
         </tr>`;
     });

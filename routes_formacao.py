@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
 from models import Formacao
+from fastapi import Query
+from sqlalchemy import func
+
 
 router = APIRouter()
 
@@ -12,24 +15,46 @@ def get_db():
         yield db
     finally:
         db.close()
-@router.get("/api/formacoes")
-def listar(db: Session = Depends(get_db)):
-    
-    dados = db.query(Formacao)\
-    .order_by(Formacao.data_termino.desc())\
-    .all()
 
-    return [
-        {
-            "id": f.id,
-            "descricao": f.descricao,
-            "data_termino": f.data_termino,
-            "carga_horaria": f.carga_horaria,
-            "modalidade": f.modalidade,
-            "eixo": f.eixo
-        }
-        for f in dados
-    ]
+
+@router.get("/api/formacoes")
+def listar(
+    busca: str = Query(None),
+    pagina: int = 1,
+    limite: int = 20,
+    db: Session = Depends(get_db)
+):
+
+    query = db.query(Formacao)
+
+    # 🔎 filtro por descrição
+    if busca:
+        query = query.filter(Formacao.descricao.ilike(f"%{busca}%"))
+
+    total = query.count()
+
+    dados = (
+        query.order_by(Formacao.data_termino.desc())
+        .offset((pagina - 1) * limite)
+        .limit(limite)
+        .all()
+    )
+
+    return {
+        "dados": [
+            {
+                "id": f.id,
+                "descricao": f.descricao,
+                "data_termino": f.data_termino,
+                "carga_horaria": f.carga_horaria,
+                "modalidade": f.modalidade,
+                "eixo": f.eixo
+            }
+            for f in dados
+        ],
+        "total": total,
+        "total_paginas": (total // limite) + (1 if total % limite else 0)
+    }
   
 @router.post("/api/formacao")
 def criar(dados: dict, db: Session = Depends(get_db)):

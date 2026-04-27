@@ -2,51 +2,79 @@
 
 {% block content %}
 
-<h3>Cadastro de Formação</h3>
+<h2>📚 Cadastro de Formação</h2>
 
-<div id="msg"></div>
+<!-- ===================== -->
+<!-- FORM -->
+<!-- ===================== -->
+<form onsubmit="salvar(event)">
+    
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="descricao" class="form-control" placeholder="Descrição" required>
+        </div>
 
-<div class="row mb-3">
-    <div class="col-md-4">
-        <input type="text" id="descricao" class="form-control" placeholder="Descrição">
+        <div class="col-md-2">
+            <input type="date" id="data_termino" class="form-control" required>
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" id="carga" class="form-control" placeholder="Carga" min="1" required>
+        </div>
+
+        <div class="col-md-2">
+            <select id="modalidade" class="form-select" required></select>
+        </div>
+
+        <div class="col-md-2">
+            <select id="eixo" class="form-select" required></select>
+        </div>
     </div>
 
-    <div class="col-md-2">
-        <input type="date" id="data_termino" class="form-control">
-    </div>
+    <button class="btn btn-primary">Salvar</button>
 
-    <div class="col-md-2">
-        <input type="number" id="carga" class="form-control" placeholder="Carga">
-    </div>
+</form>
 
-    <div class="col-md-2">
-        <select id="modalidade" class="form-control"></select>
-    </div>
-
-    <div class="col-md-2">
-        <select id="eixo" class="form-control"></select>
-    </div>
-</div>
-
-<button class="btn btn-primary mb-4" onclick="salvar()">Salvar</button>
+<div id="msg" class="mt-2"></div>
 
 <hr>
 
-<table class="table table-striped">
-    <thead>
-        <tr>            
-            <th>Descrição</th>
-            <th>Data</th>
-            <th>eixo</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody id="tabela"></tbody>
-</table>
+<!-- ===================== -->
+<!-- BUSCA + PAGINAÇÃO -->
+<!-- ===================== -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input type="text" id="busca" class="form-control" placeholder="Buscar por descrição..." onkeyup="resetarPagina()">
+    </div>
 
-<!-- 🔥 SCRIPT TEM QUE ESTAR DENTRO DO BLOCK -->
+    <div class="col-md-2">
+        <select id="limite" class="form-select" onchange="resetarPagina()">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+</div>
+
+<!-- ===================== -->
+<!-- TABELA -->
+<!-- ===================== -->
+<div id="tabela"></div>
+
+<div class="d-flex justify-content-between mt-3">
+    <button class="btn btn-secondary" onclick="anterior()">⬅ Anterior</button>
+    <span id="pagina_info"></span>
+    <button class="btn btn-secondary" onclick="proxima()">Próximo ➡</button>
+</div>
+
+<!-- ===================== -->
+<!-- SCRIPT -->
+<!-- ===================== -->
 <script>
+
 let editandoId = null;
+let pagina = 1;
+let totalPaginas = 1;
 
 // =====================
 // ENUMS
@@ -58,8 +86,8 @@ async function carregarEnums() {
     let m = document.getElementById("modalidade");
     let e = document.getElementById("eixo");
 
-    m.innerHTML = "<option value=''>Modalidade</option>";
-    e.innerHTML = "<option value=''>Eixo</option>";
+    m.innerHTML = `<option value="">Modalidade</option>`;
+    e.innerHTML = `<option value="">Eixo</option>`;
 
     data.modalidade.forEach(x => m.add(new Option(x, x)));
     data.eixo.forEach(x => e.add(new Option(x, x)));
@@ -69,30 +97,80 @@ async function carregarEnums() {
 // LISTAR
 // =====================
 async function carregarTabela() {
-    let res = await fetch("/api/formacoes");
+
+    let busca = document.getElementById("busca").value;
+    let limite = document.getElementById("limite").value;
+
+    let url = `/api/formacoes?busca=${busca}&pagina=${pagina}&limite=${limite}`;
+
+    let res = await fetch(url);
     let data = await res.json();
 
-    let html = "";
+    let html = `
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Data</th>
+                <th>Carga</th>
+                <th>Modalidade</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
 
-    data.forEach(f => {
+    data.dados.forEach(f => {
         html += `
-        <tr>            
+        <tr>
             <td>${f.descricao}</td>
             <td>${f.data_termino || ""}</td>
-            <td>${f.eixo || ""}</td>
+            <td>${f.carga_horaria}</td>
+            <td>${f.modalidade}</td>
             <td>
-                <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>Editar</button>               
+                <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="deletar(${f.id})">🗑</button>
             </td>
-        </tr>`;
+        </tr>
+        `;
     });
 
+    html += `</tbody></table>`;
+
     document.getElementById("tabela").innerHTML = html;
+
+    totalPaginas = data.total_paginas;
+    document.getElementById("pagina_info").innerText = `Página ${pagina} de ${totalPaginas}`;
 }
 
 // =====================
-// SALVAR
+// PAGINAÇÃO
 // =====================
-async function salvar() {
+function proxima() {
+    if (pagina < totalPaginas) {
+        pagina++;
+        carregarTabela();
+    }
+}
+
+function anterior() {
+    if (pagina > 1) {
+        pagina--;
+        carregarTabela();
+    }
+}
+
+function resetarPagina() {
+    pagina = 1;
+    carregarTabela();
+}
+
+// =====================
+// SALVAR / ATUALIZAR
+// =====================
+async function salvar(event) {
+    event.preventDefault();
+
     let dados = {
         descricao: document.getElementById("descricao").value.trim(),
         data_termino: document.getElementById("data_termino").value,
@@ -100,6 +178,11 @@ async function salvar() {
         modalidade: document.getElementById("modalidade").value,
         eixo: document.getElementById("eixo").value
     };
+
+    if (!dados.descricao || !dados.data_termino || !dados.carga_horaria || !dados.modalidade || !dados.eixo) {
+        mostrarMsg({erro: "Preencha todos os campos"});
+        return;
+    }
 
     let url = "/api/formacao";
     let method = "POST";
@@ -116,6 +199,7 @@ async function salvar() {
     });
 
     let r = await res.json();
+
     mostrarMsg(r);
 
     if (r.ok) {
@@ -135,6 +219,8 @@ function editar(f) {
     document.getElementById("carga").value = f.carga_horaria;
     document.getElementById("modalidade").value = f.modalidade;
     document.getElementById("eixo").value = f.eixo;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // =====================
@@ -160,13 +246,13 @@ function mostrarMsg(r) {
     if (r.erro) {
         msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
     } else {
-        msg.innerHTML = `<div class="alert alert-success">Sucesso</div>`;
+        msg.innerHTML = `<div class="alert alert-success">Salvo com sucesso</div>`;
     }
 }
 
 function limpar() {
     editandoId = null;
-    document.querySelectorAll("input, select").forEach(el => el.value = "");
+    document.querySelector("form").reset();
 }
 
 // =====================

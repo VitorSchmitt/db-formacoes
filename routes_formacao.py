@@ -51,23 +51,33 @@ def criar(dados: dict, db: Session = Depends(get_db)):
         db.rollback()
         return {"erro": "Erro ao salvar (possível duplicidade)"}
 
-@router.put("/api/formacao/{id}")
-def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
+from schemas import FormacaoUpdate
+from sqlalchemy.exc import IntegrityError
 
-    f = db.query(Formacao).get(id)
+@router.put("/api/formacao/{id}")
+def atualizar(id: int, dados: FormacaoUpdate, db: Session = Depends(get_db)):
+
+    f = db.get(Formacao, id)
 
     if not f:
         return {"erro": "Não encontrado"}
 
     try:
-        for k, v in dados.items():
+        for k, v in dados.dict(exclude_unset=True).items():
             setattr(f, k, v)
 
         db.commit()
+        db.refresh(f)
+
         return {"ok": True}
+
     except IntegrityError:
         db.rollback()
         return {"erro": "Duplicidade ao atualizar"}
+
+    except Exception as e:
+        db.rollback()
+        return {"erro": str(e)}  # 👈 agora você vai ver o erro real
 
 @router.delete("/api/formacao/{id}")
 def deletar(id: int, db: Session = Depends(get_db)):

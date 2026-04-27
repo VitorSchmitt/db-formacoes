@@ -1,0 +1,167 @@
+<h3>Cadastro de Formação</h3>
+
+<div class="row mb-2">
+    <div class="col"><input id="descricao" class="form-control" placeholder="Descrição"></div>
+    <div class="col"><input type="date" id="data_termino" class="form-control"></div>
+    <div class="col"><input type="number" id="carga" class="form-control" placeholder="Carga"></div>
+</div>
+
+<div class="row mb-2">
+    <div class="col"><select id="modalidade" class="form-control"></select></div>
+    <div class="col"><select id="eixo" class="form-control"></select></div>
+    <div class="col">
+        <button onclick="salvar()" class="btn btn-success">Salvar</button>
+    </div>
+</div>
+
+<div id="msg"></div>
+
+<hr>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Descrição</th>
+            <th>Data</th>
+            <th>Modalidade</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+</table>
+let editandoId = null;
+
+// =====================
+// ENUMS
+// =====================
+async function carregarEnums() {
+    let res = await fetch("/api/enums");
+    let data = await res.json();
+
+    let m = document.getElementById("modalidade");
+    let e = document.getElementById("eixo");
+
+    m.innerHTML = "<option value=''>Modalidade</option>";
+    e.innerHTML = "<option value=''>Eixo</option>";
+
+    data.modalidade.forEach(x => m.add(new Option(x, x)));
+    data.eixo.forEach(x => e.add(new Option(x, x)));
+}
+
+// =====================
+// LISTAR
+// =====================
+async function carregarTabela() {
+    let res = await fetch("/api/formacoes");
+    let data = await res.json();
+
+    let html = "";
+
+    data.forEach(f => {
+        html += `
+        <tr>
+            <td>${f.id}</td>
+            <td>${f.descricao}</td>
+            <td>${f.data_termino || ""}</td>
+            <td>${f.modalidade || ""}</td>
+            <td>
+                <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="deletar(${f.id})">Excluir</button>
+            </td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("tabela").innerHTML = html;
+}
+
+// =====================
+// SALVAR / ATUALIZAR
+// =====================
+async function salvar() {
+
+    let dados = {
+        descricao: document.getElementById("descricao").value.trim(),
+        data_termino: document.getElementById("data_termino").value,
+        carga_horaria: parseInt(document.getElementById("carga").value),
+        modalidade: document.getElementById("modalidade").value,
+        eixo: document.getElementById("eixo").value
+    };
+
+    let url = "/api/formacao";
+    let method = "POST";
+
+    if (editandoId) {
+        url = `/api/formacao/${editandoId}`;
+        method = "PUT";
+    }
+
+    let res = await fetch(url, {
+        method: method,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(dados)
+    });
+
+    let r = await res.json();
+
+    mostrarMsg(r);
+
+    if (r.ok) {
+        limpar();
+        carregarTabela();
+    }
+}
+
+// =====================
+// EDITAR
+// =====================
+function editar(f) {
+    editandoId = f.id;
+
+    document.getElementById("descricao").value = f.descricao;
+    document.getElementById("data_termino").value = f.data_termino;
+    document.getElementById("carga").value = f.carga_horaria;
+    document.getElementById("modalidade").value = f.modalidade;
+    document.getElementById("eixo").value = f.eixo;
+}
+
+// =====================
+// DELETAR
+// =====================
+async function deletar(id) {
+
+    if (!confirm("Excluir registro?")) return;
+
+    let res = await fetch(`/api/formacao/${id}`, {method: "DELETE"});
+    let r = await res.json();
+
+    mostrarMsg(r);
+
+    if (r.ok) carregarTabela();
+}
+
+// =====================
+// UI
+// =====================
+function mostrarMsg(r) {
+    let msg = document.getElementById("msg");
+
+    if (r.erro) {
+        msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
+    } else {
+        msg.innerHTML = `<div class="alert alert-success">Sucesso</div>`;
+    }
+}
+
+function limpar() {
+    editandoId = null;
+
+    document.querySelectorAll("input, select").forEach(el => el.value = "");
+}
+
+// =====================
+// INIT
+// =====================
+carregarEnums();
+carregarTabela();

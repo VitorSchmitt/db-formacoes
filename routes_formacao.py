@@ -14,7 +14,10 @@ def get_db():
         db.close()
 @router.get("/api/formacoes")
 def listar(db: Session = Depends(get_db)):
-    dados = db.query(Formacao).all()
+    
+    dados = db.query(Formacao)\
+    .order_by(Formacao.data_termino.desc())\
+    .all()
 
     return [
         {

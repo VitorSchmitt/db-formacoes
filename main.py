@@ -4,10 +4,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from database import SessionLocal
 from models import Participacao, Formacao, Lotacao
+from routes_formacao import router as formacao_router
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-
+app.include_router(formacao_router)
 
 # ===============================
 # WEB

@@ -30,6 +30,9 @@ class Formacao(Base):
     carga_horaria = Column(Integer, nullable=True)
     modalidade = Column(tipo_modalidade, nullable=True)
     eixo = Column(tipo_eixo, nullable=True)
+    __table_args__ = (
+        UniqueConstraint('descricao', 'data_termino', name='uq_formacao'),
+    )
 
 class Lotacao(Base):
     __tablename__ = "lotacao"

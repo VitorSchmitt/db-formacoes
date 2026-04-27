@@ -17,7 +17,10 @@ app.include_router(formacao_router)
 def home():
     return {"ok": True}
 
-
+@app.get("/web/formacoes")
+def tela_formacoes(request: Request):
+    return templates.TemplateResponse("formacoes.html", {"request": request})
+    
 @app.get("/web/dashboard")
 def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})

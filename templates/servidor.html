@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>👥 Cadastro de Servidores</h2>
+
+<form onsubmit="salvar(event)">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <input type="text" id="matricula" class="form-control" placeholder="Matrícula" required>
+        </div>
+
+        <div class="col-md-5">
+            <input type="text" id="nome" class="form-control" placeholder="Nome" required>
+        </div>
+
+        <div class="col-md-4">
+            <select id="cargo" class="form-select" required></select>
+        </div>
+    </div>
+
+    <button class="btn btn-primary">Salvar</button>
+</form>
+
+<div id="msg" class="mt-2"></div>
+
+<hr>
+
+<input type="text" id="busca" class="form-control mb-3" placeholder="Buscar..." onkeyup="carregarTabela()">
+
+<div id="tabela"></div>
+
+<script>
+
+let editando = null;
+
+// =====================
+// CARGOS
+// =====================
+async function carregarCargos() {
+    let res = await fetch("/api/cargos");
+    let data = await res.json();
+
+    let select = document.getElementById("cargo");
+    select.innerHTML = `<option value="">Cargo</option>`;
+
+    data.forEach(c => {
+        select.add(new Option(c.descricao, c.id));
+    });
+}
+
+// =====================
+// LISTAR
+// =====================
+async function carregarTabela() {
+
+    let res = await fetch("/api/servidores");
+    let data = await res.json();
+
+    let busca = document.getElementById("busca").value.toLowerCase();
+
+    let html = `
+    <table class="table table-striped">
+        <tr>
+            <th>Matrícula</th>
+            <th>Nome</th>
+            <th>Cargo</th>
+            <th>Ações</th>
+        </tr>
+    `;
+
+    data
+    .filter(s => s.nome.toLowerCase().includes(busca))
+    .forEach(s => {
+        html += `
+        <tr>
+            <td>${s.matricula}</td>
+            <td>${s.nome}</td>
+            <td>${s.cargo}</td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick='editar(${JSON.stringify(s)})'>✏️</button>
+                <button class="btn btn-danger btn-sm" onclick='deletar("${s.matricula}")'>🗑</button>
+            </td>
+        </tr>
+        `;
+    });
+
+    html += "</table>";
+
+    document.getElementById("tabela").innerHTML = html;
+}
+
+// =====================
+// SALVAR
+// =====================
+async function salvar(e) {
+    e.preventDefault();
+
+    let dados = {
+        matricula: document.getElementById("matricula").value,
+        nome: document.getElementById("nome").value,
+        cargo_id: parseInt(document.getElementById("cargo").value)
+    };
+
+    let url = "/api/servidor";
+    let method = "POST";
+
+    if (editando) {
+        url = `/api/servidor/${editando}`;
+        method = "PUT";
+    }
+
+    let res = await fetch(url, {
+        method: method,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(dados)
+    });
+
+    let r = await res.json();
+
+    mostrarMsg(r);
+
+    if (r.ok) {
+        limpar();
+        carregarTabela();
+    }
+}
+
+// =====================
+// EDITAR
+// =====================
+function editar(s) {
+    editando = s.matricula;
+
+    document.getElementById("matricula").value = s.matricula;
+    document.getElementById("nome").value = s.nome;
+}
+
+// =====================
+// DELETAR
+// =====================
+async function deletar(id) {
+    if (!confirm("Excluir?")) return;
+
+    let res = await fetch(`/api/servidor/${id}`, {method: "DELETE"});
+    let r = await res.json();
+
+    mostrarMsg(r);
+    if (r.ok) carregarTabela();
+}
+
+// =====================
+// UI
+// =====================
+function mostrarMsg(r) {
+    let msg = document.getElementById("msg");
+
+    if (r.erro) {
+        msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
+    } else {
+        msg.innerHTML = `<div class="alert alert-success">Sucesso</div>`;
+    }
+}
+
+function limpar() {
+    editando = null;
+    document.querySelector("form").reset();
+}
+
+// =====================
+// INIT
+// =====================
+carregarCargos();
+carregarTabela();
+
+</script>
+
+{% endblock %}

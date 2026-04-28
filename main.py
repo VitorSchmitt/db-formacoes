@@ -5,10 +5,13 @@ from sqlalchemy import func
 from database import SessionLocal
 from models import Participacao, Formacao, Lotacao
 from routes_formacao import router as formacao_router
+from routes_servidor import router as servidor_router
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.include_router(formacao_router)
+app.include_router(servidor_router)
+
 
 # ===============================
 # WEB
@@ -16,6 +19,12 @@ app.include_router(formacao_router)
 @app.get("/")
 def home():
     return {"ok": True}
+
+
+
+@app.get("/web/servidores")
+def tela_servidores(request: Request):
+    return templates.TemplateResponse("servidores.html", {"request": request})
 
 @app.get("/web/formacoes")
 def tela_formacoes(request: Request):

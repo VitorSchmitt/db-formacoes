@@ -5,11 +5,14 @@ from sqlalchemy.dialects.postgresql import ENUM
 
 class Servidor(Base):
     __tablename__ = "servidor"
-
     matricula = Column(String, primary_key=True)
-    nome = Column(String)
-    cargo = Column(String)
+    nome = Column(String)    
     data_registro = Column(Date)
+    cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=True)
+    cargo = relationship("Cargo", lazy="joined")
+
+
+
 tipo_modalidade = ENUM(
     "presencial", "online", "hibrido",
     name="tipo_modalidade",
@@ -39,6 +42,12 @@ class Lotacao(Base):
     id = Column(Integer, primary_key=True)
     descricao = Column(String)
     tipo = Column(String)
+
+
+class Cargo(Base):
+    __tablename__ = "cargo"
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String, unique=True, nullable=False)
     
 class Participacao(Base):
     __tablename__ = "participacao"

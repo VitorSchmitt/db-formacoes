@@ -24,7 +24,7 @@ def home():
 
 @app.get("/web/servidores")
 def tela_servidores(request: Request):
-    return templates.TemplateResponse("servidor.html", {"request": request})
+    return templates.TemplateResponse("servidores.html", {"request": request})
 
 @app.get("/web/formacoes")
 def tela_formacoes(request: Request):

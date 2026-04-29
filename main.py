@@ -44,6 +44,21 @@ def tela_participacoes(request: Request):
 # ===============================
 # API
 # ===============================
+@app.get("/api/lotacoes")
+def listar_lotacoes():
+    db = SessionLocal()
+    try:
+        dados = db.query(Lotacao).order_by(Lotacao.descricao).all()
+
+        return [
+            {"id": l.id, "descricao": l.descricao}
+            for l in dados
+        ]
+    finally:
+        db.close()
+
+
+
 @app.get("/api/dashboard")
 def api_dashboard(
     mes_inicio: str = Query(None),

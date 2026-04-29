@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>📊 Participação em Formação</h2>
+
+<!-- ===================== -->
+<!-- FORMAÇÃO (CONTEXTO FIXO) -->
+<!-- ===================== -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <label><b>Formação</b></label>
+        <select id="formacao" class="form-select" onchange="trocarFormacao()" required></select>
+    </div>
+</div>
+
+<hr>
+
+<!-- ===================== -->
+<!-- FORMULÁRIO -->
+<!-- ===================== -->
+<h5>Adicionar Servidor</h5>
+
+<form onsubmit="salvar(event)">
+    <div class="row mb-3">
+
+        <div class="col-md-3">
+            <input type="text" id="matricula" class="form-control" placeholder="Matrícula" required>
+        </div>
+
+        <div class="col-md-4">
+            <select id="lotacao" class="form-select" required></select>
+        </div>
+
+        <div class="col-md-3">
+            <input type="text" id="aproveitamento" class="form-control" placeholder="Aproveitamento" required>
+        </div>
+
+    </div>
+
+    <button class="btn btn-primary">Adicionar</button>
+</form>
+
+<div id="msg" class="mt-2"></div>
+
+<hr>
+
+<!-- ===================== -->
+<!-- LISTA -->
+<!-- ===================== -->
+<h5>Servidores na Formação</h5>
+
+<input type="text" id="busca" class="form-control mb-3" placeholder="Buscar..." onkeyup="carregarTabela()">
+
+<div id="tabela"></div>
+
+<script>
+
+let formacaoAtual = null;
+
+// =====================
+// CARREGAR FORMAÇÕES
+// =====================
+async function carregarFormacoes() {
+    let res = await fetch("/api/formacoes");
+    let data = await res.json();
+
+    let select = document.getElementById("formacao");
+    select.innerHTML = `<option value="">Selecione a formação</option>`;
+
+    data.forEach(f => {
+        select.add(new Option(f.descricao, f.id));
+    });
+
+    if (data.length > 0) {
+        formacaoAtual = data[0].id;
+        select.value = formacaoAtual;
+        carregarTabela();
+    }
+}
+
+// =====================
+// CARREGAR LOTAÇÕES
+// =====================
+async function carregarLotacoes() {
+    let res = await fetch("/api/lotacoes");
+    let data = await res.json();
+
+    let select = document.getElementById("lotacao");
+    select.innerHTML = `<option value="">Selecione a lotação</option>`;
+
+    data.forEach(l => {
+        select.add(new Option(l.descricao, l.id));
+    });
+}
+
+// =====================
+// TROCAR FORMAÇÃO
+// =====================
+function trocarFormacao() {
+    formacaoAtual = document.getElementById("formacao").value;
+    limpar();
+    carregarTabela();
+}
+
+// =====================
+// LISTAR
+// =====================
+async function carregarTabela() {
+
+    if (!formacaoAtual) return;
+
+    let res = await fetch(`/api/participacoes/${formacaoAtual}`);
+    let data = await res.json();
+
+    let busca = document.getElementById("busca").value.toLowerCase();
+
+    let html = `
+    <table class="table table-striped">
+        <tr>
+            <th>Matrícula</th>
+            <th>Nome</th>
+            <th>Lotação</th>
+            <th>Aproveitamento</th>
+            <th>Ações</th>
+        </tr>
+    `;
+
+    data
+    .filter(p =>
+        p.nome.toLowerCase().includes(busca) ||
+        p.matricula.includes(busca)
+    )
+    .forEach(p => {
+        html += `
+        <tr>
+            <td>${p.matricula}</td>
+            <td>${p.nome}</td>
+            <td>${p.lotacao || ""}</td>
+            <td>${p.aproveitamento}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deletar(${p.id})">🗑</button>
+            </td>
+        </tr>
+        `;
+    });
+
+    html += "</table>";
+
+    document.getElementById("tabela").innerHTML = html;
+}
+
+// =====================
+// SALVAR
+// =====================
+async function salvar(e) {
+    e.preventDefault();
+
+    let matricula = document.getElementById("matricula").value.trim();
+    let lotacao = document.getElementById("lotacao").value;
+    let aproveitamento = document.getElementById("aproveitamento").value.trim();
+
+    // 🔴 VALIDAÇÃO
+    if (!formacaoAtual) {
+        mostrarMsg({erro: "Selecione uma formação"});
+        return;
+    }
+
+    if (!matricula) {
+        mostrarMsg({erro: "Informe a matrícula"});
+        return;
+    }
+
+    if (!lotacao) {
+        mostrarMsg({erro: "Selecione a lotação"});
+        return;
+    }
+
+    if (!aproveitamento) {
+        mostrarMsg({erro: "Informe o aproveitamento"});
+        return;
+    }
+
+    let dados = {
+        matricula: matricula,
+        lotacao_id: parseInt(lotacao),
+        aproveitamento: aproveitamento,
+        formacao_id: formacaoAtual
+    };
+
+    let res = await fetch("/api/participacao", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(dados)
+    });
+
+    let r = await res.json();
+
+    mostrarMsg(r);
+
+    if (r.ok) {
+        limpar(); // 🔥 mantém formação
+        carregarTabela();
+    }
+}
+
+// =====================
+// DELETAR
+// =====================
+async function deletar(id) {
+    if (!confirm("Remover servidor desta formação?")) return;
+
+    let res = await fetch(`/api/participacao/${id}`, {method: "DELETE"});
+    let r = await res.json();
+
+    if (r.ok) carregarTabela();
+}
+
+// =====================
+// UI
+// =====================
+function limpar() {
+    document.getElementById("matricula").value = "";
+    document.getElementById("aproveitamento").value = "";
+    document.getElementById("lotacao").value = "";
+}
+
+function mostrarMsg(r) {
+    let msg = document.getElementById("msg");
+
+    if (r.erro) {
+        msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
+    } else {
+        msg.innerHTML = `<div class="alert alert-success">Servidor adicionado</div>`;
+    }
+
+    setTimeout(() => msg.innerHTML = "", 2500);
+}
+
+// =====================
+// INIT
+// =====================
+carregarFormacoes();
+carregarLotacoes();
+
+</script>
+
+{% endblock %}

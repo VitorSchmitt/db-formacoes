@@ -18,3 +18,14 @@ class FormacaoUpdate(BaseModel):
     carga_horaria: Optional[int]
     modalidade: Optional[str]
     eixo: Optional[str]
+# ===============================
+# SERVIDOR
+# ===============================
+class ServidorCreate(BaseModel):
+    matricula: str
+    nome: str
+    cargo_id: int
+
+class ServidorUpdate(BaseModel):
+    nome: str
+    cargo_id: int

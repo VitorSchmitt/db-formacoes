@@ -143,7 +143,8 @@ function editar(index) {
     // ✅ limpa estado anterior
     limpar();
     let s = listaServidores[index];
-
+    // ✅ limpa mensagem de sucesso/erro
+    document.getElementById("msg").innerHTML = "";
     editando = s.matricula;
     document.querySelector("button.btn-primary").innerText = "Atualizar";
     document.getElementById("matricula").value = s.matricula;
@@ -188,8 +189,7 @@ function limpar() {
     document.querySelector("form").reset();
     document.getElementById("matricula").disabled = false;
     document.querySelector("button.btn-primary").innerText = "Salvar";
-    // ✅ limpa mensagem de sucesso/erro
-    document.getElementById("msg").innerHTML = "";
+    
 }
 
 // =====================

@@ -131,7 +131,9 @@ async function salvar(e) {
     mostrarMsg(r);
 
     if (r.ok) {
-        limpar();
+        document.querySelector("form").reset();
+        document.getElementById("matricula").disabled = false;
+        document.querySelector("button.btn-primary").innerText = "Salvar";
         carregarTabela();
     }
 }

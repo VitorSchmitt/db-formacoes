@@ -31,15 +31,15 @@ def listar(formacao_id: int, db: Session = Depends(get_db)):
         .all()
 
     return [
-        {
-            "id": p.id,
-            "matricula": p.servidor.matricula,
-            "nome": p.servidor.nome,
-            "lotacao": p.lotacao.descricao if p.lotacao else None,
-            "aproveitamento": p.aproveitamento
-        }
-        for p in dados
-    ]
+    {
+        "id": p.id,
+        "matricula": p.matricula,
+        "nome": p.servidor.nome if p.servidor else None,
+        "lotacao": p.lotacao.descricao if p.lotacao else None,
+        "aproveitamento": p.aproveitamento
+    }
+    for p in dados
+]
 
 
 # ===============================

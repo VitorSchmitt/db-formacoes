@@ -188,6 +188,8 @@ function limpar() {
     document.querySelector("form").reset();
     document.getElementById("matricula").disabled = false;
     document.querySelector("button.btn-primary").innerText = "Salvar";
+    // ✅ limpa mensagem de sucesso/erro
+    document.getElementById("msg").innerHTML = "";
 }
 
 // =====================

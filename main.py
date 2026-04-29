@@ -34,6 +34,10 @@ def tela_formacoes(request: Request):
 def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
+@app.get("/web/participacoes")
+def tela_participacoes(request: Request):
+    return templates.TemplateResponse("participacoes.html", {"request": request})
+
 
 # ===============================
 # API

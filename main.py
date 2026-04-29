@@ -62,7 +62,7 @@ def api_dashboard(
             )
 
         if lotacao:
-            query = query.filter(Lotacao.descricao == lotacao)
+            query = query.filter(Lotacao.tipo == lotacao)
 
         if curso:
             query = query.filter(Formacao.descricao == curso)
@@ -72,10 +72,10 @@ def api_dashboard(
         # 📊 POR LOTAÇÃO
         lotacao_data = (
             query.with_entities(
-                func.trim(Lotacao.descricao),
+                func.trim(Lotacao.tipo),
                 func.count()
             )
-            .group_by(Lotacao.descricao)
+            .group_by(Lotacao.tipo)
             .all()
         )
 

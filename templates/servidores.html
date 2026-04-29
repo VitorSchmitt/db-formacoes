@@ -145,7 +145,7 @@ function editar(index) {
     let s = listaServidores[index];
 
     editando = s.matricula;
-
+    document.querySelector("button.btn-primary").innerText = "Atualizar";
     document.getElementById("matricula").value = s.matricula;
     document.getElementById("nome").value = s.nome;
 
@@ -187,6 +187,7 @@ function limpar() {
     editando = null;
     document.querySelector("form").reset();
     document.getElementById("matricula").disabled = false;
+    document.querySelector("button.btn-primary").innerText = "Salvar";
 }
 
 // =====================

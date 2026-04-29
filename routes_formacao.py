@@ -44,11 +44,11 @@ def listar(
         "dados": [
             {
                 "id": f.id,
-                "descricao": f.descricao,
-                "data_termino": f.data_termino,
-                "carga_horaria": f.carga_horaria,
-                "modalidade": f.modalidade,
-                "eixo": f.eixo
+                "descricao": f.descricao,                
+                "carga_horaria": f.carga_horaria,   
+                "data_termino": f.data_termino.strftime("%Y-%m-%d") if f.data_termino else None,
+                "modalidade": str(f.modalidade) if f.modalidade else None,
+                "eixo": str(f.eixo) if f.eixo else None
             }
             for f in dados
         ],

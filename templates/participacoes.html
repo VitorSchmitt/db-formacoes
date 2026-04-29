@@ -68,12 +68,12 @@ async function carregarFormacoes() {
     let select = document.getElementById("formacao");
     select.innerHTML = `<option value="">Selecione a formação</option>`;
 
-    data.forEach(f => {
+    data.dados.forEach(f => {
         select.add(new Option(f.descricao, f.id));
     });
 
-    if (data.length > 0) {
-        formacaoAtual = data[0].id;
+    if (data.dados.length > 0) {
+        formacaoAtual = data.dados[0].id;
         select.value = formacaoAtual;
         carregarTabela();
     }

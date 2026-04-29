@@ -150,6 +150,8 @@ function editar(index) {
     document.getElementById("cargo").value = s.cargo_id; // 🔥 CORREÇÃO PRINCIPAL
 
     document.getElementById("matricula").disabled = true; // UX melhor
+    // ✅ FOCO NO CAMPO (cursor)
+    document.getElementById("nome").focus();
 }
 
 // =====================

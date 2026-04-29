@@ -140,6 +140,8 @@ async function salvar(e) {
 // EDITAR
 // =====================
 function editar(index) {
+    // ✅ limpa estado anterior
+    limpar();
     let s = listaServidores[index];
 
     editando = s.matricula;
@@ -152,6 +154,7 @@ function editar(index) {
     document.getElementById("matricula").disabled = true; // UX melhor
     // ✅ FOCO NO CAMPO (cursor)
     document.getElementById("nome").focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // =====================

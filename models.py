@@ -59,3 +59,6 @@ class Participacao(Base):
     servidor = relationship("Servidor", lazy="joined")
     formacao = relationship("Formacao", lazy="joined")
     lotacao = relationship("Lotacao", lazy="joined")
+    __table_args__ = (
+    UniqueConstraint('matricula', 'formacao_id', name='uq_participacao'),
+)

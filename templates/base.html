@@ -63,8 +63,13 @@
             window.location = "/";
         }
         
-        if (!localStorage.getItem("perfil")) {
-            window.location = "/";
+       let pagina = window.location.pathname;
+
+        // páginas públicas
+        let liberadas = ["/", "/web/usuarios"];
+
+        if (!localStorage.getItem("perfil") && !liberadas.includes(pagina)) {
+            window.location.href = "/";
         }
         </script>
 

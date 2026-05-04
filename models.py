@@ -11,6 +11,13 @@ class Servidor(Base):
     cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=True)
     cargo = relationship("Cargo", lazy="joined")
 
+class Usuario(Base):
+    __tablename__ = "usuario"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, nullable=False)
+    senha = Column(String, nullable=False)
+    perfil = Column(String, nullable=False)
+
 
 
 tipo_modalidade = ENUM(

@@ -29,3 +29,8 @@ class ServidorCreate(BaseModel):
 class ServidorUpdate(BaseModel):
     nome: str
     cargo_id: int
+
+class UsuarioCreate(BaseModel):
+    username: str
+    senha: str
+    perfil: str

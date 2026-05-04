@@ -20,7 +20,15 @@ app.include_router(usuario_router)
 # WEB
 # ===============================
 @app.get("/")
-def login_page(request: Request):
+def home(request: Request):
+    db = SessionLocal()
+
+    tem_usuario = db.query(Usuario).first()
+    db.close()
+
+    if not tem_usuario:
+        return templates.TemplateResponse("usuarios.html", {"request": request})
+
     return templates.TemplateResponse("login.html", {"request": request})
 
 

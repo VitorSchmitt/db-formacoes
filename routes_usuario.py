@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Usuario
+from schemas import UsuarioCreate
 from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") 
 

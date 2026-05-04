@@ -79,3 +79,31 @@ def criar(dados: dict, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         return {"erro": str(e)}
+
+@router.delete("/api/usuario/{id}")
+def deletar(id: int, db: Session = Depends(get_db)):
+    u = db.query(Usuario).get(id)
+
+    if not u:
+        return {"erro": "Não encontrado"}
+
+    db.delete(u)
+    db.commit()
+
+    return {"ok": True}
+@router.put("/api/usuario/{id}")
+def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
+
+    u = db.query(Usuario).get(id)
+
+    if not u:
+        return {"erro": "Não encontrado"}
+
+    if dados.get("senha"):
+        u.senha = pwd_context.hash(dados["senha"])
+
+    u.perfil = dados["perfil"]
+
+    db.commit()
+
+    return {"ok": True}

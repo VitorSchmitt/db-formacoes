@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Usuario
 from passlib.context import CryptContext
-from security import pwd_context
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") 
 
 import os
 print("ARQUIVOS NA PASTA:", os.listdir())

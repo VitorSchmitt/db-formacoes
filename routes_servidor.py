@@ -44,18 +44,19 @@ def listar_cargos(db: Session = Depends(get_db)):
 # ===============================
 # CRIAR
 # ===============================
-@router.post("/api/servidor")
-def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
+@router.post("/api/usuario")
+def criar(dados: dict, db: Session = Depends(get_db)):
+
+    if not dados.get("username") or not dados.get("senha") or not dados.get("perfil"):
+        return {"erro": "Preencha todos os campos"}
+
     try:
-        cargo = db.get(Cargo, dados.cargo_id)
+        senha_hash = pwd_context.hash(dados["senha"])
 
-        if not cargo:
-            return {"erro": "Cargo inválido"}
-
-        novo = Servidor(
-            matricula=dados.matricula,
-            nome=dados.nome,
-            cargo_id=cargo.id
+        novo = Usuario(
+            username=dados["username"],
+            senha=senha_hash,
+            perfil=dados["perfil"]
         )
 
         db.add(novo)
@@ -63,9 +64,9 @@ def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
 
         return {"ok": True}
 
-    except IntegrityError:
+    except Exception as e:
         db.rollback()
-        return {"erro": "Matrícula já existe"}
+        return {"erro": str(e)}
 
 # ===============================
 # ATUALIZAR

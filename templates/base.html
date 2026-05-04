@@ -62,8 +62,11 @@
             localStorage.clear();
             window.location = "/";
         }
+        
+        if (!localStorage.getItem("perfil")) {
+            window.location = "/";
+        }
         </script>
-
 
 
         

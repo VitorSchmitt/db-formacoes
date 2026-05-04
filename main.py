@@ -8,6 +8,7 @@ from routes_formacao import router as formacao_router
 from routes_servidor import router as servidor_router
 from routes_participacao import router as participacao_router
 from routes_usuario import router as usuario_router
+from security import pwd_context
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")

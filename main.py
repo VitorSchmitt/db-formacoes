@@ -41,6 +41,10 @@ def dashboard(request: Request):
 def tela_participacoes(request: Request):
     return templates.TemplateResponse("participacoes.html", {"request": request})
 
+@app.get("/web/usuarios")
+def tela_usuarios(request: Request):
+    return templates.TemplateResponse("usuarios.html", {"request": request})
+
 
 # ===============================
 # API

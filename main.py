@@ -20,9 +20,8 @@ app.include_router(usuario_router)
 # WEB
 # ===============================
 @app.get("/")
-def home():
-    return {"ok": True}
-
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.get("/web/servidores")

@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from database import SessionLocal
-from models import Participacao, Formacao, Lotacao
+from models import Participacao, Formacao, Lotacao, Usuario
 from routes_formacao import router as formacao_router
 from routes_servidor import router as servidor_router
 from routes_participacao import router as participacao_router

@@ -8,7 +8,7 @@ from security import pwd_context
 
 router = APIRouter()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # ===============================
 # DB

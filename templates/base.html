@@ -56,6 +56,17 @@
         <a href="/web/usuarios">👤 Usuários</a>
         <a href="#" onclick="logout()">🚪 Sair</a>
         <a href="/docs">⚙️ API Docs</a>
+
+        <script>
+        function logout() {
+            localStorage.clear();
+            window.location = "/";
+        }
+        </script>
+
+
+
+        
     </div>
 
     <!-- CONTEÚDO -->

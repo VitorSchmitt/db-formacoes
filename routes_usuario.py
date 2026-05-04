@@ -5,7 +5,8 @@ from models import Usuario
 from passlib.context import CryptContext
 from security import pwd_context
 
-
+import os
+print("ARQUIVOS NA PASTA:", os.listdir())
 router = APIRouter()
 
 

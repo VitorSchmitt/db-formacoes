@@ -64,37 +64,28 @@ def listar(db: Session = Depends(get_db)):
 # ===============================
 # CRIAR USUÁRIO
 # ===============================
+from schemas import UsuarioCreate
+
 @router.post("/api/usuario")
-def criar(dados: dict, db: Session = Depends(get_db)):
+def criar(dados: UsuarioCreate, db: Session = Depends(get_db)):
 
-    print("DADOS RECEBIDOS:", dados)
+    senha = dados.senha.strip()
 
-    if not dados.get("username") or not dados.get("senha") or not dados.get("perfil"):
-        return {"erro": "Preencha todos os campos"}
+    if len(senha) > 72:
+        return {"erro": "Senha muito longa"}
 
-    existe = db.query(Usuario).filter_by(username=dados["username"]).first()
+    senha_hash = pwd_context.hash(senha)
 
-    if existe:
-        return {"erro": "Usuário já existe"}
+    novo = Usuario(
+        username=dados.username,
+        senha=senha_hash,
+        perfil=dados.perfil
+    )
 
-    try:
-        senha_hash = pwd_context.hash(dados["senha"])
+    db.add(novo)
+    db.commit()
 
-        novo = Usuario(
-            username=dados["username"],
-            senha=senha_hash,
-            perfil=dados["perfil"]
-        )
-
-        db.add(novo)
-        db.commit()
-
-        return {"ok": True}
-
-    except Exception as e:
-        db.rollback()
-        print("ERRO:", str(e))
-        return {"erro": str(e)}
+    return {"ok": True}
 
 @router.delete("/api/usuario/{id}")
 def deletar(id: int, db: Session = Depends(get_db)):

@@ -62,6 +62,17 @@ def listar(db: Session = Depends(get_db)):
 # ===============================
 @router.post("/api/usuario")
 def criar(dados: dict, db: Session = Depends(get_db)):
+
+    print("DADOS RECEBIDOS:", dados)
+
+    if not dados.get("username") or not dados.get("senha") or not dados.get("perfil"):
+        return {"erro": "Preencha todos os campos"}
+
+    existe = db.query(Usuario).filter_by(username=dados["username"]).first()
+
+    if existe:
+        return {"erro": "Usuário já existe"}
+
     try:
         senha_hash = pwd_context.hash(dados["senha"])
 
@@ -78,6 +89,7 @@ def criar(dados: dict, db: Session = Depends(get_db)):
 
     except Exception as e:
         db.rollback()
+        print("ERRO:", str(e))
         return {"erro": str(e)}
 
 @router.delete("/api/usuario/{id}")

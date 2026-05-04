@@ -4,6 +4,7 @@ from database import SessionLocal
 from models import Servidor, Cargo
 from sqlalchemy.exc import IntegrityError
 from schemas import ServidorCreate, ServidorUpdate
+from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") 
 

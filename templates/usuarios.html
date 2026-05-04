@@ -82,9 +82,9 @@ async function carregarTabela() {
     document.getElementById("tabela").innerHTML = html;
 }
 
-# =====================
-# SALVAR
-# =====================
+// =====================
+// SALVAR
+// =====================
 async function salvar(e) {
     e.preventDefault();
 
@@ -118,9 +118,9 @@ async function salvar(e) {
     }
 }
 
-# =====================
-# EDITAR
-# =====================
+// =====================
+// EDITAR
+// =====================
 function editar(u) {
     editando = u.id;
 
@@ -148,9 +148,9 @@ async function deletar(id) {
     if (r.ok) carregarTabela();
 }
 
-# =====================
-# UI
-# =====================
+// =====================
+// UI
+// =====================
 function mostrarMsg(r) {
     let msg = document.getElementById("msg");
 

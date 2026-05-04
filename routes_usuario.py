@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Usuario
 from passlib.context import CryptContext
+from security import pwd_context
+
 
 router = APIRouter()
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 from database import SessionLocal
-from models import Servidor, Cargo
+from models import Servidor, Cargo, Usuario
 from sqlalchemy.exc import IntegrityError
 from schemas import ServidorCreate, ServidorUpdate
 from passlib.context import CryptContext

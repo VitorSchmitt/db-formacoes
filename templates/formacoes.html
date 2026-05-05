@@ -4,11 +4,7 @@
 
 <h2>📚 Cadastro de Formação</h2>
 
-<!-- ===================== -->
-<!-- FORM -->
-<!-- ===================== -->
 <form onsubmit="salvar(event)">
-    
     <div class="row mb-3">
         <div class="col-md-4">
             <input type="text" id="descricao" class="form-control" placeholder="Descrição" required>
@@ -32,19 +28,15 @@
     </div>
 
     <button class="btn btn-primary">Salvar</button>
-
 </form>
 
 <div id="msg" class="mt-2"></div>
 
 <hr>
 
-<!-- ===================== -->
-<!-- BUSCA + PAGINAÇÃO -->
-<!-- ===================== -->
 <div class="row mb-3">
     <div class="col-md-6">
-        <input type="text" id="busca" class="form-control" placeholder="Buscar por descrição..." onkeyup="resetarPagina()">
+        <input type="text" id="busca" class="form-control" placeholder="Buscar..." onkeyup="resetarPagina()">
     </div>
 
     <div class="col-md-2">
@@ -56,9 +48,6 @@
     </div>
 </div>
 
-<!-- ===================== -->
-<!-- TABELA -->
-<!-- ===================== -->
 <div id="tabela"></div>
 
 <div class="d-flex justify-content-between mt-3">
@@ -67,37 +56,35 @@
     <button class="btn btn-secondary" onclick="proxima()">Próximo ➡</button>
 </div>
 
-<!-- ===================== -->
-<!-- SCRIPT -->
-<!-- ===================== -->
 <script>
+(() => {
 
 let editandoId = null;
-let pagina = 1;
+let paginaFormacao = 1;
 let totalPaginas = 1;
 
 // =====================
 // ENUMS
 // =====================
 async function carregarEnums() {
-    let res = await fetch("/api/enums");
-    let data = await res.json();
+    try {
+        let res = await fetch("/api/enums");
+        let data = await res.json();
 
-    console.log("ENUMS:", data);
+        if (!data.modalidade || !data.eixo) return;
 
-    if (!data.modalidade || !data.eixo) {
-        console.error("Erro ao carregar enums:", data);
-        return;
+        let m = document.getElementById("modalidade");
+        let e = document.getElementById("eixo");
+
+        m.innerHTML = `<option value="">Modalidade</option>`;
+        e.innerHTML = `<option value="">Eixo</option>`;
+
+        data.modalidade.forEach(x => m.add(new Option(x, x)));
+        data.eixo.forEach(x => e.add(new Option(x, x)));
+
+    } catch (err) {
+        console.error("Erro enums:", err);
     }
-
-    let m = document.getElementById("modalidade");
-    let e = document.getElementById("eixo");
-
-    m.innerHTML = `<option value="">Modalidade</option>`;
-    e.innerHTML = `<option value="">Eixo</option>`;
-
-    data.modalidade.forEach(x => m.add(new Option(x, x)));
-    data.eixo.forEach(x => e.add(new Option(x, x)));
 }
 
 // =====================
@@ -105,77 +92,85 @@ async function carregarEnums() {
 // =====================
 async function carregarTabela() {
 
-    let busca = document.getElementById("busca").value;
-    let limite = document.getElementById("limite").value;
+    try {
+        let busca = document.getElementById("busca").value;
+        let limite = document.getElementById("limite").value;
 
-    let url = `/api/formacoes?busca=${busca}&pagina=${pagina}&limite=${limite}`;
+        let url = `/api/formacoes?busca=${busca}&pagina=${paginaFormacao}&limite=${limite}`;
 
-    let res = await fetch(url);
-    let data = await res.json();
+        let res = await fetch(url);
+        let data = await res.json();
 
-    let html = `
-    <table class="table table-striped table-sm">
-        <thead>
-            <tr>
-                <th>Descrição</th>
-                <th>Data</th>
-                <th>Carga</th>
-                <th>Modalidade</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-    `;
+        if (!data.dados) return;
 
-    data.dados.forEach(f => {
-        html += `
-        <tr>
-            <td>${f.descricao}</td>
-            <td>${f.data_termino || ""}</td>
-            <td>${f.carga_horaria}</td>
-            <td>${f.modalidade}</td>
-            <td>
-                <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="deletar(${f.id})">🗑</button>
-            </td>
-        </tr>
+        let html = `
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Data</th>
+                    <th>Carga</th>
+                    <th>Modalidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
         `;
-    });
 
-    html += `</tbody></table>`;
+        data.dados.forEach(f => {
+            html += `
+            <tr>
+                <td>${f.descricao}</td>
+                <td>${f.data_termino || ""}</td>
+                <td>${f.carga_horaria}</td>
+                <td>${f.modalidade}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="deletar(${f.id})">🗑</button>
+                </td>
+            </tr>
+            `;
+        });
 
-    document.getElementById("tabela").innerHTML = html;
+        html += `</tbody></table>`;
 
-    totalPaginas = data.total_paginas;
-    document.getElementById("pagina_info").innerText = `Página ${pagina} de ${totalPaginas}`;
+        document.getElementById("tabela").innerHTML = html;
+
+        totalPaginas = data.total_paginas || 1;
+        document.getElementById("pagina_info").innerText =
+            `Página ${paginaFormacao} de ${totalPaginas}`;
+
+    } catch (err) {
+        console.error("Erro tabela:", err);
+    }
 }
 
 // =====================
 // PAGINAÇÃO
 // =====================
-function proxima() {
-    if (pagina < totalPaginas) {
-        pagina++;
+window.proxima = function () {
+    if (paginaFormacao < totalPaginas) {
+        paginaFormacao++;
         carregarTabela();
     }
 }
 
-function anterior() {
-    if (pagina > 1) {
-        pagina--;
+window.anterior = function () {
+    if (paginaFormacao > 1) {
+        paginaFormacao--;
         carregarTabela();
     }
 }
 
-function resetarPagina() {
-    pagina = 1;
+window.resetarPagina = function () {
+    paginaFormacao = 1;
     carregarTabela();
 }
 
 // =====================
-// SALVAR / ATUALIZAR
+// SALVAR
 // =====================
-async function salvar(event) {
+window.salvar = async function (event) {
     event.preventDefault();
 
     let dados = {
@@ -218,14 +213,14 @@ async function salvar(event) {
 // =====================
 // EDITAR
 // =====================
-function editar(f) {
+window.editar = function (f) {
     editandoId = f.id;
 
     document.getElementById("descricao").value = f.descricao;
     document.getElementById("data_termino").value = f.data_termino;
     document.getElementById("carga").value = f.carga_horaria;
-    document.getElementById("modalidade").value = f.modalidade;
-    document.getElementById("eixo").value = f.eixo;
+    document.getElementById("modalidade").value = f.modalidade || "";
+    document.getElementById("eixo").value = f.eixo || "";
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -233,7 +228,7 @@ function editar(f) {
 // =====================
 // DELETAR
 // =====================
-async function deletar(id) {
+window.deletar = async function (id) {
     if (!confirm("Excluir registro?")) return;
 
     let res = await fetch(`/api/formacao/${id}`, {method: "DELETE"});
@@ -255,6 +250,8 @@ function mostrarMsg(r) {
     } else {
         msg.innerHTML = `<div class="alert alert-success">Salvo com sucesso</div>`;
     }
+
+    setTimeout(() => msg.innerHTML = "", 2500);
 }
 
 function limpar() {
@@ -265,9 +262,12 @@ function limpar() {
 // =====================
 // INIT
 // =====================
-carregarEnums();
-carregarTabela();
+document.addEventListener("DOMContentLoaded", () => {
+    carregarEnums();
+    carregarTabela();
+});
 
+})();
 </script>
 
 {% endblock %}

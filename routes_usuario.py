@@ -2,14 +2,12 @@ from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Usuario
-from schemas import UsuarioCreate
 from passlib.context import CryptContext
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") 
+from security import criar_token
 
-import os
-print("ARQUIVOS NA PASTA:", os.listdir())
 router = APIRouter()
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ===============================
@@ -24,7 +22,7 @@ def get_db():
 
 
 # ===============================
-# LOGIN
+# LOGIN (JWT)
 # ===============================
 @router.post("/login")
 def login(
@@ -37,19 +35,25 @@ def login(
     if not user or not pwd_context.verify(senha, user.senha):
         return {"erro": "Usuário ou senha inválidos"}
 
+    token = criar_token({
+        "sub": user.username,
+        "perfil": user.perfil
+    })
+
     return {
         "ok": True,
+        "token": token,
         "perfil": user.perfil,
         "username": user.username
     }
 
 
 # ===============================
-# LISTAR USUÁRIOS (opcional)
+# LISTAR USUÁRIOS
 # ===============================
 @router.get("/api/usuarios")
 def listar(db: Session = Depends(get_db)):
-    dados = db.query(Usuario).all()
+    dados = db.query(Usuario).order_by(Usuario.username).all()
 
     return [
         {
@@ -64,53 +68,83 @@ def listar(db: Session = Depends(get_db)):
 # ===============================
 # CRIAR USUÁRIO
 # ===============================
-from schemas import UsuarioCreate
-
 @router.post("/api/usuario")
-def criar(dados: UsuarioCreate, db: Session = Depends(get_db)):
+def criar(dados: dict, db: Session = Depends(get_db)):
 
-    senha = dados.senha.strip()
+    # validação básica
+    if not dados.get("username") or not dados.get("senha") or not dados.get("perfil"):
+        return {"erro": "Preencha todos os campos"}
 
-    if len(senha) > 72:
-        return {"erro": "Senha muito longa"}
+    # verifica duplicidade
+    existe = db.query(Usuario).filter_by(username=dados["username"]).first()
+    if existe:
+        return {"erro": "Usuário já existe"}
 
-    senha_hash = pwd_context.hash(senha)
+    try:
+        senha_hash = pwd_context.hash(dados["senha"])
 
-    novo = Usuario(
-        username=dados.username,
-        senha=senha_hash,
-        perfil=dados.perfil
-    )
+        novo = Usuario(
+            username=dados["username"],
+            senha=senha_hash,
+            perfil=dados["perfil"]
+        )
 
-    db.add(novo)
-    db.commit()
+        db.add(novo)
+        db.commit()
 
-    return {"ok": True}
+        return {"ok": True}
 
-@router.delete("/api/usuario/{id}")
-def deletar(id: int, db: Session = Depends(get_db)):
-    u = db.query(Usuario).get(id)
+    except Exception as e:
+        db.rollback()
+        return {"erro": str(e)}
 
-    if not u:
-        return {"erro": "Não encontrado"}
 
-    db.delete(u)
-    db.commit()
-
-    return {"ok": True}
+# ===============================
+# ATUALIZAR USUÁRIO
+# ===============================
 @router.put("/api/usuario/{id}")
 def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
 
-    u = db.query(Usuario).get(id)
+    u = db.get(Usuario, id)
 
     if not u:
-        return {"erro": "Não encontrado"}
+        return {"erro": "Usuário não encontrado"}
 
-    if dados.get("senha"):
-        u.senha = pwd_context.hash(dados["senha"])
+    try:
+        # atualiza perfil
+        if dados.get("perfil"):
+            u.perfil = dados["perfil"]
 
-    u.perfil = dados["perfil"]
+        # atualiza senha (se enviada)
+        if dados.get("senha"):
+            u.senha = pwd_context.hash(dados["senha"])
 
-    db.commit()
+        db.commit()
 
-    return {"ok": True}
+        return {"ok": True}
+
+    except Exception as e:
+        db.rollback()
+        return {"erro": str(e)}
+
+
+# ===============================
+# DELETAR USUÁRIO
+# ===============================
+@router.delete("/api/usuario/{id}")
+def deletar(id: int, db: Session = Depends(get_db)):
+
+    u = db.get(Usuario, id)
+
+    if not u:
+        return {"erro": "Usuário não encontrado"}
+
+    try:
+        db.delete(u)
+        db.commit()
+
+        return {"ok": True}
+
+    except Exception as e:
+        db.rollback()
+        return {"erro": str(e)}

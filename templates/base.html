@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
     <title>Sistema</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Plotly -->
+    <!-- Plotly (se usar gráficos) -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <style>
         body {
             display: flex;
+            margin: 0;
         }
 
         .sidebar {
-            width: 220px;
+            width: 230px;
             height: 100vh;
             background: #343a40;
             color: white;
@@ -28,7 +30,7 @@
             display: block;
             margin: 10px 0;
             padding: 5px;
-            border-radius: 4px;
+            border-radius: 5px;
         }
 
         .sidebar a:hover {
@@ -36,26 +38,25 @@
             padding-left: 10px;
         }
 
-        .sidebar a.active {
-            background: #0d6efd;
-        }
-
         .content {
             flex: 1;
             padding: 20px;
             background: #f5f5f5;
+            overflow-y: auto;
         }
     </style>
 </head>
 
 <body>
 
+<!-- ===================== -->
 <!-- MENU LATERAL -->
+<!-- ===================== -->
 <div class="sidebar">
     <h4>Sistema</h4>
     <hr>
 
-    <ul id="menu-lateral" class="nav flex-column"></ul>
+    <div id="menu"></div>
 
     <hr>
 
@@ -63,7 +64,9 @@
     <a href="/docs">⚙️ API Docs</a>
 </div>
 
+<!-- ===================== -->
 <!-- CONTEÚDO -->
+<!-- ===================== -->
 <div class="content">
     {% block content %}{% endblock %}
 </div>
@@ -72,117 +75,90 @@
 <!-- SCRIPT GLOBAL -->
 <!-- ===================== -->
 <script>
-const originalFetch = window.fetch;
-
-window.fetch = function(url, options = {}) {
-    return originalFetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "perfil": localStorage.getItem("perfil"),
-            ...(options.headers || {})
-        }
-    });
-};
-</script>
-
-
-    
-<script>
 
 //
-// 🔐 CONFIG MENU POR PERFIL
+// 🔐 PROTEÇÃO GLOBAL
 //
-const MENUS = {
-    admin: [
-        { nome: "Dashboard", url: "/web/dashboard", icon: "📊" },
-        { nome: "Formações", url: "/web/formacoes", icon: "📚" },
-        { nome: "Servidores", url: "/web/servidores", icon: "👥" },
-        { nome: "Participações", url: "/web/participacoes", icon: "📋" },
-        { nome: "Usuários", url: "/web/usuarios", icon: "👤" }
-    ],
-
-    operador: [
-        { nome: "Formações", url: "/web/formacoes", icon: "📚" },
-        { nome: "Servidores", url: "/web/servidores", icon: "👥" },
-        { nome: "Participações", url: "/web/participacoes", icon: "📋" }
-    ],
-
-    custom: [
-        { nome: "Formações", url: "/web/formacoes", icon: "📚" },
-        { nome: "Servidores", url: "/web/servidores", icon: "👥" }
-    ]
-};
-
+if (!localStorage.getItem("token")) {
+    window.location.href = "/";
+}
 
 //
-// 🔐 API GLOBAL (HEADERS AUTOMÁTICOS)
+// 🌐 API GLOBAL (JWT)
 //
 function api(url, options = {}) {
     return fetch(url, {
         ...options,
         headers: {
             "Content-Type": "application/json",
-            "perfil": localStorage.getItem("perfil"),
+            "Authorization": "Bearer " + localStorage.getItem("token"),
             ...(options.headers || {})
         }
     });
 }
 
-
 //
-// 🧠 MONTA MENU DINÂMICO
+// 🎯 MENU DINÂMICO POR PERFIL
 //
 function montarMenu() {
 
     let perfil = localStorage.getItem("perfil");
 
-    let paginaAtual = window.location.pathname;
-
-    // páginas públicas
-    let liberadas = ["/"];
-
-    if (!perfil && !liberadas.includes(paginaAtual)) {
-        window.location = "/";
+    if (!perfil) {
+        logout();
         return;
     }
 
-    let menu = document.getElementById("menu-lateral");
-    menu.innerHTML = "";
+    const menus = {
 
-    let itens = MENUS[perfil] || [];
+        admin: [
+            ["/web/dashboard", "📊 Dashboard"],
+            ["/web/formacoes", "📚 Formações"],
+            ["/web/servidores", "👥 Servidores"],
+            ["/web/participacoes", "📊 Participações"],
+            ["/web/usuarios", "👤 Usuários"]
+        ],
 
-    itens.forEach(item => {
+        operador: [
+            ["/web/dashboard", "📊 Dashboard"],
+            ["/web/formacoes", "📚 Formações"],
+            ["/web/servidores", "👥 Servidores"],
+            ["/web/participacoes", "📊 Participações"]
+        ],
 
-        let li = document.createElement("li");
-        li.className = "nav-item";
+        custom: [
+            ["/web/dashboard", "📊 Dashboard"],
+            ["/web/formacoes", "📚 Formações"],
+            ["/web/servidores", "👥 Servidores"]
+        ]
+    };
 
-        let ativo = (paginaAtual === item.url) ? "active" : "";
+    let container = document.getElementById("menu");
 
-        li.innerHTML = `
-            <a class="nav-link ${ativo}" href="${item.url}">
-                ${item.icon} ${item.nome}
-            </a>
-        `;
+    container.innerHTML = "";
 
-        menu.appendChild(li);
+    if (!menus[perfil]) {
+        container.innerHTML = "<p>Sem acesso</p>";
+        return;
+    }
+
+    menus[perfil].forEach(item => {
+        container.innerHTML += `<a href="${item[0]}">${item[1]}</a>`;
     });
 }
-
 
 //
 // 🚪 LOGOUT
 //
 function logout() {
     localStorage.clear();
-    window.location = "/";
+    window.location.href = "/";
 }
 
-
 //
-// 🚀 INIT
+// 🔄 INIT
 //
-montarMenu();
+window.onload = montarMenu;
 
 </script>
 

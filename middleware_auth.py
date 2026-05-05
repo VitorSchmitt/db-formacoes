@@ -1,9 +1,7 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from security import validar_token
 
-# ===============================
-# ROTAS POR PERFIL
-# ===============================
 PERMISSOES = {
     "admin": ["*"],
 
@@ -14,67 +12,47 @@ PERMISSOES = {
         "/api/formacoes",
         "/api/participacao",
         "/api/participacoes",
-        "/api/cargos",      # 🔥 faltava
-        "/api/lotacoes",    # 🔥 faltava
-        "/api/enums"        # 🔥 faltava
+        "/api/cargos",
+        "/api/lotacoes",
+        "/api/enums"
     ],
 
     "custom": [
         "/api/servidores",
-        "/api/formacoes",
-        "/api/cargos",
-        "/api/enums"
+        "/api/formacoes"
     ]
 }
 
-
-# ===============================
-# FUNÇÃO DE VALIDAÇÃO
-# ===============================
-def tem_permissao(perfil: str, path: str) -> bool:
-
-    if not perfil:
-        return False
-
+def tem_permissao(perfil, path):
     regras = PERMISSOES.get(perfil, [])
 
-    # admin → tudo liberado
     if "*" in regras:
         return True
 
-    # verifica se a rota começa com alguma permitida
     return any(path.startswith(p) for p in regras)
 
-
-# ===============================
-# MIDDLEWARE
-# ===============================
 async def auth_middleware(request: Request, call_next):
 
     path = request.url.path
 
     # 🔓 rotas públicas
-    rotas_publicas = ["/login", "/", "/docs", "/openapi.json"]
-
-    if path in rotas_publicas or path.startswith("/web"):
+    if path in ["/", "/login", "/docs", "/openapi.json"] or path.startswith("/web"):
         return await call_next(request)
 
-    perfil = request.headers.get("perfil")
+    auth = request.headers.get("Authorization")
 
-    print("PERFIL:", perfil, "| PATH:", path)  # 🔍 debug
+    if not auth or not auth.startswith("Bearer "):
+        return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
 
-    # 🔴 sem perfil
-    if not perfil:
-        return JSONResponse(
-            status_code=401,
-            content={"erro": "Não autenticado"}
-        )
+    token = auth.split(" ")[1]
+    payload = validar_token(token)
 
-    # 🔴 sem permissão
-    if not tem_permissao(perfil, path):
-        return JSONResponse(
-            status_code=403,
-            content={"erro": "Sem permissão"}
-        )
+    if not payload:
+        return JSONResponse(status_code=401, content={"erro": "Token inválido"})
+
+    request.state.user = payload
+
+    if not tem_permissao(payload["perfil"], path):
+        return JSONResponse(status_code=403, content={"erro": "Sem permissão"})
 
     return await call_next(request)

@@ -28,21 +28,17 @@ async function login(e) {
     let res = await fetch("/login", {
         method: "POST",
         body: new URLSearchParams({
-            username: document.getElementById("username").value,
-            senha: document.getElementById("senha").value
+            username: username.value,
+            senha: senha.value
         })
     });
 
     let r = await res.json();
 
     if (r.ok) {
+        localStorage.setItem("token", r.token);
         localStorage.setItem("perfil", r.perfil);
-        localStorage.setItem("user", r.username);
-
         window.location = "/web/dashboard";
-    } else {
-        document.getElementById("msg").innerHTML =
-            `<div class="alert alert-danger">${r.erro}</div>`;
     }
 }
 

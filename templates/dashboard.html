@@ -4,19 +4,16 @@
 
 <h2 class="mb-3">📊 Dashboard de Formações</h2>
 
-<!-- ALERTA ERRO -->
 <div id="erro" class="alert alert-danger" style="display:none"></div>
-
-<!-- LOADING -->
 <div id="loading" style="display:none; font-weight:bold;">Carregando...</div>
 
 <!-- FILTROS -->
 <div class="row mb-3">
     <div class="col-md-2">
-        <input type="month" id="mes_inicio" class="form-control" min="2022-01" max="2030-12">
+        <input type="month" id="mes_inicio" class="form-control">
     </div>
     <div class="col-md-2">
-        <input type="month" id="mes_fim" class="form-control" min="2022-01" max="2030-12">
+        <input type="month" id="mes_fim" class="form-control">
     </div>
     <div class="col-md-3">
         <select id="filtroLotacao" class="form-control"></select>
@@ -82,6 +79,7 @@
 </div>
 
 <script>
+(() => {
 
 // ===============================
 // ESTADO GLOBAL
@@ -98,26 +96,38 @@ let filtros = {
 // ===============================
 async function carregar() {
 
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("erro").style.display = "none";
+    try {
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("erro").style.display = "none";
 
-    let url = `/api/dashboard?mes_inicio=${filtros.mes_inicio}&mes_fim=${filtros.mes_fim}&lotacao=${filtros.lotacao}&curso=${filtros.curso}`;
+        let url = `/api/dashboard?mes_inicio=${filtros.mes_inicio}&mes_fim=${filtros.mes_fim}&lotacao=${filtros.lotacao}&curso=${filtros.curso}`;
 
-    let res = await fetch(url);
-    let data = await res.json();
+        let res = await api(url); // 🔥 CORREÇÃO PRINCIPAL
 
-    document.getElementById("loading").style.display = "none";
+        // 🔴 erro de autenticação
+        if (res.status === 401) {
+            localStorage.clear();
+            window.location.href = "/";
+            return;
+        }
 
-    if (data.erro) {
-        let div = document.getElementById("erro");
-        div.innerText = data.erro;
-        div.style.display = "block";
-        return;
+        let data = await res.json();
+
+        document.getElementById("loading").style.display = "none";
+
+        if (data.erro) {
+            mostrarErro(data.erro);
+            return;
+        }
+
+        atualizarCards(data);
+        preencherFiltros(data);
+        montarGraficos(data);
+
+    } catch (err) {
+        console.error(err);
+        mostrarErro("Erro ao carregar dashboard");
     }
-
-    atualizarCards(data);
-    preencherFiltros(data);
-    montarGraficos(data);
 }
 
 // ===============================
@@ -125,9 +135,9 @@ async function carregar() {
 // ===============================
 function atualizarCards(data) {
 
-    document.getElementById("total").innerText = data.total;
-    document.getElementById("totalCursos").innerText = data.curso.length;
-    document.getElementById("totalLotacoes").innerText = data.lotacao.length;
+    document.getElementById("total").innerText = data.total || 0;
+    document.getElementById("totalCursos").innerText = data.curso?.length || 0;
+    document.getElementById("totalLotacoes").innerText = data.lotacao?.length || 0;
 
     let soma = data.periodo.reduce((acc, x) => acc + x.qtd, 0);
     let media = soma / (data.periodo.length || 1);
@@ -136,31 +146,26 @@ function atualizarCards(data) {
 }
 
 // ===============================
-// FILTROS (SELECT)
+// FILTROS
 // ===============================
 function preencherFiltros(data) {
 
-    let selectLotacao = document.getElementById("filtroLotacao");
-    let selectCurso = document.getElementById("filtroCurso");
+    let lot = document.getElementById("filtroLotacao");
+    let curso = document.getElementById("filtroCurso");
 
-    let atualLot = filtros.lotacao;
-    let atualCurso = filtros.curso;
+    lot.innerHTML = '<option value="">Todas Lotações</option>';
+    curso.innerHTML = '<option value="">Todos Cursos</option>';
 
-    selectLotacao.innerHTML = '<option value="">Todas Lotações</option>';
-    selectCurso.innerHTML = '<option value="">Todos Cursos</option>';
-
-    data.lotacao.forEach(item => {
-        let val = item.lotacao.trim();
-        let opt = new Option(val, val);
-        if (val === atualLot) opt.selected = true;
-        selectLotacao.add(opt);
+    data.lotacao.forEach(x => {
+        let opt = new Option(x.lotacao, x.lotacao);
+        if (x.lotacao === filtros.lotacao) opt.selected = true;
+        lot.add(opt);
     });
 
-    data.curso.forEach(item => {
-        let val = item.formacao.trim();
-        let opt = new Option(val, val);
-        if (val === atualCurso) opt.selected = true;
-        selectCurso.add(opt);
+    data.curso.forEach(x => {
+        let opt = new Option(x.formacao, x.formacao);
+        if (x.formacao === filtros.curso) opt.selected = true;
+        curso.add(opt);
     });
 }
 
@@ -172,105 +177,84 @@ function montarGraficos(data) {
     let lotTop = data.lotacao.sort((a,b)=>b.qtd-a.qtd).slice(0,10);
     let cursoTop = data.curso.sort((a,b)=>b.qtd-a.qtd).slice(0,10);
 
-    // LOTAÇÃO
     Plotly.react("g1", [{
         x: lotTop.map(x => x.lotacao),
         y: lotTop.map(x => x.qtd),
-        type: "bar",
-        marker: {
-            color: lotTop.map(x =>
-                x.lotacao === filtros.lotacao ? "red" : "#007bff"
-            )
-        }
+        type: "bar"
     }], {title: "Top Lotações"});
 
-    document.getElementById("g1").onclick = (d) => {
-        let ponto = d.target.__data__;
-    };
-
-    document.getElementById("g1").on('plotly_click', function(d) {
-        let valor = d.points[0].x;
-        filtros.lotacao = (filtros.lotacao === valor) ? "" : valor;
+    document.getElementById("g1").on('plotly_click', d => {
+        let val = d.points[0].x;
+        filtros.lotacao = (filtros.lotacao === val) ? "" : val;
         carregar();
     });
 
-    // CURSO
     Plotly.react("g2", [{
         x: cursoTop.map(x => x.formacao),
         y: cursoTop.map(x => x.qtd),
-        type: "bar",
-        marker: {
-            color: cursoTop.map(x =>
-                x.formacao === filtros.curso ? "red" : "#28a745"
-            )
-        }
+        type: "bar"
     }], {title: "Top Cursos"});
 
-    document.getElementById("g2").on('plotly_click', function(d) {
-        let valor = d.points[0].x;
-        filtros.curso = (filtros.curso === valor) ? "" : valor;
+    document.getElementById("g2").on('plotly_click', d => {
+        let val = d.points[0].x;
+        filtros.curso = (filtros.curso === val) ? "" : val;
         carregar();
     });
 
-    // PERÍODO
     Plotly.react("g3", [{
         x: data.periodo.map(x => x.mes),
         y: data.periodo.map(x => x.qtd),
         type: "scatter"
     }], {title: "Participações por Mês"});
-
-    document.getElementById("g3").on('plotly_click', function(d) {
-        let mes = d.points[0].x;
-        filtros.mes_inicio = mes;
-        filtros.mes_fim = mes;
-        carregar();
-    });
 }
 
 // ===============================
-// EVENTOS INPUT
+// EVENTOS
 // ===============================
-document.getElementById("filtroLotacao").addEventListener("change", e => {
+document.getElementById("filtroLotacao").onchange = e => {
     filtros.lotacao = e.target.value;
     carregar();
-});
+};
 
-document.getElementById("filtroCurso").addEventListener("change", e => {
+document.getElementById("filtroCurso").onchange = e => {
     filtros.curso = e.target.value;
     carregar();
-});
+};
 
-document.getElementById("mes_inicio").addEventListener("change", e => {
+document.getElementById("mes_inicio").onchange = e => {
     filtros.mes_inicio = e.target.value;
-});
+};
 
-document.getElementById("mes_fim").addEventListener("change", e => {
+document.getElementById("mes_fim").onchange = e => {
     filtros.mes_fim = e.target.value;
-});
+};
 
 // ===============================
-// LIMPAR FILTROS
+// LIMPAR
 // ===============================
 function limparFiltros() {
 
-    filtros = {
-        mes_inicio: "",
-        mes_fim: "",
-        lotacao: "",
-        curso: ""
-    };
+    filtros = { mes_inicio:"", mes_fim:"", lotacao:"", curso:"" };
 
     document.getElementById("mes_inicio").value = "";
     document.getElementById("mes_fim").value = "";
-    document.getElementById("filtroLotacao").value = "";
-    document.getElementById("filtroCurso").value = "";
 
     carregar();
 }
 
-// INIT
-carregar();
+// ===============================
+// UI
+// ===============================
+function mostrarErro(msg) {
+    let div = document.getElementById("erro");
+    div.innerText = msg;
+    div.style.display = "block";
+}
 
+// INIT
+document.addEventListener("DOMContentLoaded", carregar);
+
+})();
 </script>
 
 {% endblock %}

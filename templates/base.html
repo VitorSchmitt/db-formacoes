@@ -7,18 +7,18 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Plotly (se usar gráficos) -->
+    <!-- Plotly -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <style>
         body {
             display: flex;
             margin: 0;
+            height: 100vh;
         }
 
         .sidebar {
             width: 230px;
-            height: 100vh;
             background: #343a40;
             color: white;
             padding: 20px;
@@ -29,13 +29,18 @@
             text-decoration: none;
             display: block;
             margin: 10px 0;
-            padding: 5px;
-            border-radius: 5px;
+            padding: 6px;
+            border-radius: 6px;
+            transition: 0.2s;
         }
 
         .sidebar a:hover {
             background: #495057;
-            padding-left: 10px;
+            padding-left: 12px;
+        }
+
+        .sidebar a.ativo {
+            background: #0d6efd;
         }
 
         .content {
@@ -61,7 +66,7 @@
     <hr>
 
     <a href="#" onclick="logout()">🚪 Sair</a>
-    <a href="/docs">⚙️ API Docs</a>
+    <a href="/docs" target="_blank">⚙️ API Docs</a>
 </div>
 
 <!-- ===================== -->
@@ -79,35 +84,59 @@
 //
 // 🔐 PROTEÇÃO GLOBAL
 //
-if (!localStorage.getItem("token")) {
-    window.location.href = "/";
-}
+(function proteger() {
+    const pagina = window.location.pathname;
+
+    // páginas públicas (login)
+    const liberadas = ["/"];
+
+    if (!localStorage.getItem("token") && !liberadas.includes(pagina)) {
+        window.location.href = "/";
+    }
+})();
 
 //
 // 🌐 API GLOBAL (JWT)
 //
-function api(url, options = {}) {
-    return fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + localStorage.getItem("token"),
-            ...(options.headers || {})
+async function api(url, options = {}) {
+
+    try {
+        let res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("token"),
+                ...(options.headers || {})
+            }
+        });
+
+        // 🔴 TOKEN EXPIRADO OU INVÁLIDO
+        if (res.status === 401) {
+            logout();
+            return;
         }
-    });
+
+        // 🔴 SEM PERMISSÃO
+        if (res.status === 403) {
+            alert("Sem permissão para acessar este recurso");
+            return;
+        }
+
+        return res;
+
+    } catch (err) {
+        console.error("Erro na API:", err);
+        alert("Erro de conexão com o servidor");
+    }
 }
 
 //
-// 🎯 MENU DINÂMICO POR PERFIL
+// 🎯 MENU DINÂMICO
 //
 function montarMenu() {
 
-    let perfil = localStorage.getItem("perfil");
-
-    if (!perfil) {
-        logout();
-        return;
-    }
+    const perfil = localStorage.getItem("perfil");
+    const paginaAtual = window.location.pathname;
 
     const menus = {
 
@@ -133,7 +162,7 @@ function montarMenu() {
         ]
     };
 
-    let container = document.getElementById("menu");
+    const container = document.getElementById("menu");
 
     container.innerHTML = "";
 
@@ -143,7 +172,14 @@ function montarMenu() {
     }
 
     menus[perfil].forEach(item => {
-        container.innerHTML += `<a href="${item[0]}">${item[1]}</a>`;
+
+        let ativo = paginaAtual === item[0] ? "ativo" : "";
+
+        container.innerHTML += `
+            <a href="${item[0]}" class="${ativo}">
+                ${item[1]}
+            </a>
+        `;
     });
 }
 
@@ -158,7 +194,7 @@ function logout() {
 //
 // 🔄 INIT
 //
-window.onload = montarMenu;
+window.addEventListener("DOMContentLoaded", montarMenu);
 
 </script>
 

@@ -72,6 +72,23 @@
 <!-- SCRIPT GLOBAL -->
 <!-- ===================== -->
 <script>
+const originalFetch = window.fetch;
+
+window.fetch = function(url, options = {}) {
+    return originalFetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "perfil": localStorage.getItem("perfil"),
+            ...(options.headers || {})
+        }
+    });
+};
+</script>
+
+
+    
+<script>
 
 //
 // 🔐 CONFIG MENU POR PERFIL

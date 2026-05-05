@@ -48,38 +48,49 @@ let editando = null;
 // =====================
 async function carregarTabela() {
 
-    let res = await fetch("/api/usuarios");
-    let data = await res.json();
+    try {
+        let res = await api("/api/usuarios");
+        let data = await res.json();
 
-    let busca = document.getElementById("busca").value.toLowerCase();
+        if (!res.ok) {
+            mostrarMsg({erro: data.erro || "Erro ao carregar usuários"});
+            return;
+        }
 
-    let html = `
-    <table class="table table-striped">
-        <tr>
-            <th>Usuário</th>
-            <th>Perfil</th>
-            <th>Ações</th>
-        </tr>
-    `;
+        let busca = document.getElementById("busca").value.toLowerCase();
 
-    data
-    .filter(u => u.username.toLowerCase().includes(busca))
-    .forEach(u => {
-        html += `
-        <tr>
-            <td>${u.username}</td>
-            <td>${u.perfil}</td>
-            <td>
-                <button class="btn btn-warning btn-sm" onclick='editar(${JSON.stringify(u)})'>✏️</button>
-                <button class="btn btn-danger btn-sm" onclick='deletar(${u.id})'>🗑</button>
-            </td>
-        </tr>
+        let html = `
+        <table class="table table-striped">
+            <tr>
+                <th>Usuário</th>
+                <th>Perfil</th>
+                <th>Ações</th>
+            </tr>
         `;
-    });
 
-    html += "</table>";
+        data
+        .filter(u => u.username.toLowerCase().includes(busca))
+        .forEach(u => {
+            html += `
+            <tr>
+                <td>${u.username}</td>
+                <td>${u.perfil}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick='editar(${JSON.stringify(u)})'>✏️</button>
+                    <button class="btn btn-danger btn-sm" onclick='deletar(${u.id})'>🗑</button>
+                </td>
+            </tr>
+            `;
+        });
 
-    document.getElementById("tabela").innerHTML = html;
+        html += "</table>";
+
+        document.getElementById("tabela").innerHTML = html;
+
+    } catch (err) {
+        mostrarMsg({erro: "Falha ao conectar com o servidor"});
+        console.error(err);
+    }
 }
 
 // =====================
@@ -102,19 +113,29 @@ async function salvar(e) {
         method = "PUT";
     }
 
-    let res = await fetch(url, {
-        method: method,
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(dados)
-    });
+    try {
+        let res = await api(url, {
+            method: method,
+            body: JSON.stringify(dados)
+        });
 
-    let r = await res.json();
+        let r = await res.json();
 
-    mostrarMsg(r);
+        if (!res.ok) {
+            mostrarMsg({erro: r.erro || "Erro ao salvar"});
+            return;
+        }
 
-    if (r.ok) {
-        limpar();
-        carregarTabela();
+        mostrarMsg(r);
+
+        if (r.ok) {
+            limpar();
+            carregarTabela();
+        }
+
+    } catch (err) {
+        mostrarMsg({erro: "Erro de conexão"});
+        console.error(err);
     }
 }
 
@@ -126,8 +147,6 @@ function editar(u) {
 
     document.getElementById("username").value = u.username;
     document.getElementById("perfil").value = u.perfil;
-
-    // senha não volta (segurança)
 }
 
 // =====================
@@ -137,15 +156,26 @@ async function deletar(id) {
 
     if (!confirm("Excluir usuário?")) return;
 
-    let res = await fetch(`/api/usuario/${id}`, {
-        method: "DELETE"
-    });
+    try {
+        let res = await api(`/api/usuario/${id}`, {
+            method: "DELETE"
+        });
 
-    let r = await res.json();
+        let r = await res.json();
 
-    mostrarMsg(r);
+        if (!res.ok) {
+            mostrarMsg({erro: r.erro || "Erro ao excluir"});
+            return;
+        }
 
-    if (r.ok) carregarTabela();
+        mostrarMsg(r);
+
+        if (r.ok) carregarTabela();
+
+    } catch (err) {
+        mostrarMsg({erro: "Erro de conexão"});
+        console.error(err);
+    }
 }
 
 // =====================
@@ -159,6 +189,8 @@ function mostrarMsg(r) {
     } else {
         msg.innerHTML = `<div class="alert alert-success">Sucesso</div>`;
     }
+
+    setTimeout(() => msg.innerHTML = "", 3000);
 }
 
 function limpar() {

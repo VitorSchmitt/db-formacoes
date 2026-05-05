@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
-from database import SessionLocal
-from models import Servidor, Cargo, Usuario
 from sqlalchemy.exc import IntegrityError
-from schemas import ServidorCreate, ServidorUpdate
-from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto") 
+from database import SessionLocal
+from models import Servidor, Cargo
+from schemas import ServidorCreate, ServidorUpdate
 
 router = APIRouter()
 
+
+# ===============================
+# DB
+# ===============================
 def get_db():
     db = SessionLocal()
     try:
@@ -17,15 +19,18 @@ def get_db():
     finally:
         db.close()
 
+
 # ===============================
-# LISTAR
+# LISTAR SERVIDORES
 # ===============================
 @router.get("/api/servidores")
 def listar(db: Session = Depends(get_db)):
-    dados = db.query(Servidor)\
-        .options(joinedload(Servidor.cargo))\
-        .order_by(Servidor.nome)\
+    dados = (
+        db.query(Servidor)
+        .options(joinedload(Servidor.cargo))
+        .order_by(Servidor.nome)
         .all()
+    )
 
     return [
         {
@@ -37,29 +42,42 @@ def listar(db: Session = Depends(get_db)):
         for s in dados
     ]
 
+
 # ===============================
-# CARGOS
+# LISTAR CARGOS
 # ===============================
 @router.get("/api/cargos")
 def listar_cargos(db: Session = Depends(get_db)):
-    return db.query(Cargo).order_by(Cargo.descricao).all()
+    cargos = db.query(Cargo).order_by(Cargo.descricao).all()
+
+    return [
+        {
+            "id": c.id,
+            "descricao": c.descricao
+        }
+        for c in cargos
+    ]
+
 
 # ===============================
-# CRIAR
+# CRIAR SERVIDOR
 # ===============================
-@router.post("/api/usuario")
-def criar(dados: dict, db: Session = Depends(get_db)):
+@router.post("/api/servidor")
+def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
 
-    if not dados.get("username") or not dados.get("senha") or not dados.get("perfil"):
+    if not dados.matricula or not dados.nome or not dados.cargo_id:
         return {"erro": "Preencha todos os campos"}
 
-    try:
-        senha_hash = pwd_context.hash(dados["senha"])
+    # 🔎 valida cargo
+    cargo = db.get(Cargo, dados.cargo_id)
+    if not cargo:
+        return {"erro": "Cargo inválido"}
 
-        novo = Usuario(
-            username=dados["username"],
-            senha=senha_hash,
-            perfil=dados["perfil"]
+    try:
+        novo = Servidor(
+            matricula=dados.matricula,
+            nome=dados.nome,
+            cargo_id=dados.cargo_id
         )
 
         db.add(novo)
@@ -67,12 +85,17 @@ def criar(dados: dict, db: Session = Depends(get_db)):
 
         return {"ok": True}
 
+    except IntegrityError:
+        db.rollback()
+        return {"erro": "Servidor já cadastrado"}
+
     except Exception as e:
         db.rollback()
         return {"erro": str(e)}
 
+
 # ===============================
-# ATUALIZAR
+# ATUALIZAR SERVIDOR
 # ===============================
 @router.put("/api/servidor/{matricula}")
 def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_db)):
@@ -80,7 +103,7 @@ def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_d
     s = db.get(Servidor, matricula)
 
     if not s:
-        return {"erro": "Não encontrado"}
+        return {"erro": "Servidor não encontrado"}
 
     cargo = db.get(Cargo, dados.cargo_id)
 
@@ -92,6 +115,29 @@ def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_d
         s.cargo_id = dados.cargo_id
 
         db.commit()
+
+        return {"ok": True}
+
+    except Exception as e:
+        db.rollback()
+        return {"erro": str(e)}
+
+
+# ===============================
+# DELETAR SERVIDOR
+# ===============================
+@router.delete("/api/servidor/{matricula}")
+def deletar(matricula: str, db: Session = Depends(get_db)):
+
+    s = db.get(Servidor, matricula)
+
+    if not s:
+        return {"erro": "Servidor não encontrado"}
+
+    try:
+        db.delete(s)
+        db.commit()
+
         return {"ok": True}
 
     except Exception as e:

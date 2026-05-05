@@ -51,13 +51,19 @@ def tem_permissao(perfil: str, path: str) -> bool:
 # ===============================
 async def auth_middleware(request: Request, call_next):
 
-    # libera rotas públicas
-    if request.url.path in ["/login", "/", "/docs", "/openapi.json"]:
+    path = request.url.path
+
+    # 🔓 rotas públicas
+    rotas_publicas = ["/login", "/", "/docs", "/openapi.json"]
+
+    if path in rotas_publicas or path.startswith("/web"):
         return await call_next(request)
 
     perfil = request.headers.get("perfil")
 
-    # 🔴 sem perfil → bloqueia
+    print("PERFIL:", perfil, "| PATH:", path)  # 🔍 debug
+
+    # 🔴 sem perfil
     if not perfil:
         return JSONResponse(
             status_code=401,
@@ -65,7 +71,7 @@ async def auth_middleware(request: Request, call_next):
         )
 
     # 🔴 sem permissão
-    if not tem_permissao(perfil, request.url.path):
+    if not tem_permissao(perfil, path):
         return JSONResponse(
             status_code=403,
             content={"erro": "Sem permissão"}

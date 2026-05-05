@@ -13,12 +13,17 @@ PERMISSOES = {
         "/api/formacao",
         "/api/formacoes",
         "/api/participacao",
-        "/api/participacoes"
+        "/api/participacoes",
+        "/api/cargos",      # 🔥 faltava
+        "/api/lotacoes",    # 🔥 faltava
+        "/api/enums"        # 🔥 faltava
     ],
 
     "custom": [
         "/api/servidores",
-        "/api/formacoes"
+        "/api/formacoes",
+        "/api/cargos",
+        "/api/enums"
     ]
 }
 

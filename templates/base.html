@@ -27,11 +27,17 @@
             text-decoration: none;
             display: block;
             margin: 10px 0;
+            padding: 5px;
+            border-radius: 4px;
         }
 
         .sidebar a:hover {
             background: #495057;
             padding-left: 10px;
+        }
+
+        .sidebar a.active {
+            background: #0d6efd;
         }
 
         .content {
@@ -44,43 +50,124 @@
 
 <body>
 
-    <!-- MENU LATERAL -->
-    <div class="sidebar">
-        <h4>Sistema</h4>
-        <hr>
+<!-- MENU LATERAL -->
+<div class="sidebar">
+    <h4>Sistema</h4>
+    <hr>
 
-        <a href="/web/dashboard">📊 Dashboard</a>
-        <a href="/web/formacoes">📚 Formações</a>
-        <a href="/web/servidores">👥 Servidores</a>
-        <a href="/web/participacoes">📊 Participações</a>
-        <a href="/web/usuarios">👤 Usuários</a>
-        <a href="#" onclick="logout()">🚪 Sair</a>
-        <a href="/docs">⚙️ API Docs</a>
+    <ul id="menu-lateral" class="nav flex-column"></ul>
 
-        <script>
-        function logout() {
-            localStorage.clear();
-            window.location = "/";
+    <hr>
+
+    <a href="#" onclick="logout()">🚪 Sair</a>
+    <a href="/docs">⚙️ API Docs</a>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- ===================== -->
+<!-- SCRIPT GLOBAL -->
+<!-- ===================== -->
+<script>
+
+//
+// 🔐 CONFIG MENU POR PERFIL
+//
+const MENUS = {
+    admin: [
+        { nome: "Dashboard", url: "/web/dashboard", icon: "📊" },
+        { nome: "Formações", url: "/web/formacoes", icon: "📚" },
+        { nome: "Servidores", url: "/web/servidores", icon: "👥" },
+        { nome: "Participações", url: "/web/participacoes", icon: "📋" },
+        { nome: "Usuários", url: "/web/usuarios", icon: "👤" }
+    ],
+
+    operador: [
+        { nome: "Formações", url: "/web/formacoes", icon: "📚" },
+        { nome: "Servidores", url: "/web/servidores", icon: "👥" },
+        { nome: "Participações", url: "/web/participacoes", icon: "📋" }
+    ],
+
+    custom: [
+        { nome: "Formações", url: "/web/formacoes", icon: "📚" },
+        { nome: "Servidores", url: "/web/servidores", icon: "👥" }
+    ]
+};
+
+
+//
+// 🔐 API GLOBAL (HEADERS AUTOMÁTICOS)
+//
+function api(url, options = {}) {
+    return fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            "perfil": localStorage.getItem("perfil"),
+            ...(options.headers || {})
         }
-        
-       let pagina = window.location.pathname;
-
-        // páginas públicas
-        let liberadas = ["/", "/web/usuarios"];
-
-        if (!localStorage.getItem("perfil") && !liberadas.includes(pagina)) {
-            window.location.href = "/";
-        }
-        </script>
+    });
+}
 
 
-        
-    </div>
+//
+// 🧠 MONTA MENU DINÂMICO
+//
+function montarMenu() {
 
-    <!-- CONTEÚDO -->
-    <div class="content">
-        {% block content %}{% endblock %}
-    </div>
+    let perfil = localStorage.getItem("perfil");
+
+    let paginaAtual = window.location.pathname;
+
+    // páginas públicas
+    let liberadas = ["/"];
+
+    if (!perfil && !liberadas.includes(paginaAtual)) {
+        window.location = "/";
+        return;
+    }
+
+    let menu = document.getElementById("menu-lateral");
+    menu.innerHTML = "";
+
+    let itens = MENUS[perfil] || [];
+
+    itens.forEach(item => {
+
+        let li = document.createElement("li");
+        li.className = "nav-item";
+
+        let ativo = (paginaAtual === item.url) ? "active" : "";
+
+        li.innerHTML = `
+            <a class="nav-link ${ativo}" href="${item.url}">
+                ${item.icon} ${item.nome}
+            </a>
+        `;
+
+        menu.appendChild(li);
+    });
+}
+
+
+//
+// 🚪 LOGOUT
+//
+function logout() {
+    localStorage.clear();
+    window.location = "/";
+}
+
+
+//
+// 🚀 INIT
+//
+montarMenu();
+
+</script>
 
 </body>
 </html>

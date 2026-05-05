@@ -120,24 +120,40 @@ async function salvar(e) {
         method = "PUT";
     }
 
-    let res = await fetch(url, {
-        method: method,
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(dados)
-    });
+    try {
+        let res = await fetch(url, {
+            method: method,
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(dados)
+        });
 
-    let r = await res.json();
+        let r;
 
-    mostrarMsg(r);
+        // 🔥 tenta ler JSON com segurança
+        try {
+            r = await res.json();
+        } catch {
+            r = {erro: "Erro inesperado no servidor"};
+        }
 
-    if (r.ok) {
-        document.querySelector("form").reset();
-        document.getElementById("matricula").disabled = false;
-        document.querySelector("button.btn-primary").innerText = "Salvar";
-        carregarTabela();
+        // 🔥 se HTTP erro
+        if (!res.ok) {
+            mostrarMsg({erro: r.erro || "Erro ao salvar servidor"});
+            return;
+        }
+
+        mostrarMsg(r);
+
+        if (r.ok) {
+            limpar();
+            carregarTabela();
+        }
+
+    } catch (err) {
+        mostrarMsg({erro: "Falha de conexão com o servidor"});
+        console.error(err);
     }
 }
-
 // =====================
 // EDITAR
 // =====================

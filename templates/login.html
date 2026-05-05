@@ -7,8 +7,8 @@
 
 <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
 
-<div class="card p-4" style="width: 300px;">
-    <h4 class="mb-3 text-center">Login</h4>
+<div class="card p-4 shadow" style="width: 320px;">
+    <h4 class="mb-3 text-center">🔐 Login</h4>
 
     <form onsubmit="login(event)">
         <input id="username" class="form-control mb-2" placeholder="Usuário" required>
@@ -25,21 +25,68 @@
 async function login(e) {
     e.preventDefault();
 
-    let res = await fetch("/login", {
-        method: "POST",
-        body: new URLSearchParams({
-            username: username.value,
-            senha: senha.value
-        })
-    });
+    let username = document.getElementById("username").value.trim();
+    let senha = document.getElementById("senha").value.trim();
 
-    let r = await res.json();
+    // 🔴 validação
+    if (!username || !senha) {
+        mostrarMsg("Preencha usuário e senha", "danger");
+        return;
+    }
 
-    if (r.ok) {
+    try {
+        let res = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                senha: senha
+            })
+        });
+
+        let r;
+
+        try {
+            r = await res.json();
+        } catch {
+            mostrarMsg("Erro inesperado no servidor", "danger");
+            return;
+        }
+
+        // 🔴 erro de autenticação
+        if (!res.ok || !r.token) {
+            mostrarMsg(r.erro || "Usuário ou senha inválidos", "danger");
+            return;
+        }
+
+        // ✅ limpa sessão anterior
+        localStorage.clear();
+
+        // ✅ salva dados
         localStorage.setItem("token", r.token);
         localStorage.setItem("perfil", r.perfil);
-        window.location = "/web/dashboard";
+
+        mostrarMsg("Login realizado com sucesso", "success");
+
+        // 🚀 redireciona
+        setTimeout(() => {
+            window.location.href = "/web/dashboard";
+        }, 800);
+
+    } catch (err) {
+        console.error(err);
+        mostrarMsg("Erro de conexão com o servidor", "danger");
     }
+}
+
+// =====================
+// UI
+// =====================
+function mostrarMsg(texto, tipo) {
+    document.getElementById("msg").innerHTML =
+        `<div class="alert alert-${tipo}">${texto}</div>`;
 }
 
 </script>

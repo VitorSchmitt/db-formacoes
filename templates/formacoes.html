@@ -83,6 +83,13 @@ async function carregarEnums() {
     let res = await fetch("/api/enums");
     let data = await res.json();
 
+    console.log("ENUMS:", data);
+
+    if (!data.modalidade || !data.eixo) {
+        console.error("Erro ao carregar enums:", data);
+        return;
+    }
+
     let m = document.getElementById("modalidade");
     let e = document.getElementById("eixo");
 

@@ -1,31 +1,69 @@
-from fastapi import APIRouter, Request, Form
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import APIRouter, Request, Form, Depends
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+
+from database import SessionLocal
+from models import Usuario
 
 router = APIRouter()
 
-# fake (depois liga no banco)
-USUARIOS = {
-    "admin": {"senha": "147", "perfil": "admin"},
-    "user": {"senha": "147", "perfil": "operador"}
-}
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @router.post("/login")
-async def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    user = USUARIOS.get(username)
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
 
-    if not user or user["senha"] != password:
-        return JSONResponse(status_code=401, content={"erro": "Login inválido"})
+    user = db.query(Usuario).filter(
+        Usuario.username == username
+    ).first()
+
+    if not user:
+        return JSONResponse(
+            status_code=401,
+            content={"erro": "Usuário inválido"}
+        )
+
+    if not pwd_context.verify(password, user.senha):
+        return JSONResponse(
+            status_code=401,
+            content={"erro": "Senha inválida"}
+        )
 
     request.session["user"] = {
-        "username": username,
-        "perfil": user["perfil"]
+        "id": user.id,
+        "username": user.username,
+        "perfil": user.perfil
     }
 
-    return RedirectResponse("/web/dashboard", status_code=302)
+    return {
+        "ok": True,
+        "redirect": "/web/dashboard"
+    }
 
 
 @router.get("/logout")
 def logout(request: Request):
+
     request.session.clear()
-    return RedirectResponse("/", status_code=302)
+
+    return {
+        "ok": True,
+        "redirect": "/"
+    }

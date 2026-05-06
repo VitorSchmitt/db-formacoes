@@ -6,6 +6,7 @@ from database import SessionLocal
 from models import Participacao, Formacao, Lotacao, Usuario
 from routes_formacao import router as formacao_router
 from routes_servidor import router as servidor_router
+from routes_login import router as login_router
 from routes_participacao import router as participacao_router
 from routes_usuario import router as usuario_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,7 +19,7 @@ app.include_router(formacao_router)
 app.include_router(servidor_router)
 app.include_router(participacao_router)
 app.include_router(usuario_router)
-
+app.include_router(login_router)
 
 # ===============================
 # WEB

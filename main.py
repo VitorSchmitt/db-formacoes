@@ -6,6 +6,8 @@ from starlette.responses import JSONResponse
 
 from database import SessionLocal
 from models import Usuario
+from typing import Optional
+from fastapi import Query
 
 from routes_formacao import router as formacao_router
 from routes_servidor import router as servidor_router
@@ -149,10 +151,10 @@ def listar_lotacoes():
 
 @app.get("/api/dashboard")
 def api_dashboard(
-    mes_inicio: str = Query(None),
-    mes_fim: str = Query(None),
-    lotacao: str = Query(None),
-    curso: str = Query(None),
+    mes_inicio: Optional[str] = Query(default=None),
+    mes_fim: Optional[str] = Query(default=None),
+    lotacao: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
 ):
     db: Session = SessionLocal()
 

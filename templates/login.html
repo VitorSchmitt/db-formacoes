@@ -5,11 +5,22 @@
     <title>Login</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f5f5;
+        }
+
+        .card {
+            border-radius: 12px;
+        }
+    </style>
 </head>
 
-<body class="d-flex justify-content-center align-items-center vh-100 bg-light">
+<body class="d-flex justify-content-center align-items-center vh-100">
 
-<div class="card p-4 shadow" style="width: 320px;">
+<div class="card p-4 shadow" style="width: 340px;">
+    
     <h4 class="mb-3 text-center">🔐 Login</h4>
 
     <form onsubmit="login(event)">
@@ -30,7 +41,6 @@ async function login(e) {
     let username = document.getElementById("username").value.trim();
     let senha = document.getElementById("senha").value.trim();
 
-    // 🔴 validação simples
     if (!username || !senha) {
         mostrarMsg("Preencha usuário e senha", "danger");
         return;
@@ -39,24 +49,16 @@ async function login(e) {
     try {
         let res = await fetch("/login", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+            body: new URLSearchParams({
                 username: username,
                 senha: senha
             })
         });
 
-        // 🔥 DEBUG (importante!)
-        console.log("Status:", res.status);
-
         let r = await res.json().catch(() => null);
 
-        console.log("Resposta:", r);
-
         // 🔴 erro backend
-        if (!res.ok || !r || !r.token) {
+        if (!res.ok || !r || r.erro) {
             mostrarMsg(r?.erro || "Usuário ou senha inválidos", "danger");
             return;
         }
@@ -73,7 +75,7 @@ async function login(e) {
         // 🚀 redireciona
         setTimeout(() => {
             window.location.href = "/web/dashboard";
-        }, 800);
+        }, 700);
 
     } catch (err) {
         console.error(err);

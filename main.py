@@ -38,11 +38,53 @@ app.include_router(dashboard_router)
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+    
+# ===============================
+# WEB PAGES
+# ===============================
+@app.get("/")
+def home(request: Request):
+    db = SessionLocal()
+    try:
+        tem_usuario = db.query(Usuario).first()
+
+        if not tem_usuario:
+            return templates.TemplateResponse("usuarios.html", {"request": request})
+
+        return templates.TemplateResponse("login.html", {"request": request})
+    finally:
+        db.close()
 
 
 @app.get("/web/dashboard")
 def dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
-        "user": request.session.get("user")
-    })
+
+    user = request.session.get("user")
+
+    if not user:
+        return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request, "user": user}
+    )
+
+
+@app.get("/web/servidores")
+def tela_servidores(request: Request):
+    return templates.TemplateResponse("servidores.html", {"request": request})
+
+
+@app.get("/web/formacoes")
+def tela_formacoes(request: Request):
+    return templates.TemplateResponse("formacoes.html", {"request": request})
+
+
+@app.get("/web/participacoes")
+def tela_participacoes(request: Request):
+    return templates.TemplateResponse("participacoes.html", {"request": request})
+
+
+@app.get("/web/usuarios")
+def tela_usuarios(request: Request):
+    return templates.TemplateResponse("usuarios.html", {"request": request})

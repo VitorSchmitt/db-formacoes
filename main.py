@@ -23,9 +23,23 @@ app = FastAPI()
 # 🔐 SESSION MIDDLEWARE (OBRIGATÓRIO)
 app.add_middleware(
     SessionMiddleware,
-    secret_key="minha_chave_fixa_super_segura"
+    secret_key="minha_chave_fixa_super_segura_147"
 )
+# =========================
+# "BANCO" FAKE
+# =========================
+USUARIOS = {
+    "admin": {"senha": "147", "perfil": "admin"},
+    "user": {"senha": "147", "perfil": "operador"}
+}
 
+# =========================
+# PERMISSÕES
+# =========================
+PERMISSOES = {
+    "admin": ["*"],
+    "operador": ["/api/dados"]
+}
 # ===============================
 # TEMPLATES
 # ===============================

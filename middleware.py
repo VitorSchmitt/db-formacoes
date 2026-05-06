@@ -1,4 +1,3 @@
-"""Middleware de autenticação e autorização"""
 import logging
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -28,7 +27,7 @@ PERMISSOES = {
         "/api/enums"
     ],
 
-    "consultor": [
+    "custom": [
         "/api/servidores",
         "/api/formacoes",
         "/api/dashboard"
@@ -75,7 +74,7 @@ def tem_permissao(perfil: str, path: str) -> bool:
     Verifica se um perfil tem permissão para acessar uma rota
     
     Args:
-        perfil: Perfil do usuário (admin, operador, consultor)
+        perfil: Perfil do usuário (admin, operador, custom)
         path: Caminho da requisição
     
     Returns:
@@ -89,24 +88,6 @@ def tem_permissao(perfil: str, path: str) -> bool:
 
     # Verifica se o caminho começa com alguma rota permitida
     return any(path.startswith(p) for p in regras)
-
-
-def is_admin(request: Request) -> bool:
-    """Verifica se o usuário é admin"""
-    user = getattr(request.state, "user", None)
-    return user and user.get("perfil") == "admin"
-
-
-def is_operador(request: Request) -> bool:
-    """Verifica se o usuário é operador"""
-    user = getattr(request.state, "user", None)
-    return user and user.get("perfil") == "operador"
-
-
-def is_consultor(request: Request) -> bool:
-    """Verifica se o usuário é consultor"""
-    user = getattr(request.state, "user", None)
-    return user and user.get("perfil") == "consultor"
 
 
 # ===============================
@@ -150,10 +131,7 @@ async def auth_middleware(
         logger.warning(f"Requisição não autenticada para {method} {path}")
         return JSONResponse(
             status_code=401,
-            content={
-                "erro": "Não autenticado",
-                "message": "Realize o login para continuar"
-            }
+            content={"erro": "Não autenticado", "message": "Realize o login para continuar"}
         )
 
     # ✅ Armazena usuário no estado da requisição
@@ -168,10 +146,7 @@ async def auth_middleware(
         )
         return JSONResponse(
             status_code=403,
-            content={
-                "erro": "Sem permissão",
-                "message": f"Seu perfil ({perfil}) não tem acesso a este recurso"
-            }
+            content={"erro": "Sem permissão", "message": f"Seu perfil ({perfil}) não tem acesso a este recurso"}
         )
 
     # ✅ Prossegue com a requisição

@@ -17,8 +17,31 @@ app.add_middleware(
     secret_key="super-secret-key"
 )
 
-# middleware
-app.add_middleware(AuthMiddleware)
+# ===============================
+# AUTH MIDDLEWARE (SEGURO)
+# ===============================
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+
+    # libera rotas públicas
+    if request.url.path in PUBLIC_PATHS:
+        return await call_next(request)
+
+    # tenta acessar sessão com segurança
+    try:
+        user = request.session.get("user")
+    except Exception:
+        user = None
+
+    # bloqueia se não autenticado
+    if not user:
+        return JSONResponse(
+            status_code=401,
+            content={"erro": "Não autenticado"}
+        )
+
+    return await call_next(request)
+
 
 # templates
 templates = Jinja2Templates(directory="templates")

@@ -1,63 +1,8 @@
-"""Modelos de dados para DB Formações"""
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, UniqueConstraint, DateTime, Boolean
 from sqlalchemy.orm import relationship
-from database import Base
 from sqlalchemy.dialects.postgresql import ENUM
-
-
-class Servidor(Base):
-    """
-    Modelo de Servidor
-    
-    Attributes:
-        matricula: Matrícula do servidor (chave primária)
-        nome: Nome do servidor
-        data_registro: Data de registro
-        cargo_id: FK para Cargo
-    """
-    __tablename__ = "servidor"
-    
-    matricula = Column(String, primary_key=True, index=True)
-    nome = Column(String, nullable=False, index=True)
-    data_registro = Column(Date)
-    cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=True)
-    
-    # Relacionamentos
-    cargo = relationship("Cargo", lazy="joined")
-    participacoes = relationship(
-        "Participacao",
-        back_populates="servidor",
-        cascade="all, delete-orphan"
-    )
-    
-    def __repr__(self):
-        return f"<Servidor(matricula={self.matricula}, nome={self.nome})>"
-
-
-class Usuario(Base):
-    """
-    Modelo de Usuário para autenticação
-    
-    Attributes:
-        id: ID do usuário
-        username: Nome de usuário único
-        senha: Senha criptografada
-        perfil: Perfil de acesso (admin, operador, custom)
-    """
-    __tablename__ = "usuario"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, nullable=False, index=True)
-    senha = Column(String, nullable=False)
-    perfil = Column(String, nullable=False, index=True)
-    
-    __table_args__ = (
-        Index("ix_usuario_username_perfil", "username", "perfil"),
-    )
-    
-    def __repr__(self):
-        return f"<Usuario(username={self.username}, perfil={self.perfil})>"
-
+from datetime import datetime
+from database import Base
 
 # ===============================
 # ENUMS
@@ -65,7 +10,7 @@ class Usuario(Base):
 tipo_modalidade = ENUM(
     "presencial", "online", "hibrido",
     name="tipo_modalidade",
-    create_type=False
+    create_type=False  # ⚠️ Importante: já existe no banco
 )
 
 tipo_eixo = ENUM(
@@ -73,125 +18,162 @@ tipo_eixo = ENUM(
     "Gestão do Trabalho/Saúde Mental e Bem Estar",
     "Qualificação da Prática Socioeducativa Temas Transversais",
     name="tipo_eixo",
-    create_type=False
+    create_type=False  # ⚠️ Importante: já existe no banco
 )
 
-
-class Formacao(Base):
-    """
-    Modelo de Formação/Curso
-    
-    Attributes:
-        id: ID da formação
-        descricao: Descrição do curso
-        data_termino: Data de término
-        carga_horaria: Carga horária em horas
-        modalidade: Modalidade (presencial, online, hibrido)
-        eixo: Eixo de formação
-    """
-    __tablename__ = "formacao"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    descricao = Column(String, nullable=True, index=True)
-    data_termino = Column(Date, nullable=True, index=True)
-    carga_horaria = Column(Integer, nullable=True)
-    modalidade = Column(tipo_modalidade, nullable=True)
-    eixo = Column(tipo_eixo, nullable=True)
-    
-    # Relacionamentos
-    participacoes = relationship(
-        "Participacao",
-        back_populates="formacao",
-        cascade="all, delete-orphan"
-    )
-    
-    __table_args__ = (
-        UniqueConstraint('descricao', 'data_termino', name='uq_formacao'),
-        Index("ix_formacao_data_termino", "data_termino"),
-    )
-    
-    def __repr__(self):
-        return f"<Formacao(id={self.id}, descricao={self.descricao})>"
-
-
-class Lotacao(Base):
-    """
-    Modelo de Lotação
-    
-    Attributes:
-        id: ID da lotação
-        descricao: Descrição
-        tipo: Tipo de lotação
-    """
-    __tablename__ = "lotacao"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    descricao = Column(String, nullable=False, index=True)
-    tipo = Column(String, nullable=False, index=True)
-    
-    # Relacionamentos
-    participacoes = relationship(
-        "Participacao",
-        back_populates="lotacao",
-        cascade="all, delete-orphan"
-    )
-    
-    __table_args__ = (
-        Index("ix_lotacao_tipo", "tipo"),
-    )
-    
-    def __repr__(self):
-        return f"<Lotacao(id={self.id}, tipo={self.tipo})>"
-
+# ===============================
+# MODELS
+# ===============================
 
 class Cargo(Base):
     """
     Modelo de Cargo
     
-    Attributes:
-        id: ID do cargo
-        descricao: Descrição do cargo
+    Representa os cargos disponíveis para servidores
     """
     __tablename__ = "cargo"
     
     id = Column(Integer, primary_key=True, index=True)
-    descricao = Column(String, unique=True, nullable=False, index=True)
+    descricao = Column(String(255), unique=True, nullable=False, index=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
     
-    # Relacionamentos
+    # Relationship
     servidores = relationship("Servidor", back_populates="cargo")
     
     def __repr__(self):
-        return f"<Cargo(id={self.id}, descricao={self.descricao})>"
+        return f"<Cargo {self.id}: {self.descricao}>"
+
+
+class Servidor(Base):
+    """
+    Modelo de Servidor (Funcionário)
+    
+    Representa os servidores públicos do município
+    """
+    __tablename__ = "servidor"
+    
+    matricula = Column(String(20), primary_key=True, index=True)
+    nome = Column(String(255), nullable=False, index=True)
+    data_registro = Column(Date, nullable=True)
+    cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
+    participacoes = relationship("Participacao", back_populates="servidor")
+    
+    __table_args__ = (
+        UniqueConstraint('matricula', name='uq_servidor_matricula'),
+    )
+    
+    def __repr__(self):
+        return f"<Servidor {self.matricula}: {self.nome}>"
+
+
+class Formacao(Base):
+    """
+    Modelo de Formação (Curso/Treinamento)
+    
+    Representa as formações oferecidas pela prefeitura
+    """
+    __tablename__ = "formacao"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String(500), nullable=False, index=True)
+    data_termino = Column(Date, nullable=True, index=True)
+    carga_horaria = Column(Integer, nullable=True)
+    modalidade = Column(tipo_modalidade, nullable=True)
+    eixo = Column(tipo_eixo, nullable=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ativo = Column(Boolean, default=True)
+    
+    # Relationships
+    participacoes = relationship("Participacao", back_populates="formacao")
+    
+    __table_args__ = (
+        UniqueConstraint('descricao', 'data_termino', name='uq_formacao_descricao_data'),
+    )
+    
+    def __repr__(self):
+        return f"<Formacao {self.id}: {self.descricao}>"
+
+
+class Lotacao(Base):
+    """
+    Modelo de Lotação (Departamento/Setor)
+    
+    Representa os setores/departamentos da prefeitura
+    """
+    __tablename__ = "lotacao"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String(255), nullable=False, index=True)
+    tipo = Column(String(100), nullable=False, index=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ativo = Column(Boolean, default=True)
+    
+    # Relationships
+    participacoes = relationship("Participacao", back_populates="lotacao")
+    
+    __table_args__ = (
+        UniqueConstraint('descricao', 'tipo', name='uq_lotacao_descricao_tipo'),
+    )
+    
+    def __repr__(self):
+        return f"<Lotacao {self.id}: {self.descricao} ({self.tipo})>"
 
 
 class Participacao(Base):
     """
-    Modelo de Participação em Formação
+    Modelo de Participação
     
-    Attributes:
-        id: ID da participação
-        matricula: FK para Servidor
-        formacao_id: FK para Formacao
-        lotacao_id: FK para Lotacao
-        aproveitamento: Aproveitamento (aprovado, reprovado, etc)
+    Representa a participação de servidores em formações
     """
     __tablename__ = "participacao"
     
     id = Column(Integer, primary_key=True, index=True)
-    matricula = Column(String, ForeignKey("servidor.matricula"), nullable=True, index=True)
-    formacao_id = Column(Integer, ForeignKey("formacao.id"), nullable=True, index=True)
-    lotacao_id = Column(Integer, ForeignKey("lotacao.id"), nullable=True, index=True)
-    aproveitamento = Column(String, nullable=True, index=True)
+    matricula = Column(String(20), ForeignKey("servidor.matricula"), nullable=False)
+    formacao_id = Column(Integer, ForeignKey("formacao.id"), nullable=False)
+    lotacao_id = Column(Integer, ForeignKey("lotacao.id"), nullable=False)
+    aproveitamento = Column(String(50), nullable=True)  # Ex: "Aprovado", "Reprovado", etc
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relacionamentos
+    # Relationships
     servidor = relationship("Servidor", back_populates="participacoes", lazy="joined")
     formacao = relationship("Formacao", back_populates="participacoes", lazy="joined")
     lotacao = relationship("Lotacao", back_populates="participacoes", lazy="joined")
     
     __table_args__ = (
-        UniqueConstraint('matricula', 'formacao_id', name='uq_participacao'),
-        Index("ix_participacao_aproveitamento", "aproveitamento"),
+        UniqueConstraint('matricula', 'formacao_id', name='uq_participacao_matricula_formacao'),
     )
     
     def __repr__(self):
-        return f"<Participacao(matricula={self.matricula}, formacao_id={self.formacao_id})>"
+        return f"<Participacao {self.id}: {self.matricula} -> {self.formacao_id}>"
+
+
+class Usuario(Base):
+    """
+    Modelo de Usuário (Acesso ao Sistema)
+    
+    Representa os usuários que acessam o sistema web
+    """
+    __tablename__ = "usuario"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    senha = Column(String(255), nullable=False)
+    perfil = Column(String(50), nullable=False, default="custom")  # admin, operador, custom
+    email = Column(String(255), unique=True, nullable=True)
+    ativo = Column(Boolean, default=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    ultimo_login = Column(DateTime, nullable=True)
+    
+    __table_args__ = (
+        UniqueConstraint('username', name='uq_usuario_username'),
+        UniqueConstraint('email', name='uq_usuario_email'),
+    )
+    
+    def __repr__(self):
+        return f"<Usuario {self.id}: {self.username} ({self.perfil})>"

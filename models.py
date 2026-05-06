@@ -53,8 +53,7 @@ class Servidor(Base):
     __tablename__ = "servidor"
     
     matricula = Column(String(20), primary_key=True, index=True)
-    nome = Column(String(255), nullable=False, index=True)
-    data_registro = Column(Date, nullable=True)
+    nome = Column(String(255), nullable=False, index=True)    
     cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=True)
     criado_em = Column(DateTime, default=datetime.utcnow)
     

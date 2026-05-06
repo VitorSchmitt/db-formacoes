@@ -1,6 +1,11 @@
+from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import JSONResponse
 
+# ======================
+# CONFIG
+# ======================
 
 PERMISSOES = {
     "admin": ["*"],
@@ -11,7 +16,7 @@ PERMISSOES = {
 }
 
 PUBLIC_PATHS = ["/", "/login", "/docs", "/openapi.json"]
-PUBLIC_PREFIX = ["/static", "/web"]
+PUBLIC_PREFIX = ["/static"]  # 👈 corrigido
 
 
 def is_public(path: str):
@@ -24,6 +29,10 @@ def tem_permissao(perfil: str, path: str):
         return True
     return any(path.startswith(p) for p in regras)
 
+
+# ======================
+# MIDDLEWARE
+# ======================
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
@@ -42,3 +51,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         request.state.user = user
         return await call_next(request)
+
+
+# ======================
+# APP
+# ======================
+
+app = FastAPI()
+
+app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
+app.add_middleware(AuthMiddleware)

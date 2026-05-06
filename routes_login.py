@@ -26,7 +26,7 @@ def get_db():
 async def login(
     request: Request,
     username: str = Form(...),
-    password: str = Form(...),
+    senha: str = Form(...),
     db: Session = Depends(get_db)
 ):
 
@@ -40,7 +40,7 @@ async def login(
             content={"erro": "Usuário inválido"}
         )
 
-    if not pwd_context.verify(password, user.senha):
+    if not pwd_context.verify(senha, user.senha):
         return JSONResponse(
             status_code=401,
             content={"erro": "Senha inválida"}

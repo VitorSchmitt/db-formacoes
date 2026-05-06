@@ -11,7 +11,7 @@ from routes_servidor import router as servidor_router
 from routes_formacao import router as formacao_router
 from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
-
+from middleware import AuthMiddleware
 app = FastAPI()
 
 # sessão
@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 # middleware
-app.middleware("http")(auth_middleware)
+app.add_middleware(AuthMiddleware)
 
 # templates
 templates = Jinja2Templates(directory="templates")

@@ -2,31 +2,44 @@ from fastapi import FastAPI, Request, Query
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+
 from database import SessionLocal
 from models import Participacao, Formacao, Lotacao, Usuario
+
 from routes_formacao import router as formacao_router
 from routes_servidor import router as servidor_router
 from routes_login import router as login_router
 from routes_participacao import router as participacao_router
 from routes_usuario import router as usuario_router
-from fastapi.middleware.cors import CORSMiddleware
+
 from middleware import auth_middleware
 from starlette.middleware.sessions import SessionMiddleware
 
 
-
+# ===============================
+# APP
+# ===============================
 app = FastAPI()
+
+# 🔐 sessão (obrigatório)
 app.add_middleware(
     SessionMiddleware,
-    secret_key="sua_chave_super_secreta"
+    secret_key="minha_chave_fixa_super_segura"
 )
+
+# 🔐 auth middleware
 app.middleware("http")(auth_middleware)
+
+# templates
 templates = Jinja2Templates(directory="templates")
+
+# routers
 app.include_router(formacao_router)
 app.include_router(servidor_router)
 app.include_router(participacao_router)
 app.include_router(usuario_router)
 app.include_router(login_router)
+
 
 # ===============================
 # WEB
@@ -34,31 +47,36 @@ app.include_router(login_router)
 @app.get("/")
 def home(request: Request):
     db = SessionLocal()
+    try:
+        tem_usuario = db.query(Usuario).first()
 
-    tem_usuario = db.query(Usuario).first()
-    db.close()
+        if not tem_usuario:
+            return templates.TemplateResponse("usuarios.html", {"request": request})
 
-    if not tem_usuario:
-        return templates.TemplateResponse("usuarios.html", {"request": request})
-
-    return templates.TemplateResponse("login.html", {"request": request})
+        return templates.TemplateResponse("login.html", {"request": request})
+    finally:
+        db.close()
 
 
 @app.get("/web/servidores")
 def tela_servidores(request: Request):
     return templates.TemplateResponse("servidores.html", {"request": request})
 
+
 @app.get("/web/formacoes")
 def tela_formacoes(request: Request):
     return templates.TemplateResponse("formacoes.html", {"request": request})
-    
+
+
 @app.get("/web/dashboard")
 def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
+
 @app.get("/web/participacoes")
 def tela_participacoes(request: Request):
     return templates.TemplateResponse("participacoes.html", {"request": request})
+
 
 @app.get("/web/usuarios")
 def tela_usuarios(request: Request):
@@ -73,14 +91,9 @@ def listar_lotacoes():
     db = SessionLocal()
     try:
         dados = db.query(Lotacao).order_by(Lotacao.descricao).all()
-
-        return [
-            {"id": l.id, "descricao": l.descricao}
-            for l in dados
-        ]
+        return [{"id": l.id, "descricao": l.descricao} for l in dados]
     finally:
         db.close()
-
 
 
 @app.get("/api/dashboard")
@@ -95,7 +108,6 @@ def api_dashboard(
     try:
         query = db.query(Participacao).join(Formacao).join(Lotacao)
 
-        # 🔎 FILTROS
         if mes_inicio:
             query = query.filter(
                 func.to_char(Formacao.data_termino, "YYYY-MM") >= mes_inicio
@@ -114,27 +126,18 @@ def api_dashboard(
 
         total = query.count()
 
-        # 📊 POR LOTAÇÃO
         lotacao_data = (
-            query.with_entities(
-                func.trim(Lotacao.tipo),
-                func.count()
-            )
+            query.with_entities(func.trim(Lotacao.tipo), func.count())
             .group_by(Lotacao.tipo)
             .all()
         )
 
-        # 📊 POR CURSO
         curso_data = (
-            query.with_entities(
-                func.trim(Formacao.descricao),
-                func.count()
-            )
+            query.with_entities(func.trim(Formacao.descricao), func.count())
             .group_by(Formacao.descricao)
             .all()
         )
 
-        # 📊 POR PERÍODO
         periodo_data = (
             query.with_entities(
                 func.to_char(Formacao.data_termino, "YYYY-MM"),

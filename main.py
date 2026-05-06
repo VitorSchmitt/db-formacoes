@@ -1,9 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-
-from middleware import auth_middleware
-
 # imports dos seus arquivos atuais
 from routes_login import router as login_router
 from routes_usuario import router as usuario_router

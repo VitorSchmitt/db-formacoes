@@ -34,23 +34,17 @@ def tem_permissao(perfil: str, path: str):
 # MIDDLEWARE
 # ======================
 
-class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        path = request.url.path
+async def auth_middleware(request: Request, call_next):
 
-        if is_public(path):
-            return await call_next(request)
-
-        user = request.session.get("user")
-
-        if not user:
-            return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
-
-        if not tem_permissao(user.get("perfil"), path):
-            return JSONResponse(status_code=403, content={"erro": "Sem permissão"})
-
-        request.state.user = user
+    if request.url.path in PUBLIC_PATHS:
         return await call_next(request)
+
+    user = request.session.get("user")
+
+    if not user:
+        return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
+
+    return await call_next(request)
 
 
 # ======================

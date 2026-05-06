@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, Request
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Usuario
 from passlib.context import CryptContext
-from security import criar_token
 
 router = APIRouter()
 
@@ -22,10 +21,11 @@ def get_db():
 
 
 # ===============================
-# LOGIN (JWT)
+# LOGIN (SESSÃO PURA)
 # ===============================
 @router.post("/login")
 def login(
+    request: Request,
     username: str = Form(...),
     senha: str = Form(...),
     db: Session = Depends(get_db)
@@ -35,16 +35,17 @@ def login(
     if not user or not pwd_context.verify(senha, user.senha):
         return {"erro": "Usuário ou senha inválidos"}
 
-    token = criar_token({
-        "sub": user.username,
+    # 🔐 salva sessão
+    request.session["user"] = {
+        "id": user.id,
+        "username": user.username,
         "perfil": user.perfil
-    })
+    }
 
     return {
         "ok": True,
-        "token": token,
-        "perfil": user.perfil,
-        "username": user.username
+        "username": user.username,
+        "perfil": user.perfil
     }
 
 
@@ -71,21 +72,17 @@ def listar(db: Session = Depends(get_db)):
 @router.post("/api/usuario")
 def criar(dados: dict, db: Session = Depends(get_db)):
 
-    # validação básica
-    if not dados.get("username") or not dados.get("senha") or not dados.get("perfil"):
+    if not all(k in dados for k in ["username", "senha", "perfil"]):
         return {"erro": "Preencha todos os campos"}
 
-    # verifica duplicidade
     existe = db.query(Usuario).filter_by(username=dados["username"]).first()
     if existe:
         return {"erro": "Usuário já existe"}
 
     try:
-        senha_hash = pwd_context.hash(dados["senha"])
-
         novo = Usuario(
             username=dados["username"],
-            senha=senha_hash,
+            senha=pwd_context.hash(dados["senha"]),
             perfil=dados["perfil"]
         )
 
@@ -111,11 +108,9 @@ def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
         return {"erro": "Usuário não encontrado"}
 
     try:
-        # atualiza perfil
         if dados.get("perfil"):
             u.perfil = dados["perfil"]
 
-        # atualiza senha (se enviada)
         if dados.get("senha"):
             u.senha = pwd_context.hash(dados["senha"])
 

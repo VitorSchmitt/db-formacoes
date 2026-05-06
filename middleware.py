@@ -40,8 +40,9 @@ async def auth_middleware(request: Request, call_next):
     if path in ["/", "/login", "/docs", "/openapi.json"] or path.startswith("/web"):
         return await call_next(request)
 
-    # 🔐 AGORA É SESSÃO (não token)
-    user = request.session.get("user")
+    # 🔐 sessão segura
+    session = getattr(request, "session", None) or {}
+    user = session.get("user")
 
     if not user:
         return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
@@ -50,7 +51,6 @@ async def auth_middleware(request: Request, call_next):
 
     perfil = user.get("perfil")
 
-    # 🔒 permissões continuam funcionando
     if not tem_permissao(perfil, path):
         return JSONResponse(status_code=403, content={"erro": "Sem permissão"})
 

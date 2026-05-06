@@ -1,6 +1,11 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.responses import JSONResponse
+
+from database import SessionLocal
+from models import Usuario
+
 # imports dos seus arquivos atuais
 from routes_login import router as login_router
 from routes_usuario import router as usuario_router
@@ -8,6 +13,8 @@ from routes_servidor import router as servidor_router
 from routes_formacao import router as formacao_router
 from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
+
+from middleware import auth_middleware
 
 app = FastAPI()
 
@@ -17,31 +24,8 @@ app.add_middleware(
     secret_key="super-secret-key"
 )
 
-# ===============================
-# AUTH MIDDLEWARE (SEGURO)
-# ===============================
-@app.middleware("http")
-async def auth_middleware(request: Request, call_next):
-
-    # libera rotas públicas
-    if request.url.path in PUBLIC_PATHS:
-        return await call_next(request)
-
-    # tenta acessar sessão com segurança
-    try:
-        user = request.session.get("user")
-    except Exception:
-        user = None
-
-    # bloqueia se não autenticado
-    if not user:
-        return JSONResponse(
-            status_code=401,
-            content={"erro": "Não autenticado"}
-        )
-
-    return await call_next(request)
-
+# middleware auth
+app.middleware("http")(auth_middleware)
 
 # templates
 templates = Jinja2Templates(directory="templates")
@@ -54,27 +38,29 @@ app.include_router(formacao_router)
 app.include_router(participacao_router)
 app.include_router(dashboard_router)
 
-# =====================
+# ===============================
 # WEB
-# =====================
+# ===============================
 
 @app.get("/")
 def home(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-    
-# ===============================
-# WEB PAGES
-# ===============================
-@app.get("/")
-def home(request: Request):
+
     db = SessionLocal()
+
     try:
         tem_usuario = db.query(Usuario).first()
 
         if not tem_usuario:
-            return templates.TemplateResponse("usuarios.html", {"request": request})
+            return templates.TemplateResponse(
+                "usuarios.html",
+                {"request": request}
+            )
 
-        return templates.TemplateResponse("login.html", {"request": request})
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request}
+        )
+
     finally:
         db.close()
 
@@ -82,32 +68,43 @@ def home(request: Request):
 @app.get("/web/dashboard")
 def dashboard(request: Request):
 
-    user = request.session.get("user")
-
-    if not user:
-        return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
-
     return templates.TemplateResponse(
         "dashboard.html",
-        {"request": request, "user": user}
+        {"request": request}
     )
 
 
 @app.get("/web/servidores")
 def tela_servidores(request: Request):
-    return templates.TemplateResponse("servidores.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "servidores.html",
+        {"request": request}
+    )
 
 
 @app.get("/web/formacoes")
 def tela_formacoes(request: Request):
-    return templates.TemplateResponse("formacoes.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "formacoes.html",
+        {"request": request}
+    )
 
 
 @app.get("/web/participacoes")
 def tela_participacoes(request: Request):
-    return templates.TemplateResponse("participacoes.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "participacoes.html",
+        {"request": request}
+    )
 
 
 @app.get("/web/usuarios")
 def tela_usuarios(request: Request):
-    return templates.TemplateResponse("usuarios.html", {"request": request})
+
+    return templates.TemplateResponse(
+        "usuarios.html",
+        {"request": request}
+    )

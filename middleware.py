@@ -1,154 +1,51 @@
-import logging
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from typing import Callable, Awaitable
 
-# ===============================
-# LOGGER
-# ===============================
-logger = logging.getLogger(__name__)
-
-# ===============================
-# PERMISSÕES POR PERFIL
-# ===============================
 PERMISSOES = {
     "admin": ["*"],
-
     "operador": [
-        "/api/servidor",
-        "/api/servidores",
-        "/api/formacao",
-        "/api/formacoes",
-        "/api/participacao",
-        "/api/participacoes",
-        "/api/cargos",
-        "/api/lotacoes",
-        "/api/dashboard",
-        "/api/enums"
-    ],
-
-    "custom": [
         "/api/servidores",
         "/api/formacoes",
         "/api/dashboard"
     ]
 }
 
-# ===============================
-# ROTAS PÚBLICAS
-# ===============================
 PUBLIC_PATHS = [
     "/",
     "/login",
-    "/logout",
-    "/health",
     "/docs",
-    "/redoc",
     "/openapi.json"
 ]
 
-PUBLIC_PATH_PREFIXES = [
-    "/static/",
-    "/web/"
-]
+PUBLIC_PREFIX = ["/static", "/web"]
 
 
-def is_public_route(path: str) -> bool:
-    """
-    Verifica se a rota é pública
-    
-    Args:
-        path: Caminho da requisição
-    
-    Returns:
-        bool: True se é pública, False caso contrário
-    """
-    if path in PUBLIC_PATHS:
-        return True
-    
-    return any(path.startswith(prefix) for prefix in PUBLIC_PATH_PREFIXES)
+def is_public(path: str):
+    return path in PUBLIC_PATHS or any(path.startswith(p) for p in PUBLIC_PREFIX)
 
 
-def tem_permissao(perfil: str, path: str) -> bool:
-    """
-    Verifica se um perfil tem permissão para acessar uma rota
-    
-    Args:
-        perfil: Perfil do usuário (admin, operador, custom)
-        path: Caminho da requisição
-    
-    Returns:
-        bool: True se tem permissão, False caso contrário
-    """
+def tem_permissao(perfil: str, path: str):
     regras = PERMISSOES.get(perfil, [])
 
-    # Admin tem acesso total
     if "*" in regras:
         return True
 
-    # Verifica se o caminho começa com alguma rota permitida
     return any(path.startswith(p) for p in regras)
 
 
-# ===============================
-# MIDDLEWARE DE AUTENTICAÇÃO
-# ===============================
-async def auth_middleware(
-    request: Request,
-    call_next: Callable[[Request], Awaitable[JSONResponse]]
-) -> JSONResponse:
-    """
-    Middleware de autenticação e autorização
-    
-    - Libera rotas públicas
-    - Verifica autenticação do usuário
-    - Valida permissões por perfil
-    
-    Args:
-        request: Requisição FastAPI
-        call_next: Função para chamar o próximo middleware
-    
-    Returns:
-        JSONResponse: Resposta da requisição ou erro de autenticação/autorização
-    """
+async def auth_middleware(request: Request, call_next):
     path = request.url.path
-    method = request.method
 
-    # 🔓 Libera rotas públicas
-    if is_public_route(path):
+    if is_public(path):
         return await call_next(request)
 
-    # 🔐 Obtém usuário da sessão
-    try:
-        session = getattr(request, "session", {})
-        user = session.get("user")
-    except Exception as e:
-        logger.error(f"Erro ao obter sessão: {str(e)}")
-        user = None
+    user = request.session.get("user")
 
-    # ❌ Usuário não autenticado
     if not user:
-        logger.warning(f"Requisição não autenticada para {method} {path}")
-        return JSONResponse(
-            status_code=401,
-            content={"erro": "Não autenticado", "message": "Realize o login para continuar"}
-        )
+        return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
 
-    # ✅ Armazena usuário no estado da requisição
+    if not tem_permissao(user.get("perfil"), path):
+        return JSONResponse(status_code=403, content={"erro": "Sem permissão"})
+
     request.state.user = user
-
-    # 🔐 Verifica permissões
-    perfil = user.get("perfil", "")
-    if not tem_permissao(perfil, path):
-        logger.warning(
-            f"Acesso negado: usuário {user.get('username')} ({perfil}) "
-            f"tentou acessar {method} {path}"
-        )
-        return JSONResponse(
-            status_code=403,
-            content={"erro": "Sem permissão", "message": f"Seu perfil ({perfil}) não tem acesso a este recurso"}
-        )
-
-    # ✅ Prossegue com a requisição
-    logger.info(f"Acesso autorizado: {user.get('username')} - {method} {path}")
     return await call_next(request)

@@ -1,17 +1,16 @@
 from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+
 from database import SessionLocal
 from models import Usuario
-from passlib.context import CryptContext
 
 router = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# ===============================
-# DB
-# ===============================
 def get_db():
     db = SessionLocal()
     try:
@@ -20,9 +19,9 @@ def get_db():
         db.close()
 
 
-# ===============================
-# LOGIN (SESSÃO PURA)
-# ===============================
+# =========================
+# LOGIN
+# =========================
 @router.post("/login")
 def login(
     request: Request,
@@ -33,10 +32,13 @@ def login(
 
     user = db.query(Usuario).filter(Usuario.username == username).first()
 
-    if not user or not pwd_context.verify(senha, user.senha):
-        return {"erro": "Usuário ou senha inválidos"}
+    if not user or not user.senha or not pwd_context.verify(senha, user.senha):
+        return JSONResponse(
+            status_code=401,
+            content={"erro": "Usuário ou senha inválidos"}
+        )
 
-    # 🔐 salva sessão
+    # 🔐 sessão
     request.session["user"] = {
         "id": user.id,
         "username": user.username,
@@ -45,6 +47,14 @@ def login(
 
     return {
         "ok": True,
-        "perfil": user.perfil,
-        "username": user.username
+        "redirect": "/dashboard"
     }
+
+
+# =========================
+# LOGOUT
+# =========================
+@router.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return {"ok": True, "redirect": "/login"}

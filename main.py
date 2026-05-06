@@ -11,8 +11,15 @@ from routes_participacao import router as participacao_router
 from routes_usuario import router as usuario_router
 from fastapi.middleware.cors import CORSMiddleware
 from middleware import auth_middleware
+from starlette.middleware.sessions import SessionMiddleware
+
+
 
 app = FastAPI()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="sua_chave_super_secreta"
+)
 app.middleware("http")(auth_middleware)
 templates = Jinja2Templates(directory="templates")
 app.include_router(formacao_router)

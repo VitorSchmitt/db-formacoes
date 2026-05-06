@@ -61,25 +61,23 @@ PUBLIC_PATHS = [
 # ===============================
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
+    path = request.url.path
 
-    # libera rotas públicas
-    if request.url.path in PUBLIC_PATHS:
+    if is_public_route(path):
         return await call_next(request)
 
-    # tenta acessar sessão com segurança
-    try:
-        user = request.session.get("user")
-    except Exception:
-        user = None
+    user = request.session.get("user")
 
-    # bloqueia se não autenticado
     if not user:
-        return JSONResponse(
-            status_code=401,
-            content={"erro": "Não autenticado"}
-        )
+        return JSONResponse(status_code=401, content={"erro": "Não autenticado"})
+
+    perfil = user.get("perfil")
+
+    if not tem_permissao(perfil, path):
+        return JSONResponse(status_code=403, content={"erro": "Sem permissão"})
 
     return await call_next(request)
+    
 
 # ===============================
 # ROUTERS

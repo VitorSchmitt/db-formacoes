@@ -165,8 +165,7 @@ class Usuario(Base):
     perfil = Column(String(50), nullable=False, default="custom")  # admin, operador, custom
     email = Column(String(255), unique=True, nullable=True)
     ativo = Column(Boolean, default=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
-    atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    criado_em = Column(DateTime, default=datetime.utcnow)    
     ultimo_login = Column(DateTime, nullable=True)
     
     __table_args__ = (

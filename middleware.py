@@ -49,9 +49,7 @@ def tem_permissao(perfil: str, path: str):
 # ======================
 # MIDDLEWARE PROFISSIONAL
 # ======================
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi import Request
+
 
 class AuthMiddleware(BaseHTTPMiddleware):
 

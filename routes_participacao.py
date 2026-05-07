@@ -23,12 +23,12 @@ def listar_lotacoes(db: Session = Depends(get_db)):
     lotacoes = db.query(Lotacao).order_by(Lotacao.tipo).all()
 
     return [
-        {
-            "id": l.id,
-            "tipo": l.tipo
-        }
-        for l in lotacoes
-    ]
+    {
+        "id": lotacao.id,
+        "tipo": lotacao.tipo
+    }
+    for lotacao in lotacoes
+]
 # ===============================
 # LISTAR POR FORMAÇÃO
 # ===============================

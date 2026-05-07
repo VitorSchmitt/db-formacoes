@@ -18,14 +18,17 @@ from middleware import AuthMiddleware
 
 app = FastAPI()
 
+
+# middleware auth
+app.add_middleware(AuthMiddleware)
+
 # sessão
 app.add_middleware(
     SessionMiddleware,
     secret_key="super-secret-key"
 )
 
-# middleware auth
-app.add_middleware(AuthMiddleware)
+
 
 # templates
 templates = Jinja2Templates(directory="templates")

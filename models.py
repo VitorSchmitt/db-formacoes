@@ -143,7 +143,7 @@ class Participacao(Base):
     lotacao = relationship("Lotacao", back_populates="participacoes", lazy="joined")
     
     __table_args__ = (
-        UniqueConstraint('matricula', 'formacao_id', name='uq_participacao_matricula_formacao'),
+        UniqueConstraint('matricula', 'formacao_id', name='uq_participacao'),
     )
     
     def __repr__(self):

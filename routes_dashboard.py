@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
 from models import Participacao, Servidor, Formacao, Lotacao
 from fastapi import Query
+from sqlalchemy import func
 
 router = APIRouter()
 

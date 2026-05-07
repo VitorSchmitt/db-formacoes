@@ -1,37 +1,36 @@
 from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 # ======================
 # CONFIG
 # ======================
+
+PUBLIC_PATHS = [
+    "/",
+    "/login",
+    "/docs",
+    "/openapi.json",
+]
+
+PUBLIC_PREFIX = [
+    "/static"
+]
 
 PERMISSOES = {
     "admin": ["*"],
 
     "operador": [
         "/api/dashboard",
+        "/api",
         "/web/dashboard"
     ]
 }
-
-PUBLIC_PATHS = [
-    "/",
-    "/login",
-    "/docs",
-    "/openapi.json"
-]
-
-PUBLIC_PREFIX = [
-    "/static",
-    "/web"
-]
 
 # ======================
 # HELPERS
 # ======================
 
 def is_public(path: str):
-
     return (
         path in PUBLIC_PATHS
         or any(path.startswith(p) for p in PUBLIC_PREFIX)
@@ -39,7 +38,6 @@ def is_public(path: str):
 
 
 def tem_permissao(perfil: str, path: str):
-
     regras = PERMISSOES.get(perfil, [])
 
     if "*" in regras:
@@ -48,38 +46,45 @@ def tem_permissao(perfil: str, path: str):
     return any(path.startswith(p) for p in regras)
 
 # ======================
-# MIDDLEWARE
+# MIDDLEWARE PROFISSIONAL
 # ======================
 
 async def auth_middleware(request: Request, call_next):
 
     path = request.url.path
 
-    # libera públicas
+    # 1. rotas públicas
     if is_public(path):
         return await call_next(request)
 
-    # sessão protegida
-    try:
-        user = request.session.get("user")
-    except Exception:
-        user = None
+    # 2. sessão
+    user = request.session.get("user")
 
-    # não autenticado
+    # 3. não autenticado
     if not user:
+
+        # WEB → redireciona
+        if path.startswith("/web"):
+            return RedirectResponse(url="/")
+
+        # API → JSON
         return JSONResponse(
             status_code=401,
             content={"erro": "Não autenticado"}
         )
 
-    # perfil
     perfil = user.get("perfil")
 
-    # sem permissão
+    # 4. sem permissão
     if not tem_permissao(perfil, path):
+
+        if path.startswith("/web"):
+            return RedirectResponse(url="/")
+
         return JSONResponse(
             status_code=403,
             content={"erro": "Sem permissão"}
         )
 
+    # 5. segue request normal
     return await call_next(request)

@@ -90,7 +90,7 @@ class Formacao(Base):
     participacoes = relationship("Participacao", back_populates="formacao")
     
     __table_args__ = (
-        UniqueConstraint('descricao', 'data_termino', name='uq_formacao_descricao_data'),
+        UniqueConstraint('descricao', 'data_termino', name='uq_formacao'),
     )
     
     def __repr__(self):
@@ -101,7 +101,7 @@ class Lotacao(Base):
     """
     Modelo de Lotação (Departamento/Setor)
     
-    Representa os setores/departamentos da prefeitura
+    Representa os setores/departamentos da fase
     """
     __tablename__ = "lotacao"
     
@@ -113,10 +113,6 @@ class Lotacao(Base):
     
     # Relationships
     participacoes = relationship("Participacao", back_populates="lotacao")
-    
-    __table_args__ = (
-        UniqueConstraint('descricao', 'tipo', name='uq_lotacao_descricao_tipo'),
-    )
     
     def __repr__(self):
         return f"<Lotacao {self.id}: {self.descricao} ({self.tipo})>"

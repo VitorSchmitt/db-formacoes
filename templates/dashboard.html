@@ -53,41 +53,41 @@ async function carregar() {
     if (grafico2) grafico2.destroy();
     if (grafico3) grafico3.destroy();
 
-    // 📊 LOTAÇÃO
-    grafico1 = new Chart(document.getElementById("graficoLotacao"), {
-        type: "bar",
-        data: {
-            labels: data.lotacao.map(x => x.nome),
-            datasets: [{
-                label: "Por Lotação",
-                data: data.lotacao.map(x => x.qtd)
-            }]
-        }
-    });
+   // 📊 LOTAÇÃO
+grafico1 = new Chart(document.getElementById("graficoLotacao"), {
+    type: "bar",
+    data: {
+        labels: (data.lotacao || []).map(x => x.nome),
+        datasets: [{
+            label: "Por Lotação",
+            data: (data.lotacao || []).map(x => x.qtd)
+        }]
+    }
+});
 
-    // 📊 CURSO
-    grafico2 = new Chart(document.getElementById("graficoCurso"), {
-        type: "bar",
-        data: {
-            labels: data.curso.map(x => x.nome),
-            datasets: [{
-                label: "Por Curso",
-                data: data.curso.map(x => x.qtd)
-            }]
-        }
-    });
+// 📊 CURSO
+grafico2 = new Chart(document.getElementById("graficoCurso"), {
+    type: "bar",
+    data: {
+        labels: (data.curso || []).map(x => x.nome),
+        datasets: [{
+            label: "Por Curso",
+            data: (data.curso || []).map(x => x.qtd)
+        }]
+    }
+});
 
-    // 📊 PERÍODO
-    grafico3 = new Chart(document.getElementById("graficoPeriodo"), {
-        type: "line",
-        data: {
-            labels: data.periodo.map(x => x.mes),
-            datasets: [{
-                label: "Evolução",
-                data: data.periodo.map(x => x.qtd)
-            }]
-        }
-    });
+// 📊 PERÍODO
+grafico3 = new Chart(document.getElementById("graficoPeriodo"), {
+    type: "line",
+    data: {
+        labels: (data.periodo || []).map(x => x.mes),
+        datasets: [{
+            label: "Evolução",
+            data: (data.periodo || []).map(x => x.qtd)
+        }]
+    }
+});
 }
 
 // carrega ao abrir

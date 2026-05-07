@@ -35,8 +35,16 @@ async function carregar() {
     const inicio = document.getElementById("mes_inicio").value;
     const fim = document.getElementById("mes_fim").value;
 
-    const res = await fetch(`/api/dashboard?mes_inicio=${inicio}&mes_fim=${fim}`);
-    const data = await res.json();
+    const res = await fetch(`/api/dashboard?mes_inicio=${inicio}&mes_fim=${fim}`, {
+    credentials: "include"
+    });
+
+    if (!res.ok) {
+        console.error("Erro API:", res.status);
+        return;
+    }
+
+     const data = await res.json();
 
     document.getElementById("total").innerText = data.total;
 

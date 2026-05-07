@@ -24,12 +24,12 @@ def dashboard(
 
         if mes_inicio:
             query = query.filter(
-                func.strftime('%Y-%m', Formacao.data_termino) >= mes_inicio
+                func.to_char(Formacao.data_termino, 'YYYY-MM') >= mes_inicio
             )
 
         if mes_fim:
             query = query.filter(
-                func.strftime('%Y-%m', Formacao.data_termino) <= mes_fim
+               func.to_char(Formacao.data_termino, 'YYYY-MM') <= mes_fim
             )
 
         total = query.count()

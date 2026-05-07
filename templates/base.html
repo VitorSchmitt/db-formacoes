@@ -81,44 +81,27 @@
 <!-- ===================== -->
 <script>
 
-//
-// 🔐 PROTEÇÃO GLOBAL
-//
-(function proteger() {
-    const pagina = window.location.pathname;
 
-    // páginas públicas (login)
-    const liberadas = ["/"];
-
-    if (!localStorage.getItem("token") && !liberadas.includes(pagina)) {
-        window.location.href = "/";
-    }
-})();
-
-//
-// 🌐 API GLOBAL (JWT)
-//
-async function api(url, options = {}) {
+window.api = async function(url, options = {}) {
 
     try {
+
         let res = await fetch(url, {
+            credentials: "include",
             ...options,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + localStorage.getItem("token"),
                 ...(options.headers || {})
             }
         });
 
-        // 🔴 TOKEN EXPIRADO OU INVÁLIDO
         if (res.status === 401) {
-            logout();
+            window.location.href = "/";
             return;
         }
 
-        // 🔴 SEM PERMISSÃO
         if (res.status === 403) {
-            alert("Sem permissão para acessar este recurso");
+            alert("Sem permissão");
             return;
         }
 

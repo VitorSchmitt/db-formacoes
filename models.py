@@ -169,8 +169,8 @@ class Usuario(Base):
     ultimo_login = Column(DateTime, nullable=True)
     
     __table_args__ = (
-        UniqueConstraint('username', name='uq_usuario_username'),
-        UniqueConstraint('email', name='uq_usuario_email'),
+        UniqueConstraint('username', name='usuario_username_key'),
+        UniqueConstraint('email', name='usuario_email_key'),
     )
     
     def __repr__(self):

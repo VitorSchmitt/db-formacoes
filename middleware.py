@@ -49,7 +49,7 @@ def tem_permissao(perfil: str, path: str):
 # MIDDLEWARE PROFISSIONAL
 # ======================
 class AuthMiddleware(BaseHTTPMiddleware):
-    def auth_middleware(request: Request, call_next):
+    async  def auth_middleware(request: Request, call_next):
     
         path = request.url.path
     

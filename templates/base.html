@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Sistema</title>
@@ -9,6 +10,107 @@
 
     <!-- Plotly -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- ===================== -->
+    <!-- SCRIPT GLOBAL -->
+    <!-- ===================== -->
+    <script>
+
+    // 🌐 API GLOBAL
+    window.api = async function(url, options = {}) {
+
+        try {
+
+            let res = await fetch(url, {
+                credentials: "include",
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            // 🔴 NÃO AUTENTICADO
+            if (res.status === 401) {
+                window.location.href = "/";
+                return;
+            }
+
+            // 🔴 SEM PERMISSÃO
+            if (res.status === 403) {
+                alert("Sem permissão para acessar este recurso");
+                return;
+            }
+
+            return res;
+
+        } catch (err) {
+            console.error("Erro na API:", err);
+            alert("Erro de conexão com o servidor");
+        }
+    }
+
+    // 🎯 MENU DINÂMICO
+    function montarMenu() {
+
+        const perfil = localStorage.getItem("perfil");
+        const paginaAtual = window.location.pathname;
+
+        const menus = {
+
+            admin: [
+                ["/web/dashboard", "📊 Dashboard"],
+                ["/web/formacoes", "📚 Formações"],
+                ["/web/servidores", "👥 Servidores"],
+                ["/web/participacoes", "📊 Participações"],
+                ["/web/usuarios", "👤 Usuários"]
+            ],
+
+            operador: [
+                ["/web/dashboard", "📊 Dashboard"],
+                ["/web/formacoes", "📚 Formações"],
+                ["/web/servidores", "👥 Servidores"],
+                ["/web/participacoes", "📊 Participações"]
+            ],
+
+            custom: [
+                ["/web/dashboard", "📊 Dashboard"],
+                ["/web/formacoes", "📚 Formações"],
+                ["/web/servidores", "👥 Servidores"]
+            ]
+        };
+
+        const container = document.getElementById("menu");
+
+        container.innerHTML = "";
+
+        if (!menus[perfil]) {
+            container.innerHTML = "<p>Sem acesso</p>";
+            return;
+        }
+
+        menus[perfil].forEach(item => {
+
+            let ativo = paginaAtual === item[0] ? "ativo" : "";
+
+            container.innerHTML += `
+                <a href="${item[0]}" class="${ativo}">
+                    ${item[1]}
+                </a>
+            `;
+        });
+    }
+
+    // 🚪 LOGOUT
+    function logout() {
+        localStorage.clear();
+        window.location.href = "/";
+    }
+
+    // 🔄 INIT
+    window.addEventListener("DOMContentLoaded", montarMenu);
+
+    </script>
 
     <style>
         body {
@@ -50,136 +152,37 @@
             overflow-y: auto;
         }
     </style>
+
 </head>
 
 <body>
 
-<!-- ===================== -->
-<!-- MENU LATERAL -->
-<!-- ===================== -->
-<div class="sidebar">
-    <h4>Sistema</h4>
-    <hr>
+    <!-- ===================== -->
+    <!-- MENU LATERAL -->
+    <!-- ===================== -->
+    <div class="sidebar">
 
-    <div id="menu"></div>
+        <h4>Sistema</h4>
 
-    <hr>
+        <hr>
 
-    <a href="#" onclick="logout()">🚪 Sair</a>
-    <a href="/docs" target="_blank">⚙️ API Docs</a>
-</div>
+        <div id="menu"></div>
 
-<!-- ===================== -->
-<!-- CONTEÚDO -->
-<!-- ===================== -->
-<div class="content">
-    {% block content %}{% endblock %}
-</div>
+        <hr>
 
-<!-- ===================== -->
-<!-- SCRIPT GLOBAL -->
-<!-- ===================== -->
-<script>
+        <a href="#" onclick="logout()">🚪 Sair</a>
 
+        <a href="/docs" target="_blank">⚙️ API Docs</a>
 
-window.api = async function(url, options = {}) {
+    </div>
 
-    try {
-
-        let res = await fetch(url, {
-            credentials: "include",
-            ...options,
-            headers: {
-                "Content-Type": "application/json",
-                ...(options.headers || {})
-            }
-        });
-
-        if (res.status === 401) {
-            window.location.href = "/";
-            return;
-        }
-
-        if (res.status === 403) {
-            alert("Sem permissão");
-            return;
-        }
-
-        return res;
-
-    } catch (err) {
-        console.error("Erro na API:", err);
-        alert("Erro de conexão com o servidor");
-    }
-}
-
-//
-// 🎯 MENU DINÂMICO
-//
-function montarMenu() {
-
-    const perfil = localStorage.getItem("perfil");
-    const paginaAtual = window.location.pathname;
-
-    const menus = {
-
-        admin: [
-            ["/web/dashboard", "📊 Dashboard"],
-            ["/web/formacoes", "📚 Formações"],
-            ["/web/servidores", "👥 Servidores"],
-            ["/web/participacoes", "📊 Participações"],
-            ["/web/usuarios", "👤 Usuários"]
-        ],
-
-        operador: [
-            ["/web/dashboard", "📊 Dashboard"],
-            ["/web/formacoes", "📚 Formações"],
-            ["/web/servidores", "👥 Servidores"],
-            ["/web/participacoes", "📊 Participações"]
-        ],
-
-        custom: [
-            ["/web/dashboard", "📊 Dashboard"],
-            ["/web/formacoes", "📚 Formações"],
-            ["/web/servidores", "👥 Servidores"]
-        ]
-    };
-
-    const container = document.getElementById("menu");
-
-    container.innerHTML = "";
-
-    if (!menus[perfil]) {
-        container.innerHTML = "<p>Sem acesso</p>";
-        return;
-    }
-
-    menus[perfil].forEach(item => {
-
-        let ativo = paginaAtual === item[0] ? "ativo" : "";
-
-        container.innerHTML += `
-            <a href="${item[0]}" class="${ativo}">
-                ${item[1]}
-            </a>
-        `;
-    });
-}
-
-//
-// 🚪 LOGOUT
-//
-function logout() {
-    localStorage.clear();
-    window.location.href = "/";
-}
-
-//
-// 🔄 INIT
-//
-window.addEventListener("DOMContentLoaded", montarMenu);
-
-</script>
+    <!-- ===================== -->
+    <!-- CONTEÚDO -->
+    <!-- ===================== -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
 
 </body>
+
 </html>

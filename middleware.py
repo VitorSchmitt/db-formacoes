@@ -19,7 +19,8 @@ PUBLIC_PATHS = [
 ]
 
 PUBLIC_PREFIX = [
-    "/static,/web"
+    "/static",
+    "/web"
 ]
 
 PERMISSOES = {

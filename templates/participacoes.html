@@ -107,7 +107,7 @@ async function carregarLotacoes() {
         select.innerHTML = `<option value="">Selecione a lotação</option>`;
 
         data.forEach(l => {
-            select.add(new Option(l.tipo, l.id));
+            select.add(new Option(l.descricao, l.id));
         });
 
     } catch (err) {

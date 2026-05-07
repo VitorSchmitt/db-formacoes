@@ -23,9 +23,8 @@ from sqlalchemy import select
 def listar_lotacoes(db: Session = Depends(get_db)):
 
     stmt = (
-        select(Lotacao.id, Lotacao.tipo)
-        .where(Lotacao.ativo == True)
-        .distinct()
+        select(Lotacao.id, Lotacao.descricao)
+        .where(Lotacao.ativo == True)        
         .order_by(Lotacao.tipo)
     )
 
@@ -34,9 +33,9 @@ def listar_lotacoes(db: Session = Depends(get_db)):
     return [
         {
             "id": id_,
-            "tipo": tipo
+            "descricao": descricao
         }
-        for id_, tipo in result
+        for id_, descricao in result
     ]
 # ===============================
 # LISTAR POR FORMAÇÃO

@@ -17,21 +17,26 @@ def get_db():
         db.close()
 
 
+from sqlalchemy import select
+
 @router.get("/api/lotacoes")
 def listar_lotacoes(db: Session = Depends(get_db)):
 
-    lotacoes = db.query(Lotacao.tipo)\
-        .filter(Lotacao.ativo == True)\
-        .distinct()\
-        .order_by(Lotacao.tipo)\
-        .all()
+    stmt = (
+        select(Lotacao.id, Lotacao.tipo)
+        .where(Lotacao.ativo == True)
+        .distinct()
+        .order_by(Lotacao.tipo)
+    )
+
+    result = db.execute(stmt).all()
 
     return [
         {
-            "id": l.tipo,
-            "descricao": l.tipo
+            "id": id_,
+            "descricao": tipo
         }
-        for l in lotacoes
+        for id_, tipo in result
     ]
 # ===============================
 # LISTAR POR FORMAÇÃO

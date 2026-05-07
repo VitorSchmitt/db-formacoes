@@ -45,10 +45,10 @@ def dashboard(
         ).join(Participacao).join(Lotacao).group_by(Formacao.descricao).all()
 
         periodo_data = db.query(
-            func.strftime('%Y-%m', Formacao.data_termino),
-            func.count()
+        func.to_char(Formacao.data_termino, 'YYYY-MM'),
+        func.count()
         ).join(Participacao).join(Lotacao).group_by(
-            func.strftime('%Y-%m', Formacao.data_termino)
+        func.to_char(Formacao.data_termino, 'YYYY-MM')
         ).all()
 
         return {

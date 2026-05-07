@@ -19,17 +19,22 @@ PUBLIC_PATHS = [
 ]
 
 PUBLIC_PREFIX = [
-    "/static",
-    "/web"
+    "/static"
 ]
 
 PERMISSOES = {
     "admin": ["*"],
 
     "operador": [
+        "/web/dashboard",
+        "/web/servidores",
+        "/web/formacoes",
+        "/web/participacoes",
+
         "/api/dashboard",
-        "/api",
-        "/web/dashboard"
+        "/api/servidores",
+        "/api/formacoes",
+        "/api/participacoes",
     ]
 }
 

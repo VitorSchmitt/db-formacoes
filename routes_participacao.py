@@ -34,7 +34,7 @@ def listar_lotacoes(db: Session = Depends(get_db)):
     return [
         {
             "id": id_,
-            "descricao": tipo
+            "tipo": tipo
         }
         for id_, tipo in result
     ]

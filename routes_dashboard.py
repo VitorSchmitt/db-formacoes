@@ -1,7 +1,12 @@
 from sqlalchemy import func
 
 @router.get("/dashboard")
-def dashboard(...):
+def dashboard(
+    mes_inicio: str = None,
+    mes_fim: str = None,
+    lotacao: str = None,
+    curso: str = None
+):
     db = SessionLocal()
 
     try:

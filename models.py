@@ -135,8 +135,7 @@ class Participacao(Base):
     formacao_id = Column(Integer, ForeignKey("formacao.id"), nullable=False)
     lotacao_id = Column(Integer, ForeignKey("lotacao.id"), nullable=False)
     aproveitamento = Column(String(50), nullable=True)  # Ex: "Aprovado", "Reprovado", etc
-    criado_em = Column(DateTime, default=datetime.utcnow)
-    atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    criado_em = Column(DateTime, default=datetime.utcnow)    
     
     # Relationships
     servidor = relationship("Servidor", back_populates="participacoes", lazy="joined")

@@ -14,7 +14,7 @@ from routes_formacao import router as formacao_router
 from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
 
-from middleware import auth_middleware
+
 
 app = FastAPI()
 

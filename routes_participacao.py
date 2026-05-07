@@ -20,15 +20,19 @@ def get_db():
 @router.get("/api/lotacoes")
 def listar_lotacoes(db: Session = Depends(get_db)):
 
-    lotacoes = db.query(Lotacao).order_by(Lotacao.tipo).all()
+    lotacoes = db.query(Lotacao.tipo)\
+        .filter(Lotacao.ativo == True)\
+        .distinct()\
+        .order_by(Lotacao.tipo)\
+        .all()
 
     return [
-    {
-        "id": lotacao.id,
-        "tipo": lotacao.tipo
-    }
-    for lotacao in lotacoes
-]
+        {
+            "id": l.tipo,
+            "descricao": l.tipo
+        }
+        for l in lotacoes
+    ]
 # ===============================
 # LISTAR POR FORMAÇÃO
 # ===============================

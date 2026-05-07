@@ -1,70 +1,42 @@
-from fastapi import APIRouter, Query
-from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from database import SessionLocal
-from models import Participacao, Formacao, Lotacao
-
-router = APIRouter(prefix="/api")
-
-
 @router.get("/dashboard")
-def dashboard(
-    mes_inicio: str = Query(None),
-    mes_fim: str = Query(None),
-    lotacao: str = Query(None),
-    curso: str = Query(None),
-):
-    db: Session = SessionLocal()
+def dashboard(...):
+    db = SessionLocal()
 
     try:
-        query = db.query(Participacao).join(Formacao).join(Lotacao)
+        query = db.query(Participacao)\
+            .join(Formacao, Participacao.formacao_id == Formacao.id)\
+            .join(Lotacao, Participacao.lotacao_id == Lotacao.id)
 
-        # 📅 filtro período (formato: 2025-01)
         if mes_inicio:
             query = query.filter(
-                func.to_char(Formacao.data_termino, "YYYY-MM") >= mes_inicio
+                func.strftime('%Y-%m', Formacao.data_termino) >= mes_inicio
             )
 
         if mes_fim:
             query = query.filter(
-                func.to_char(Formacao.data_termino, "YYYY-MM") <= mes_fim
+                func.strftime('%Y-%m', Formacao.data_termino) <= mes_fim
             )
-
-        # 🏢 filtro lotação
-        if lotacao:
-            query = query.filter(Lotacao.tipo == lotacao)
-
-        # 📚 filtro curso
-        if curso:
-            query = query.filter(Formacao.descricao == curso)
 
         total = query.count()
 
-        # 📊 por lotação
-        lotacao_data = (
-            query.with_entities(func.trim(Lotacao.tipo), func.count())
-            .group_by(Lotacao.tipo)
-            .all()
-        )
+        lotacao_data = db.query(
+            Lotacao.tipo,
+            func.count()
+        ).join(Participacao).join(Formacao).group_by(Lotacao.tipo).all()
 
-        # 📊 por curso
-        curso_data = (
-            query.with_entities(func.trim(Formacao.descricao), func.count())
-            .group_by(Formacao.descricao)
-            .all()
-        )
+        curso_data = db.query(
+            Formacao.descricao,
+            func.count()
+        ).join(Participacao).join(Lotacao).group_by(Formacao.descricao).all()
 
-        # 📊 por período
-        periodo_data = (
-            query.with_entities(
-                func.to_char(Formacao.data_termino, "YYYY-MM"),
-                func.count()
-            )
-            .group_by(func.to_char(Formacao.data_termino, "YYYY-MM"))
-            .order_by(func.to_char(Formacao.data_termino, "YYYY-MM"))
-            .all()
-        )
+        periodo_data = db.query(
+            func.strftime('%Y-%m', Formacao.data_termino),
+            func.count()
+        ).join(Participacao).join(Lotacao).group_by(
+            func.strftime('%Y-%m', Formacao.data_termino)
+        ).all()
 
         return {
             "total": total,
@@ -74,6 +46,8 @@ def dashboard(
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"erro": str(e)}
 
     finally:

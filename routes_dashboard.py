@@ -7,7 +7,7 @@ from fastapi import Query
 
 router = APIRouter()
 
-@router.get("/dashboard")
+@router.get("api/dashboard")
 def dashboard(
     mes_inicio: str = Query(None),
     mes_fim: str = Query(None),

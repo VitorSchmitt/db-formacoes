@@ -13,7 +13,7 @@ from routes_servidor import router as servidor_router
 from routes_formacao import router as formacao_router
 from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
-from middleware import auth_middleware
+from middleware import Auth_middleware
 
 
 app = FastAPI()

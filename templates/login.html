@@ -36,6 +36,7 @@
 async function login() {
 
     const formData = new FormData();
+
     formData.append("username", document.getElementById("username").value);
     formData.append("senha", document.getElementById("senha").value);
 
@@ -47,8 +48,14 @@ async function login() {
     const data = await res.json();
 
     if (data.ok) {
+
+        // salva perfil do usuário
+        localStorage.setItem("perfil", data.perfil);
+
         window.location.href = data.redirect;
+
     } else {
+
         document.getElementById("msg").innerText = data.erro;
     }
 }

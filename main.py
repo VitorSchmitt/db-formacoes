@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 # middleware auth
-app.middleware("http")(auth_middleware)
+app.middleware("http")(AuthMiddleware)
 
 # templates
 templates = Jinja2Templates(directory="templates")

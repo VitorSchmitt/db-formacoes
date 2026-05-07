@@ -55,6 +55,7 @@ async def login(
     return {
         "ok": True,
         "redirect": "/web/dashboard"
+        "perfil": usuario.perfil
     }
 
 

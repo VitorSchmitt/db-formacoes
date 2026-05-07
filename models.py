@@ -61,9 +61,6 @@ class Servidor(Base):
     cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
     participacoes = relationship("Participacao", back_populates="servidor")
     
-    __table_args__ = (
-        UniqueConstraint('matricula', name='uq_servidor_matricula'),
-    )
     
     def __repr__(self):
         return f"<Servidor {self.matricula}: {self.nome}>"

@@ -1,11 +1,17 @@
-from sqlalchemy import func
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from database import SessionLocal
+from models import Participacao, Servidor, Formacao, Lotacao
+
+router = APIRouter()
 
 @router.get("/dashboard")
 def dashboard(
-    mes_inicio: str = None,
-    mes_fim: str = None,
-    lotacao: str = None,
-    curso: str = None
+    mes_inicio: str = Query(None),
+    mes_fim: str = Query(None),
+    lotacao: str = Query(None),
+    curso: str = Query(None),
 ):
     db = SessionLocal()
 

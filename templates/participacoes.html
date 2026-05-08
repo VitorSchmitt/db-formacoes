@@ -95,7 +95,7 @@ async function carregarFormacoes() {
 // =====================
 async function carregarLotacoes() {
     try {
-        let res = await api("/api/lotacoes");
+        let res = await api("/api/lotacoes/ativas");
         let data = await res.json();
 
         if (!res.ok) {

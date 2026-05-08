@@ -69,7 +69,7 @@ async function carregarTabela() {
             </tr>
         `;
 
-        filtrado.forEach((l, i) => {
+        filtrado.forEach((l) => {
 
             let status = l.ativo ? "🟢 Ativo" : "🔴 Inativo";
             let btnTexto = l.ativo ? "Desativar" : "Ativar";
@@ -83,7 +83,7 @@ async function carregarTabela() {
                 <td>
 
                     <button class="btn btn-warning btn-sm"
-                            onclick="editar(${i})">
+                            onclick="editar(${l.id})">
                         ✏️
                     </button>
 
@@ -96,6 +96,16 @@ async function carregarTabela() {
             </tr>
             `;
         });
+
+        html += "</table>";
+
+        document.getElementById("tabela").innerHTML = html;
+
+    } catch (err) {
+        mostrarMsg({erro: "Erro de conexão ao carregar lotações"});
+        console.error(err);
+    }
+}
 
         html += "</table>";
 

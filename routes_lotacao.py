@@ -33,31 +33,7 @@ def listar_lotacoes(db: Session = Depends(get_db)):
     ]
 
 
-# =====================================================
-# 📌 LISTAR AGRUPADO POR TIPO (somente ativos)
-# =====================================================
-@router.get("/agrupadas")
-def lotacoes_agrupadas(db: Session = Depends(get_db)):
-    stmt = (
-        select(Lotacao.tipo, Lotacao.id, Lotacao.descricao)
-        .where(Lotacao.ativo == True)
-        .order_by(Lotacao.tipo, Lotacao.descricao)
-    )
 
-    result = db.execute(stmt).all()
-
-    agrupado = {}
-
-    for tipo, id_, descricao in result:
-        if tipo not in agrupado:
-            agrupado[tipo] = []
-
-        agrupado[tipo].append({
-            "id": id_,
-            "descricao": descricao
-        })
-
-    return agrupado
 
 
 # =====================================================

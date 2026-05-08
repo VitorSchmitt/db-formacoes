@@ -16,6 +16,8 @@ PUBLIC_PATHS = [
     "/web/formacoes",
     "/web/participacoes",
     "/web/usuarios",
+    "/web/lotacoes"
+    
 ]
 
 PUBLIC_PREFIX = [
@@ -30,11 +32,13 @@ PERMISSOES = {
         "/web/servidores",
         "/web/formacoes",
         "/web/participacoes",
+        "/web/lotacoes",
 
         "/api/dashboard",
         "/api/servidores",
         "/api/formacoes",
         "/api/participacoes",
+        "/api/lotacoes",
     ]
 }
 

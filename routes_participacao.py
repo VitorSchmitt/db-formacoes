@@ -19,24 +19,7 @@ def get_db():
 
 from sqlalchemy import select
 
-@router.get("/api/lotacoes")
-def listar_lotacoes(db: Session = Depends(get_db)):
 
-    stmt = (
-        select(Lotacao.id, Lotacao.descricao)
-        .where(Lotacao.ativo == True)        
-        .order_by(Lotacao.descricao)
-    )
-
-    result = db.execute(stmt).all()
-
-    return [
-        {
-            "id": id_,
-            "descricao": descricao
-        }
-        for id_, descricao in result
-    ]
 # ===============================
 # LISTAR POR FORMAÇÃO
 # ===============================

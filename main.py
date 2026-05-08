@@ -13,6 +13,7 @@ from routes_servidor import router as servidor_router
 from routes_formacao import router as formacao_router
 from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
+from routes_lotacao import router as lotacao_router
 from middleware import AuthMiddleware
 
 
@@ -40,6 +41,7 @@ app.include_router(servidor_router)
 app.include_router(formacao_router)
 app.include_router(participacao_router)
 app.include_router(dashboard_router)
+app.include_router(lotacao_router)
 
 # ===============================
 # WEB
@@ -109,5 +111,13 @@ def tela_usuarios(request: Request):
 
     return templates.TemplateResponse(
         "usuarios.html",
+        {"request": request}
+    )
+
+@app.get("/web/lotacoes")
+def tela_lotacoes(request: Request):
+
+    return templates.TemplateResponse(
+        "lotacao.html",
         {"request": request}
     )

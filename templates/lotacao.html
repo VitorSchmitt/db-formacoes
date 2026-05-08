@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h2>🏢 Cadastro de Lotação</h2>
+<h2>🏢 Cadastro de Lotações</h2>
 
 <form onsubmit="salvar(event)">
     <div class="row mb-3">
@@ -12,7 +12,7 @@
         </div>
 
         <div class="col-md-4">
-            <input type="text" id="tipo" class="form-control" placeholder="Tipo (Ex: Coordenação)" required>
+            <input type="text" id="tipo" class="form-control" placeholder="Tipo" required>
         </div>
 
     </div>
@@ -38,7 +38,7 @@ let editando = null;
 let listaLotacoes = [];
 
 // =====================
-// LISTAR LOTAÇÕES
+// LISTAR
 // =====================
 async function carregarTabela() {
     try {
@@ -64,17 +64,34 @@ async function carregarTabela() {
             <tr>
                 <th>Descrição</th>
                 <th>Tipo</th>
+                <th>Status</th>
                 <th>Ações</th>
             </tr>
         `;
 
         filtrado.forEach((l, i) => {
+
+            let status = l.ativo ? "🟢 Ativo" : "🔴 Inativo";
+            let btnTexto = l.ativo ? "Desativar" : "Ativar";
+            let btnClasse = l.ativo ? "btn-danger" : "btn-success";
+
             html += `
             <tr>
                 <td>${l.descricao}</td>
                 <td>${l.tipo}</td>
+                <td>${status}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editar(${i})">✏️</button>
+
+                    <button class="btn btn-warning btn-sm"
+                            onclick="editar(${i})">
+                        ✏️
+                    </button>
+
+                    <button class="btn ${btnClasse} btn-sm"
+                            onclick="toggle(${l.id})">
+                        ${btnTexto}
+                    </button>
+
                 </td>
             </tr>
             `;
@@ -92,7 +109,7 @@ async function carregarTabela() {
 
 
 // =====================
-// SALVAR (CRIAR / EDITAR)
+// SALVAR
 // =====================
 async function salvar(e) {
     e.preventDefault();
@@ -124,7 +141,6 @@ async function salvar(e) {
         }
 
         mostrarMsg({ok: true});
-
         limpar();
         carregarTabela();
 
@@ -151,12 +167,39 @@ function editar(index) {
     document.querySelector("button.btn-primary").innerText = "Atualizar";
 
     document.getElementById("descricao").focus();
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 
 // =====================
-// LIMPAR FORM
+// TOGGLE ATIVO/INATIVO
+// =====================
+async function toggle(id) {
+    try {
+        let res = await api(`/api/lotacoes/toggle/${id}`, {
+            method: "PATCH"
+        });
+
+        let r = await res.json();
+
+        if (!res.ok) {
+            mostrarMsg({erro: r.erro || "Erro ao atualizar status"});
+            return;
+        }
+
+        mostrarMsg({ok: true});
+        carregarTabela();
+
+    } catch (err) {
+        mostrarMsg({erro: "Erro de conexão"});
+        console.error(err);
+    }
+}
+
+
+// =====================
+// LIMPAR
 // =====================
 function limpar() {
     editando = null;

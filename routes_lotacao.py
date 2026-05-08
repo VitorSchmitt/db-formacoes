@@ -13,10 +13,12 @@ router = APIRouter(prefix="/api/lotacoes", tags=["Lotação"])
 # =====================================================
 @router.get("/")
 def listar_lotacoes(db: Session = Depends(get_db)):
-    stmt = (
-        select(Lotacao)
-        .order_by(Lotacao.tipo, Lotacao.descricao)
-    )
+    stmt = select(
+    Lotacao.id,
+    Lotacao.descricao,
+    Lotacao.tipo,
+    Lotacao.ativo
+    ).order_by(Lotacao.tipo, Lotacao.descricao)
 
     result = db.execute(stmt).scalars().all()
 

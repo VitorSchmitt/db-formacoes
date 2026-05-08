@@ -46,7 +46,7 @@ async function carregarTabela() {
         let data = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: data.erro || "Erro ao carregar lotações"});
+            mostrarMsg({ erro: data.erro || "Erro ao carregar lotações" });
             return;
         }
 
@@ -102,17 +102,7 @@ async function carregarTabela() {
         document.getElementById("tabela").innerHTML = html;
 
     } catch (err) {
-        mostrarMsg({erro: "Erro de conexão ao carregar lotações"});
-        console.error(err);
-    }
-}
-
-        html += "</table>";
-
-        document.getElementById("tabela").innerHTML = html;
-
-    } catch (err) {
-        mostrarMsg({erro: "Erro de conexão ao carregar lotações"});
+        mostrarMsg({ erro: "Erro de conexão ao carregar lotações" });
         console.error(err);
     }
 }
@@ -146,16 +136,16 @@ async function salvar(e) {
         let r = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: r.erro || "Erro ao salvar"});
+            mostrarMsg({ erro: r.erro || "Erro ao salvar" });
             return;
         }
 
-        mostrarMsg({ok: true});
+        mostrarMsg({ ok: true });
         limpar();
         carregarTabela();
 
     } catch (err) {
-        mostrarMsg({erro: "Falha de conexão com o servidor"});
+        mostrarMsg({ erro: "Falha de conexão com o servidor" });
         console.error(err);
     }
 }
@@ -169,6 +159,8 @@ function editar(id) {
 
     let l = listaLotacoes.find(x => x.id === id);
 
+    if (!l) return;
+
     editando = l.id;
 
     document.getElementById("descricao").value = l.descricao;
@@ -178,6 +170,7 @@ function editar(id) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 // =====================
 // TOGGLE ATIVO/INATIVO
@@ -191,15 +184,15 @@ async function toggle(id) {
         let r = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: r.erro || "Erro ao atualizar status"});
+            mostrarMsg({ erro: r.erro || "Erro ao atualizar status" });
             return;
         }
 
-        mostrarMsg({ok: true});
+        mostrarMsg({ ok: true });
         carregarTabela();
 
     } catch (err) {
-        mostrarMsg({erro: "Erro de conexão"});
+        mostrarMsg({ erro: "Erro de conexão" });
         console.error(err);
     }
 }

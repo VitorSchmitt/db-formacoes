@@ -154,10 +154,10 @@ async function salvar(e) {
 // =====================
 // EDITAR
 // =====================
-function editar(index) {
+function editar(id) {
     limpar();
 
-    let l = listaLotacoes[index];
+    let l = listaLotacoes.find(x => x.id === id);
 
     editando = l.id;
 
@@ -166,11 +166,8 @@ function editar(index) {
 
     document.querySelector("button.btn-primary").innerText = "Atualizar";
 
-    document.getElementById("descricao").focus();
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 
 // =====================
 // TOGGLE ATIVO/INATIVO

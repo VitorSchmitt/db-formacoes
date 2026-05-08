@@ -156,3 +156,23 @@ def deletar(id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         return {"erro": str(e)}
+
+@router.get("/api/lotacoes/ativas")
+def listar_lotacoes_ativas(db: Session = Depends(get_db)):
+
+    stmt = (
+        select(Lotacao)
+        .where(Lotacao.ativo == True)
+        .order_by(Lotacao.tipo, Lotacao.descricao)
+    )
+
+    lotacoes = db.execute(stmt).scalars().all()
+
+    return [
+        {
+            "id": l.id,
+            "descricao": l.descricao,
+            "tipo": l.tipo
+        }
+        for l in lotacoes
+    ]

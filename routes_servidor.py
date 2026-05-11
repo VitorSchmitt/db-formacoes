@@ -37,7 +37,8 @@ def listar(db: Session = Depends(get_db)):
             "matricula": s.matricula,
             "nome": s.nome,
             "cargo": s.cargo.descricao if s.cargo else None,
-            "cargo_id": s.cargo_id
+            "cargo_id": s.cargo_id,
+            "ativo": s.ativo,
         }
         for s in dados
     ]
@@ -78,12 +79,19 @@ def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
             matricula=dados.matricula,
             nome=dados.nome,
             cargo_id=dados.cargo_id
+            ativo=True
         )
 
         db.add(novo)
         db.commit()
 
-        return {"ok": True}
+        return {
+        "ok": True,
+        "matricula": novo.matricula,
+        "nome": novo.nome,
+        "cargo_id": novo.cargo_id,
+        "ativo": novo.ativo
+    }
 
     except IntegrityError:
         db.rollback()
@@ -122,9 +130,30 @@ def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_d
         db.rollback()
         return {"erro": str(e)}
 
+# =====================================================
+# 📌 TOGGLE ATIVO / INATIVO
+# =====================================================
+@router.patch("/toggle/{matricula}")
+def toggle_servidor(matricula: str, db: Session = Depends(get_db)):
+
+    servidor = db.get(Servidor, matricula)
+
+    if not servidor:
+        raise HTTPException(status_code=404, detail="Servidor não encontrado")
+
+    servidor.ativo = not servidor.ativo
+
+    db.commit()
+
+    return {
+        "ok": True,
+        "ativo": servidor.ativo
+    }
+
+
 
 # ===============================
-# DELETAR SERVIDOR
+#  📌 DESATIVAR SERVIDOR
 # ===============================
 @router.delete("/api/servidor/{matricula}")
 def deletar(matricula: str, db: Session = Depends(get_db)):
@@ -135,10 +164,13 @@ def deletar(matricula: str, db: Session = Depends(get_db)):
         return {"erro": "Servidor não encontrado"}
 
     try:
-        db.delete(s)
+        servidor.ativo = False
         db.commit()
 
-        return {"ok": True}
+        return {
+        "ok": True,
+        "message": "Servidor desativado com sucesso"
+    }
 
     except Exception as e:
         db.rollback()

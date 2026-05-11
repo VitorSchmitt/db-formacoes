@@ -65,7 +65,7 @@ let formacaoAtual = null;
 // =====================
 async function carregarFormacoes() {
     try {
-        let res = await api("/api/formacoes");
+        let res = await api("/api/formacoes/ativas");
         let data = await res.json();
 
         if (!res.ok) {

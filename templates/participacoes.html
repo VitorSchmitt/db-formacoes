@@ -25,7 +25,9 @@
     <div class="row mb-3">
 
         <div class="col-md-3">
-            <input type="text" id="matricula" class="form-control" placeholder="Matrícula" required>
+            <select id="servidor" class="form-select" required>
+            <option value="">Selecione o servidor</option>
+        </select>
         </div>
 
         <div class="col-md-4">
@@ -87,6 +89,44 @@ async function carregarFormacoes() {
     } catch (err) {
         mostrarMsg({erro: "Erro de conexão (formações)"});
         console.error(err);
+    }
+}
+// ======================================
+// CARREGAR SERVIDORES ATIVOS
+// ======================================
+async function carregarServidores() {
+
+    try {
+
+        let res = await api("/api/servidores/ativos");
+        let data = await res.json();
+
+        let select = document.getElementById("servidor");
+
+        select.innerHTML = `
+            <option value="">
+                Selecione o servidor
+            </option>
+        `;
+
+        data
+        .filter(s => s.ativo)
+        .forEach(s => {
+
+            select.innerHTML += `
+                <option value="${s.matricula}">
+                    ${s.nome} (${s.matricula})
+                </option>
+            `;
+        });
+
+    } catch(err) {
+
+        console.error(err);
+
+        mostrarMsg({
+            erro: "Erro ao carregar servidores"
+        });
     }
 }
 
@@ -187,25 +227,51 @@ async function carregarTabela() {
 // SALVAR
 // =====================
 async function salvar(e) {
+
     e.preventDefault();
 
-    let matricula = document.getElementById("matricula").value.trim();
-    let lotacao = document.getElementById("lotacao").value;
-    let aproveitamento = document.getElementById("aproveitamento").value.trim();
+    let matricula = document.getElementById("servidor").value;
 
-    if (!formacaoAtual) return mostrarMsg({erro: "Selecione uma formação"});
-    if (!matricula) return mostrarMsg({erro: "Informe a matrícula"});
-    if (!lotacao) return mostrarMsg({erro: "Selecione a lotação"});
-    if (!aproveitamento) return mostrarMsg({erro: "Informe o aproveitamento"});
+    let lotacao = document.getElementById("lotacao").value;
+
+    let aproveitamento = document
+        .getElementById("aproveitamento")
+        .value
+        .trim();
+
+    if (!formacaoAtual)
+        return mostrarMsg({
+            erro: "Selecione uma formação"
+        });
+
+    if (!matricula)
+        return mostrarMsg({
+            erro: "Selecione um servidor"
+        });
+
+    if (!lotacao)
+        return mostrarMsg({
+            erro: "Selecione a lotação"
+        });
+
+    if (!aproveitamento)
+        return mostrarMsg({
+            erro: "Informe o aproveitamento"
+        });
 
     let dados = {
-        matricula,
+
+        matricula: matricula,
+
         lotacao_id: parseInt(lotacao),
-        aproveitamento,
+
+        aproveitamento: aproveitamento,
+
         formacao_id: formacaoAtual
     };
 
     try {
+
         let res = await api("/api/participacao", {
             method: "POST",
             body: JSON.stringify(dados)
@@ -214,23 +280,32 @@ async function salvar(e) {
         let r = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: r.erro || "Erro ao salvar"});
+
+            mostrarMsg({
+                erro: r.erro || "Erro ao salvar"
+            });
+
             return;
         }
 
         mostrarMsg(r);
 
         if (r.ok) {
+
             limpar();
+
             carregarTabela();
         }
 
     } catch (err) {
-        mostrarMsg({erro: "Erro de conexão ao salvar"});
+
+        mostrarMsg({
+            erro: "Erro de conexão ao salvar"
+        });
+
         console.error(err);
     }
 }
-
 // =====================
 // DELETAR
 // =====================
@@ -261,8 +336,11 @@ async function deletar(id) {
 // UI
 // =====================
 function limpar() {
-    document.getElementById("matricula").value = "";
+
+    document.getElementById("servidor").value = "";
+
     document.getElementById("aproveitamento").value = "";
+
     document.getElementById("lotacao").value = "";
 }
 

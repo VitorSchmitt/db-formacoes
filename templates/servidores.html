@@ -279,7 +279,7 @@ async function salvar(e) {
 // =====================================================
 // EDITAR
 // =====================================================
-function editar(index) {
+ffunction editar(index) {
 
     limpar();
 
@@ -291,14 +291,32 @@ function editar(index) {
     document.getElementById("nome").value = s.nome;
     document.getElementById("cargo").value = s.cargo_id;
 
+    // matrícula não pode alterar
     document.getElementById("matricula").disabled = true;
 
+    // muda botão
     document.querySelector(".btn-primary").innerText = "Atualizar";
 
+    // muda título
+    document.querySelector("h2").innerHTML =
+        `✏️ Editando Servidor: ${s.nome}`;
+
+    // sobe tela
     window.scrollTo({
         top: 0,
         behavior: "smooth"
     });
+
+    // foco visual
+    setTimeout(() => {
+        document.getElementById("nome").focus();
+    }, 300);
+
+    // destaque visual do formulário
+    document.querySelector("form").classList.add("border");
+    document.querySelector("form").classList.add("border-warning");
+    document.querySelector("form").classList.add("p-3");
+    document.querySelector("form").classList.add("rounded");
 }
 
 
@@ -368,6 +386,15 @@ function limpar() {
     document.getElementById("matricula").disabled = false;
 
     document.querySelector(".btn-primary").innerText = "Salvar";
+
+    document.querySelector("h2").innerHTML =
+        "👥 Cadastro de Servidores";
+
+    // remove destaque
+    document.querySelector("form").classList.remove("border");
+    document.querySelector("form").classList.remove("border-warning");
+    document.querySelector("form").classList.remove("p-3");
+    document.querySelector("form").classList.remove("rounded");
 }
 
 

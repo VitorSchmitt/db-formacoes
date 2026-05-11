@@ -177,21 +177,21 @@ def listar_lotacoes_ativas(db: Session = Depends(get_db)):
         for l in lotacoes
     ]
 @router.get("/api/servidores/ativos")
-def listar_lotacoes_ativas(db: Session = Depends(get_db)):
+def listar_servidores_ativos(db: Session = Depends(get_db)):
 
-    stmt = (
-        select(Lotacao)
-        .where(Lotacao.ativo == True)
-        .order_by(Lotacao.tipo, Lotacao.descricao)
+    def listar(db: Session = Depends(get_db)):
+    dados = (
+        db.query(Servidor)
+        .options(joinedload(Servidor.cargo))
+        .where(Servidor.ativo == True)
+        .order_by(Servidor.nome)
+        .all()
     )
-
-    lotacoes = db.execute(stmt).scalars().all()
 
     return [
         {
-            "id": l.id,
-            "descricao": l.descricao,
-            "tipo": l.tipo
+            "matricula": s.matricula,
+            "nome": s.nome,                 
         }
-        for l in lotacoes
+        for s in dados
     ]

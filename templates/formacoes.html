@@ -87,7 +87,7 @@ async function carregarEnums() {
     }
 }
     
-async function toggleFormacao(id) {
+window.toggleFormacao = async function (id) {
 
     try {
 
@@ -95,9 +95,12 @@ async function toggleFormacao(id) {
             method: "PATCH"
         });
 
-        let r = await res.json();
+        await res.json();
 
-        mostrarMsg({message: "Status alterado com sucesso"});
+        mostrarMsg({
+            message: "Status alterado com sucesso"
+        });
+
         carregarTabela();
 
     } catch(err) {

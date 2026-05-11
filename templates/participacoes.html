@@ -63,31 +63,56 @@ let formacaoAtual = null;
 // =====================
 // FORMAÇÕES
 // =====================
+// =====================
+// FORMAÇÕES
+// =====================
 async function carregarFormacoes() {
+
     try {
+
         let res = await api("/api/formacoes/ativas");
+
         let data = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: data.erro || "Erro ao carregar formações"});
+
+            mostrarMsg({
+                erro: data.erro || "Erro ao carregar formações"
+            });
+
             return;
         }
 
         let select = document.getElementById("formacao");
-        select.innerHTML = `<option value="">Selecione a formação</option>`;
 
-        data.dados.forEach(f => {
-            select.add(new Option(f.descricao, f.id));
+        select.innerHTML = `
+            <option value="">
+                Selecione a formação
+            </option>
+        `;
+
+        data.forEach(f => {
+
+            select.add(
+                new Option(f.descricao, f.id)
+            );
         });
 
-        if (data.dados.length > 0) {
-            formacaoAtual = data.dados[0].id;
+        if (data.length > 0) {
+
+            formacaoAtual = data[0].id;
+
             select.value = formacaoAtual;
+
             carregarTabela();
         }
 
     } catch (err) {
-        mostrarMsg({erro: "Erro de conexão (formações)"});
+
+        mostrarMsg({
+            erro: "Erro de conexão (formações)"
+        });
+
         console.error(err);
     }
 }

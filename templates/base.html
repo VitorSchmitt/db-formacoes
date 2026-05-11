@@ -2,18 +2,23 @@
 <html lang="pt-br">
 
 <head>
+
     <meta charset="UTF-8">
+
     <title>Sistema</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
     <!-- Plotly -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-    <!-- ===================== -->
+    <!-- ===================================================== -->
     <!-- SCRIPT GLOBAL -->
-    <!-- ===================== -->
+    <!-- ===================================================== -->
     <script>
 
     // 🌐 API GLOBAL
@@ -22,8 +27,11 @@
         try {
 
             let res = await fetch(url, {
+
                 credentials: "include",
+
                 ...options,
+
                 headers: {
                     "Content-Type": "application/json",
                     ...(options.headers || {})
@@ -32,43 +40,54 @@
 
             // 🔴 NÃO AUTENTICADO
             if (res.status === 401) {
+
                 window.location.href = "/";
+
                 return;
             }
 
             // 🔴 SEM PERMISSÃO
             if (res.status === 403) {
+
                 alert("Sem permissão para acessar este recurso");
+
                 return;
             }
 
             return res;
 
         } catch (err) {
+
             console.error("Erro na API:", err);
+
             alert("Erro de conexão com o servidor");
         }
-    }
+    };
 
-    // 🎯 MENU DINÂMICO
+
+    // =====================================================
+    // MENU DINÂMICO
+    // =====================================================
     function montarMenu() {
 
         const perfil = localStorage.getItem("perfil");
+
         const paginaAtual = window.location.pathname;
 
         const menus = {
 
             admin: [
+
                 ["/web/dashboard", "📊 Dashboard"],
                 ["/web/formacoes", "📚 Formações"],
                 ["/web/servidores", "👥 Servidores"],
-                ["/web/participacoes", "📊 Participações"],                
+                ["/web/participacoes", "📊 Participações"],
                 ["/web/lotacoes", "🧭 Lotações"],
                 ["/web/usuarios", "👤 Usuários"]
             ],
 
             operador: [
-                ["/web/dashboard", "📊 Dashboard"],
+                
                 ["/web/formacoes", "📚 Formações"],
                 ["/web/servidores", "👥 Servidores"],
                 ["/web/participacoes", "📊 Participações"],
@@ -76,6 +95,7 @@
             ],
 
             custom: [
+
                 ["/web/dashboard", "📊 Dashboard"],
                 ["/web/formacoes", "📚 Formações"],
                 ["/web/servidores", "👥 Servidores"]
@@ -87,90 +107,158 @@
         container.innerHTML = "";
 
         if (!menus[perfil]) {
-            container.innerHTML = "<p>Sem acesso</p>";
+
+            container.innerHTML = `
+                <p class="text-light">
+                    Sem acesso
+                </p>
+            `;
+
             return;
         }
 
         menus[perfil].forEach(item => {
 
-            let ativo = paginaAtual === item[0] ? "ativo" : "";
+            let ativo =
+                paginaAtual === item[0]
+                ? "ativo"
+                : "";
 
             container.innerHTML += `
-                <a href="${item[0]}" class="${ativo}">
+                <a href="${item[0]}"
+                   class="${ativo}">
                     ${item[1]}
                 </a>
             `;
         });
     }
 
-    // 🚪 LOGOUT
+
+    // =====================================================
+    // LOGOUT
+    // =====================================================
     function logout() {
+
         localStorage.clear();
+
         window.location.href = "/";
     }
 
-    // 🔄 INIT
-    window.addEventListener("DOMContentLoaded", montarMenu);
+
+    // =====================================================
+    // INIT
+    // =====================================================
+    window.addEventListener(
+        "DOMContentLoaded",
+        montarMenu
+    );
 
     </script>
 
-<style>
 
-    :root{
+    <!-- ===================================================== -->
+    <!-- ESTILO -->
+    <!-- ===================================================== -->
+    <style>
+
+    :root {
+
         --sidebar-bg: #1f2937;
+
         --sidebar-hover: #374151;
+
         --sidebar-active: #2563eb;
 
         --content-bg: #f3f4f6;
 
         --text-light: #f9fafb;
+
         --text-muted: #d1d5db;
 
         --border-color: #e5e7eb;
     }
 
-    body{
+
+    /* =====================================================
+       BODY
+    ===================================================== */
+
+    body {
+
         display: flex;
+
         margin: 0;
-        height: 100vh;
+
+        min-height: 100vh;
+
         background: var(--content-bg);
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+        font-family:
+            "Segoe UI",
+            Tahoma,
+            Geneva,
+            Verdana,
+            sans-serif;
+
         color: #111827;
     }
 
-    /* =========================================
-       SIDEBAR
-    ========================================= */
 
-    .sidebar{
+    /* =====================================================
+       SIDEBAR
+    ===================================================== */
+
+    .sidebar {
+
         width: 240px;
+
         background: var(--sidebar-bg);
+
         color: var(--text-light);
+
         padding: 24px 16px;
 
         display: flex;
+
         flex-direction: column;
 
         box-shadow:
             2px 0 10px rgba(0,0,0,0.08);
     }
 
-    .sidebar h4{
+
+    .sidebar h4 {
+
         font-size: 1.1rem;
+
         font-weight: 600;
+
         margin-bottom: 24px;
+
         color: white;
+
         letter-spacing: 0.5px;
     }
 
-    .sidebar a{
+
+    .sidebar hr {
+
+        border-color: rgba(255,255,255,0.1);
+    }
+
+
+    .sidebar a {
+
         color: var(--text-muted);
+
         text-decoration: none;
 
         display: flex;
+
         align-items: center;
 
         padding: 12px 14px;
+
         margin-bottom: 6px;
 
         border-radius: 10px;
@@ -181,23 +269,33 @@
             transform 0.15s ease;
     }
 
-    .sidebar a:hover{
+
+    .sidebar a:hover {
+
         background: var(--sidebar-hover);
+
         color: white;
+
         transform: translateX(3px);
     }
 
-    .sidebar a.ativo{
+
+    .sidebar a.ativo {
+
         background: var(--sidebar-active);
+
         color: white;
+
         font-weight: 600;
     }
 
-    /* =========================================
-       CONTENT
-    ========================================= */
 
-    .content{
+    /* =====================================================
+       CONTENT
+    ===================================================== */
+
+    .content {
+
         flex: 1;
 
         padding: 28px;
@@ -205,18 +303,22 @@
         background: var(--content-bg);
 
         overflow-y: auto;
+
+        min-height: 100vh;
     }
 
-    /* =========================================
-       CARDS / FORMULÁRIOS
-    ========================================= */
 
-    .card-custom{
+    /* =====================================================
+       CARDS / FORMULÁRIOS
+    ===================================================== */
+
+    .card-custom {
+
         background: white;
 
         border-radius: 14px;
 
-        padding: 20px;
+        padding: 24px;
 
         border: 1px solid var(--border-color);
 
@@ -224,61 +326,138 @@
             0 2px 8px rgba(0,0,0,0.04);
     }
 
-    /* =========================================
+
+    /* =====================================================
+       TÍTULOS
+    ===================================================== */
+
+    h2 {
+
+        font-weight: 600;
+
+        margin-bottom: 20px;
+    }
+
+
+    h5 {
+
+        font-weight: 600;
+    }
+
+
+    /* =====================================================
        TABELAS
-    ========================================= */
+    ===================================================== */
 
-    table{
-        background: white;
+    .table {
+
+        background: white !important;
+
         border-radius: 10px;
+
         overflow: hidden;
+
+        margin-bottom: 0;
     }
 
-    .table thead{
-        background: #111827;
-        color: white;
+
+    .table thead {
+
+        background: #111827 !important;
+
+        color: white !important;
     }
 
-    /* =========================================
+
+    .table th,
+    .table td {
+
+        vertical-align: middle;
+    }
+
+
+    /* =====================================================
+       FORMULÁRIOS
+    ===================================================== */
+
+    .form-control,
+    .form-select {
+
+        border-radius: 10px;
+    }
+
+
+    /* =====================================================
        BOTÕES
-    ========================================= */
+    ===================================================== */
 
-    .btn-primary{
+    .btn {
+
+        border-radius: 10px;
+    }
+
+
+    .btn-primary {
+
         background: #2563eb;
+
         border: none;
     }
 
-    .btn-primary:hover{
+
+    .btn-primary:hover {
+
         background: #1d4ed8;
     }
 
-    .btn-warning{
+
+    .btn-warning {
+
         color: white;
+
         background: #f59e0b;
+
         border: none;
     }
 
-    .btn-warning:hover{
+
+    .btn-warning:hover {
+
         background: #d97706;
     }
 
-    .btn-danger{
+
+    .btn-danger {
+
         border: none;
     }
 
-    .btn-success{
+
+    .btn-success {
+
         border: none;
     }
 
-</style>
+
+    /* =====================================================
+       ALERTAS
+    ===================================================== */
+
+    .alert {
+
+        border-radius: 10px;
+    }
+
+    </style>
 
 </head>
 
+
 <body>
 
-    <!-- ===================== -->
-    <!-- MENU LATERAL -->
-    <!-- ===================== -->
+    <!-- ===================================================== -->
+    <!-- MENU -->
+    <!-- ===================================================== -->
     <div class="sidebar">
 
         <h4>NTEV - FORMAÇÕES</h4>
@@ -289,17 +468,31 @@
 
         <hr>
 
-        <a href="#" onclick="logout()">🚪 Sair</a>
+        <a href="#"
+           onclick="logout()">
+            🚪 Sair
+        </a>
 
-        <a href="/docs" target="_blank">⚙️ API Docs</a>
+        <a href="/docs"
+           target="_blank">
+            ⚙️ API Docs
+        </a>
 
     </div>
 
-    <!-- ===================== -->
+
+    <!-- ===================================================== -->
     <!-- CONTEÚDO -->
-    <!-- ===================== -->
+    <!-- ===================================================== -->
     <div class="content">
-        {% block content %}{% endblock %}
+
+        <div class="card-custom">
+
+            {% block content %}
+            {% endblock %}
+
+        </div>
+
     </div>
 
 </body>

@@ -105,18 +105,56 @@ def atualizar(id: int, dados: FormacaoUpdate, db: Session = Depends(get_db)):
         db.rollback()
         return {"erro": str(e)}  # 👈 agora você vai ver o erro real
 
-@router.delete("/api/formacao/{id}")
-def deletar(id: int, db: Session = Depends(get_db)):
 
-    f = db.query(Formacao).get(id)
+@router.patch("/api/formacoes/toggle/{formacao_id}")
+def toggle_formacao(
+    formacao_id: int,
+    db: Session = Depends(get_db)
+):
 
-    if not f:
-        return {"erro": "Não encontrado"}
+    formacao = db.get(Formacao, formacao_id)
 
-    db.delete(f)
+    if not formacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Formação não encontrada"
+        )
+
+    formacao.ativo = not formacao.ativo
+
     db.commit()
 
-    return {"ok": True}
+    return {
+        "ok": True,
+        "ativo": formacao.ativo
+    }
+
+
+@router.delete("/api/formacoes/{formacao_id}")
+def desativar_formacao(
+    formacao_id: int,
+    db: Session = Depends(get_db)
+):
+
+    formacao = db.get(Formacao, formacao_id)
+
+    if not formacao:
+        return {
+            "erro": "Formação não encontrada"
+        }
+
+    formacao.ativo = False
+
+    db.commit()
+
+    return {
+        "ok": True,
+        "message": "Formação desativada"
+    }
+
+
+
+
 @router.get("/api/enums")
 def enums():
     return {

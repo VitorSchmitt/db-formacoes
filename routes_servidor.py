@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 
@@ -6,7 +6,10 @@ from database import SessionLocal
 from models import Servidor, Cargo
 from schemas import ServidorCreate, ServidorUpdate
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/api/servidores",
+    tags=["Servidor"]
+)
 
 
 # ===============================
@@ -23,8 +26,9 @@ def get_db():
 # ===============================
 # LISTAR SERVIDORES
 # ===============================
-@router.get("/api/servidores")
+@router.get("/")
 def listar(db: Session = Depends(get_db)):
+
     dados = (
         db.query(Servidor)
         .options(joinedload(Servidor.cargo))
@@ -47,8 +51,9 @@ def listar(db: Session = Depends(get_db)):
 # ===============================
 # LISTAR CARGOS
 # ===============================
-@router.get("/api/cargos")
+@router.get("/cargos")
 def listar_cargos(db: Session = Depends(get_db)):
+
     cargos = db.query(Cargo).order_by(Cargo.descricao).all()
 
     return [
@@ -63,35 +68,37 @@ def listar_cargos(db: Session = Depends(get_db)):
 # ===============================
 # CRIAR SERVIDOR
 # ===============================
-@router.post("/api/servidor")
+@router.post("/")
 def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
 
     if not dados.matricula or not dados.nome or not dados.cargo_id:
         return {"erro": "Preencha todos os campos"}
 
-    # 🔎 valida cargo
     cargo = db.get(Cargo, dados.cargo_id)
+
     if not cargo:
         return {"erro": "Cargo inválido"}
 
     try:
+
         novo = Servidor(
             matricula=dados.matricula,
             nome=dados.nome,
-            cargo_id=dados.cargo_id
+            cargo_id=dados.cargo_id,
             ativo=True
         )
 
         db.add(novo)
         db.commit()
+        db.refresh(novo)
 
         return {
-        "ok": True,
-        "matricula": novo.matricula,
-        "nome": novo.nome,
-        "cargo_id": novo.cargo_id,
-        "ativo": novo.ativo
-    }
+            "ok": True,
+            "matricula": novo.matricula,
+            "nome": novo.nome,
+            "cargo_id": novo.cargo_id,
+            "ativo": novo.ativo
+        }
 
     except IntegrityError:
         db.rollback()
@@ -105,8 +112,12 @@ def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
 # ===============================
 # ATUALIZAR SERVIDOR
 # ===============================
-@router.put("/api/servidor/{matricula}")
-def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_db)):
+@router.put("/{matricula}")
+def atualizar(
+    matricula: str,
+    dados: ServidorUpdate,
+    db: Session = Depends(get_db)
+):
 
     s = db.get(Servidor, matricula)
 
@@ -119,6 +130,7 @@ def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_d
         return {"erro": "Cargo inválido"}
 
     try:
+
         s.nome = dados.nome
         s.cargo_id = dados.cargo_id
 
@@ -130,16 +142,23 @@ def atualizar(matricula: str, dados: ServidorUpdate, db: Session = Depends(get_d
         db.rollback()
         return {"erro": str(e)}
 
+
 # =====================================================
-# 📌 TOGGLE ATIVO / INATIVO
+# TOGGLE ATIVO / INATIVO
 # =====================================================
 @router.patch("/toggle/{matricula}")
-def toggle_servidor(matricula: str, db: Session = Depends(get_db)):
+def toggle_servidor(
+    matricula: str,
+    db: Session = Depends(get_db)
+):
 
     servidor = db.get(Servidor, matricula)
 
     if not servidor:
-        raise HTTPException(status_code=404, detail="Servidor não encontrado")
+        raise HTTPException(
+            status_code=404,
+            detail="Servidor não encontrado"
+        )
 
     servidor.ativo = not servidor.ativo
 
@@ -151,12 +170,14 @@ def toggle_servidor(matricula: str, db: Session = Depends(get_db)):
     }
 
 
-
 # ===============================
-#  📌 DESATIVAR SERVIDOR
+# DESATIVAR SERVIDOR
 # ===============================
-@router.delete("/api/servidor/{matricula}")
-def deletar(matricula: str, db: Session = Depends(get_db)):
+@router.delete("/{matricula}")
+def deletar(
+    matricula: str,
+    db: Session = Depends(get_db)
+):
 
     s = db.get(Servidor, matricula)
 
@@ -164,13 +185,15 @@ def deletar(matricula: str, db: Session = Depends(get_db)):
         return {"erro": "Servidor não encontrado"}
 
     try:
-        servidor.ativo = False
+
+        s.ativo = False
+
         db.commit()
 
         return {
-        "ok": True,
-        "message": "Servidor desativado com sucesso"
-    }
+            "ok": True,
+            "message": "Servidor desativado com sucesso"
+        }
 
     except Exception as e:
         db.rollback()

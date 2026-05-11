@@ -178,16 +178,15 @@ def listar_lotacoes_ativas(db: Session = Depends(get_db)):
     ]
 @router.get("/api/servidores/ativos")
 def listar_servidores_ativos(db: Session = Depends(get_db)):
-
-    def listar(db: Session = Depends(get_db)):
-    dados = (
+    
+    stmt = (
         db.query(Servidor)
         .options(joinedload(Servidor.cargo))
         .where(Servidor.ativo == True)
         .order_by(Servidor.nome)
         .all()
     )
-
+    lotacoes = db.execute(stmt).scalars().all()
     return [
         {
             "matricula": s.matricula,

@@ -114,46 +114,163 @@
 
     </script>
 
-    <style>
-        body {
-            display: flex;
-            margin: 0;
-            height: 100vh;
-        }
+<style>
 
-        .sidebar {
-            width: 230px;
-            background: #343a40;
-            color: white;
-            padding: 20px;
-        }
+    :root{
+        --sidebar-bg: #1f2937;
+        --sidebar-hover: #374151;
+        --sidebar-active: #2563eb;
 
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            margin: 10px 0;
-            padding: 6px;
-            border-radius: 6px;
-            transition: 0.2s;
-        }
+        --content-bg: #f3f4f6;
 
-        .sidebar a:hover {
-            background: #495057;
-            padding-left: 12px;
-        }
+        --text-light: #f9fafb;
+        --text-muted: #d1d5db;
 
-        .sidebar a.ativo {
-            background: #0d6efd;
-        }
+        --border-color: #e5e7eb;
+    }
 
-        .content {
-            flex: 1;
-            padding: 20px;
-            background: #f5f5f5;
-            overflow-y: auto;
-        }
-    </style>
+    body{
+        display: flex;
+        margin: 0;
+        height: 100vh;
+        background: var(--content-bg);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #111827;
+    }
+
+    /* =========================================
+       SIDEBAR
+    ========================================= */
+
+    .sidebar{
+        width: 240px;
+        background: var(--sidebar-bg);
+        color: var(--text-light);
+        padding: 24px 16px;
+
+        display: flex;
+        flex-direction: column;
+
+        box-shadow:
+            2px 0 10px rgba(0,0,0,0.08);
+    }
+
+    .sidebar h4{
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: white;
+        letter-spacing: 0.5px;
+    }
+
+    .sidebar a{
+        color: var(--text-muted);
+        text-decoration: none;
+
+        display: flex;
+        align-items: center;
+
+        padding: 12px 14px;
+        margin-bottom: 6px;
+
+        border-radius: 10px;
+
+        transition:
+            background 0.2s ease,
+            color 0.2s ease,
+            transform 0.15s ease;
+    }
+
+    .sidebar a:hover{
+        background: var(--sidebar-hover);
+        color: white;
+        transform: translateX(3px);
+    }
+
+    .sidebar a.ativo{
+        background: var(--sidebar-active);
+        color: white;
+        font-weight: 600;
+    }
+
+    /* =========================================
+       CONTENT
+    ========================================= */
+
+    .content{
+        flex: 1;
+
+        padding: 28px;
+
+        background: var(--content-bg);
+
+        overflow-y: auto;
+    }
+
+    /* =========================================
+       CARDS / FORMULÁRIOS
+    ========================================= */
+
+    .card-custom{
+        background: white;
+
+        border-radius: 14px;
+
+        padding: 20px;
+
+        border: 1px solid var(--border-color);
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* =========================================
+       TABELAS
+    ========================================= */
+
+    table{
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .table thead{
+        background: #111827;
+        color: white;
+    }
+
+    /* =========================================
+       BOTÕES
+    ========================================= */
+
+    .btn-primary{
+        background: #2563eb;
+        border: none;
+    }
+
+    .btn-primary:hover{
+        background: #1d4ed8;
+    }
+
+    .btn-warning{
+        color: white;
+        background: #f59e0b;
+        border: none;
+    }
+
+    .btn-warning:hover{
+        background: #d97706;
+    }
+
+    .btn-danger{
+        border: none;
+    }
+
+    .btn-success{
+        border: none;
+    }
+
+</style>
 
 </head>
 

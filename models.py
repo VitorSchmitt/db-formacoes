@@ -56,7 +56,7 @@ class Servidor(Base):
     nome = Column(String(255), nullable=False, index=True)    
     cargo_id = Column(Integer, ForeignKey("cargo.id"), nullable=True)
     criado_em = Column(DateTime, default=datetime.utcnow)
-    
+    ativo = Column(Boolean, default=True)
     # Relationships
     cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
     participacoes = relationship("Participacao", back_populates="servidor")

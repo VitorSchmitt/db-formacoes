@@ -193,3 +193,21 @@ def listar_servidores_ativos(db: Session = Depends(get_db)):
         }
         for s in dados
     ]
+
+@router.get("/api/formacoes/ativas")
+def listar_formacoes_ativas(db: Session = Depends(get_db)):
+
+    dados = (
+        db.query(Formacao)
+        .filter(Formacao.ativo == True)
+        .order_by(Formacao.descricao)
+        .all()
+    )
+
+    return [
+        {
+            "id": f.id,
+            "descricao": f.descricao
+        }
+        for f in dados
+    ]

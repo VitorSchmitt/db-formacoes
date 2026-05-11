@@ -200,7 +200,7 @@ def listar_formacoes_ativas(db: Session = Depends(get_db)):
     dados = (
         db.query(Formacao)
         .filter(Formacao.ativo == True)
-        .order_by(Formacao.descricao)
+        .order_by(Formacao.data_termino)
         .all()
     )
 

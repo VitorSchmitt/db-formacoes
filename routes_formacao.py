@@ -48,7 +48,8 @@ def listar(
                 "carga_horaria": f.carga_horaria,   
                 "data_termino": f.data_termino.strftime("%Y-%m-%d") if f.data_termino else None,
                 "modalidade": str(f.modalidade) if f.modalidade else None,
-                "eixo": str(f.eixo) if f.eixo else None
+                "eixo": str(f.eixo) if f.eixo else None,
+                "ativo": f.ativo
             }
             for f in dados
         ],

@@ -198,11 +198,11 @@ def listar_servidores_ativos(db: Session = Depends(get_db)):
 def listar_formacoes_ativas(db: Session = Depends(get_db)):
 
     dados = (
-        db.query(Formacao)
-        .filter(Formacao.ativo == True)
-        .order_by(Formacao.data_termino)
-        .all()
-    )
+    db.query(Formacao)
+    .filter(Formacao.ativo == True)
+    .order_by(Formacao.data_termino.desc())
+    .all()
+)
 
     return [
         {

@@ -99,6 +99,7 @@ async function carregarServidores() {
     try {
 
         let res = await api("/api/servidores/ativos");
+
         let data = await res.json();
 
         let select = document.getElementById("servidor");
@@ -109,9 +110,7 @@ async function carregarServidores() {
             </option>
         `;
 
-        data
-        .filter(s => s.ativo)
-        .forEach(s => {
+        data.forEach(s => {
 
             select.innerHTML += `
                 <option value="${s.matricula}">
@@ -361,6 +360,7 @@ function mostrarMsg(r) {
 // =====================
 carregarFormacoes();
 carregarLotacoes();
+carregarServidores();
 
 </script>
 

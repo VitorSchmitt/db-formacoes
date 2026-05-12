@@ -26,7 +26,6 @@ PUBLIC_PREFIX = [
 
 PERMISSOES = {
     "admin": ["*"],
-
     "operador": [ 
         "/web/dashboard",
         "/web/servidores",

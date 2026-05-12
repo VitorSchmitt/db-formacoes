@@ -28,20 +28,20 @@ PERMISSOES = {
     "admin": ["*"],
 
     "operador": [ 
-        "/web/daschboard",
+        "/web/dashboard",
         "/web/servidores",
         "/web/formacoes",
         "/web/participacoes",
         "/web/lotacoes",
-        "/api/daschboard",
+        "/api/dashboard",
         "/api/servidores",
         "/api/formacoes",
         "/api/participacoes",
         "/api/lotacoes"
     ]
     "custom": [ 
-        "/web/daschboard",        
-        "/api/daschboard"
+        "/web/dashboard",        
+        "/api/dashboard"
     ]
     
 }

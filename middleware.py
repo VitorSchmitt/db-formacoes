@@ -27,18 +27,15 @@ PUBLIC_PREFIX = [
 PERMISSOES = {
     "admin": ["*"],
 
-    "operador": [
-        "/web/dashboard",
+    "operador": [        
         "/web/servidores",
         "/web/formacoes",
         "/web/participacoes",
-        "/web/lotacoes",
-
-        "/api/dashboard",
+        "/web/lotacoes",        
         "/api/servidores",
         "/api/formacoes",
         "/api/participacoes",
-        "/api/lotacoes",
+        "/api/lotacoes"
     ]
 }
 

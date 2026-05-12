@@ -5,18 +5,34 @@
 <h2>👤 Cadastro de Usuários</h2>
 
 <form onsubmit="salvar(event)">
+    
     <div class="row mb-3">
 
         <div class="col-md-3">
-            <input type="text" id="username" class="form-control" placeholder="Usuário" required>
+            <input 
+                type="text" 
+                id="username" 
+                class="form-control" 
+                placeholder="Usuário" 
+                required
+            >
         </div>
 
         <div class="col-md-3">
-            <input type="password" id="senha" class="form-control" placeholder="Senha" required>
+            <input 
+                type="password" 
+                id="senha" 
+                class="form-control" 
+                placeholder="Senha"
+            >
         </div>
 
-        <div class="col-md-3">
-            <select id="perfil" class="form-select" required>
+        <div class="col-md-2">
+            <select 
+                id="perfil" 
+                class="form-select" 
+                required
+            >
                 <option value="">Perfil</option>
                 <option value="admin">Admin</option>
                 <option value="operador">Operador</option>
@@ -24,18 +40,36 @@
             </select>
         </div>
 
-        <div class="col-md-3">
-            <button class="btn btn-primary w-100">Salvar</button>
+        <div class="col-md-2">
+            <input 
+                type="email" 
+                id="email" 
+                class="form-control" 
+                placeholder="E-mail"
+            >
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">
+                Salvar
+            </button>
         </div>
 
     </div>
+
 </form>
 
 <div id="msg"></div>
 
 <hr>
 
-<input type="text" id="busca" class="form-control mb-3" placeholder="Buscar usuário..." onkeyup="carregarTabela()">
+<input 
+    type="text" 
+    id="busca" 
+    class="form-control mb-3" 
+    placeholder="Buscar usuário..."
+    onkeyup="carregarTabela()"
+>
 
 <div id="tabela"></div>
 
@@ -43,77 +77,176 @@
 
 let editando = null;
 
-// =====================
+// ==========================
+// FORMATAR DATA
+// ==========================
+function formatarData(data) {
+
+    if (!data) return "-";
+
+    let d = new Date(data);
+
+    return d.toLocaleString("pt-BR");
+}
+
+// ==========================
 // LISTAR
-// =====================
+// ==========================
 async function carregarTabela() {
 
     try {
+
         let res = await api("/api/usuarios");
+
         let data = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: data.erro || "Erro ao carregar usuários"});
+
+            mostrarMsg({
+                erro: data.erro || "Erro ao carregar usuários"
+            });
+
             return;
         }
 
-        let busca = document.getElementById("busca").value.toLowerCase();
+        let busca = document
+            .getElementById("busca")
+            .value
+            .toLowerCase();
 
         let html = `
-        <table class="table table-striped">
-            <tr>
-                <th>Usuário</th>
-                <th>Perfil</th>
-                <th>Ações</th>
-            </tr>
+        
+        <table class="table table-striped table-hover align-middle">
+
+            <thead class="table-dark">
+
+                <tr>
+                    <th>Usuário</th>
+                    <th>Perfil</th>
+                    <th>E-mail</th>
+                    <th>Status</th>
+                    <th>Criado em</th>
+                    <th>Último Login</th>
+                    <th width="120">Ações</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
         `;
 
         data
-        .filter(u => u.username.toLowerCase().includes(busca))
+        .filter(u => 
+            u.username.toLowerCase().includes(busca)
+        )
         .forEach(u => {
+
+            let status = u.ativo
+                ? "🟢 Ativo"
+                : "🔴 Inativo";
+
+            let btnStatus = u.ativo
+                ? `
+                    <button
+                        class="btn btn-danger btn-sm"
+                        onclick="alterarStatus(${u.id}, false)"
+                        title="Desativar"
+                    >
+                        ⛔
+                    </button>
+                `
+                : `
+                    <button
+                        class="btn btn-success btn-sm"
+                        onclick="alterarStatus(${u.id}, true)"
+                        title="Ativar"
+                    >
+                        ✅
+                    </button>
+                `;
+
             html += `
+
             <tr>
+
                 <td>${u.username}</td>
-                <td>${u.perfil}</td>
+
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick='editar(${JSON.stringify(u)})'>✏️</button>
-                    <button class="btn btn-danger btn-sm" onclick='deletar(${u.id})'>🗑</button>
+                    <span class="badge bg-primary">
+                        ${u.perfil}
+                    </span>
                 </td>
+
+                <td>${u.email || "-"}</td>
+
+                <td>${status}</td>
+
+                <td>${formatarData(u.criado_em)}</td>
+
+                <td>${formatarData(u.ultimo_login)}</td>
+
+                <td>
+
+                    <button
+                        class="btn btn-warning btn-sm"
+                        onclick='editar(${JSON.stringify(u)})'
+                        title="Editar"
+                    >
+                        ✏️
+                    </button>
+
+                    ${btnStatus}
+
+                </td>
+
             </tr>
             `;
         });
 
-        html += "</table>";
+        html += `
+            </tbody>
+        </table>
+        `;
 
         document.getElementById("tabela").innerHTML = html;
 
     } catch (err) {
-        mostrarMsg({erro: "Falha ao conectar com o servidor"});
+
+        mostrarMsg({
+            erro: "Falha ao conectar com o servidor"
+        });
+
         console.error(err);
     }
 }
 
-// =====================
+// ==========================
 // SALVAR
-// =====================
+// ==========================
 async function salvar(e) {
+
     e.preventDefault();
 
     let dados = {
         username: document.getElementById("username").value,
         senha: document.getElementById("senha").value,
-        perfil: document.getElementById("perfil").value
+        perfil: document.getElementById("perfil").value,
+        email: document.getElementById("email").value
     };
 
     let url = "/api/usuario";
+
     let method = "POST";
 
     if (editando) {
+
         url = `/api/usuario/${editando}`;
+
         method = "PUT";
     }
 
     try {
+
         let res = await api(url, {
             method: method,
             body: JSON.stringify(dados)
@@ -122,85 +255,135 @@ async function salvar(e) {
         let r = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: r.erro || "Erro ao salvar"});
+
+            mostrarMsg({
+                erro: r.erro || "Erro ao salvar"
+            });
+
             return;
         }
 
         mostrarMsg(r);
 
         if (r.ok) {
+
             limpar();
+
             carregarTabela();
         }
 
     } catch (err) {
-        mostrarMsg({erro: "Erro de conexão"});
+
+        mostrarMsg({
+            erro: "Erro de conexão"
+        });
+
         console.error(err);
     }
 }
 
-// =====================
+// ==========================
 // EDITAR
-// =====================
+// ==========================
 function editar(u) {
+
     editando = u.id;
 
     document.getElementById("username").value = u.username;
+
     document.getElementById("perfil").value = u.perfil;
+
+    document.getElementById("email").value = u.email || "";
+
+    document.getElementById("senha").value = "";
 }
 
-// =====================
-// DELETAR
-// =====================
-async function deletar(id) {
-
-    if (!confirm("Excluir usuário?")) return;
+// ==========================
+// ALTERAR STATUS
+// ==========================
+async function alterarStatus(id, ativo) {
 
     try {
-        let res = await api(`/api/usuario/${id}`, {
-            method: "DELETE"
+
+        let res = await api(`/api/usuario/${id}/status`, {
+
+            method: "PUT",
+
+            body: JSON.stringify({
+                ativo: ativo
+            })
+
         });
 
         let r = await res.json();
 
         if (!res.ok) {
-            mostrarMsg({erro: r.erro || "Erro ao excluir"});
+
+            mostrarMsg({
+                erro: r.erro || "Erro ao alterar status"
+            });
+
             return;
         }
 
         mostrarMsg(r);
 
-        if (r.ok) carregarTabela();
+        carregarTabela();
 
     } catch (err) {
-        mostrarMsg({erro: "Erro de conexão"});
+
+        mostrarMsg({
+            erro: "Erro de conexão"
+        });
+
         console.error(err);
     }
 }
 
-// =====================
-// UI
-// =====================
+// ==========================
+// MENSAGENS
+// ==========================
 function mostrarMsg(r) {
+
     let msg = document.getElementById("msg");
 
     if (r.erro) {
-        msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
+
+        msg.innerHTML = `
+            <div class="alert alert-danger">
+                ${r.erro}
+            </div>
+        `;
+
     } else {
-        msg.innerHTML = `<div class="alert alert-success">Sucesso</div>`;
+
+        msg.innerHTML = `
+            <div class="alert alert-success">
+                Sucesso
+            </div>
+        `;
     }
 
-    setTimeout(() => msg.innerHTML = "", 3000);
+    setTimeout(() => {
+
+        msg.innerHTML = "";
+
+    }, 3000);
 }
 
+// ==========================
+// LIMPAR
+// ==========================
 function limpar() {
+
     editando = null;
+
     document.querySelector("form").reset();
 }
 
-// =====================
+// ==========================
 // INIT
-// =====================
+// ==========================
 carregarTabela();
 
 </script>

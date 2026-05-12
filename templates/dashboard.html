@@ -1,85 +1,483 @@
+# dashboard.html (Refatorado)
+
+```html
 {% extends "base.html" %}
 
 {% block content %}
 
-<h2>Dashboard</h2>
+<h2 class="mb-3">📊 Dashboard de Formações</h2>
 
-<div class="filtros">
-    Início: <input type="month" id="mes_inicio">
-    Fim: <input type="month" id="mes_fim">
-    <button onclick="carregar()">Filtrar</button>
+<div id="erro" class="alert alert-danger" style="display:none"></div>
+<div id="loading" style="display:none; font-weight:bold;">Carregando...</div>
+
+<!-- FILTROS -->
+<div class="row mb-3">
+    <div class="col-md-2">
+        <input type="month" id="mes_inicio" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+        <input type="month" id="mes_fim" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <select id="filtroLotacao" class="form-control">
+            <option value="">Todas Lotações</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select id="filtroCurso" class="form-control">
+            <option value="">Todos Cursos</option>
+        </select>
+    </div>
+
+    <div class="col-md-1">
+        <button onclick="carregar()" class="btn btn-dark w-100">
+            OK
+        </button>
+    </div>
+
+    <div class="col-md-1">
+        <button onclick="limparFiltros()" class="btn btn-secondary w-100">
+            ⟲
+        </button>
+    </div>
 </div>
 
-<h3>Total: <span id="total"></span></h3>
+<!-- CARDS -->
+<div class="row mb-4">
 
-<canvas id="graficoLotacao"></canvas>
-<canvas id="graficoCurso"></canvas>
-<canvas id="graficoPeriodo"></canvas>
+    <div class="col-md-3">
+        <div class="card text-white bg-primary text-center shadow-sm">
+            <div class="card-body">
+                <h6>Total Participações</h6>
+                <h2 id="total">0</h2>
+            </div>
+        </div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div class="col-md-3">
+        <div class="card text-white bg-success text-center shadow-sm">
+            <div class="card-body">
+                <h6>Total Cursos</h6>
+                <h2 id="totalCursos">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-dark bg-warning text-center shadow-sm">
+            <div class="card-body">
+                <h6>Total Lotações</h6>
+                <h2 id="totalLotacoes">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-dark text-center shadow-sm">
+            <div class="card-body">
+                <h6>Média Mensal</h6>
+                <h2 id="media">0</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- GRÁFICOS -->
+<div class="row">
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="g1"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="g2"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="g3"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 <script>
+(() => {
 
-let grafico1, grafico2, grafico3;
+// ====================================
+// ESTADO GLOBAL
+// ====================================
+let filtros = {
+    mes_inicio: "",
+    mes_fim: "",
+    lotacao: "",
+    curso: ""
+};
 
+let filtrosCarregados = false;
+
+// ====================================
+// HELPERS
+// ====================================
+function mostrarErro(msg) {
+
+    let div = document.getElementById("erro");
+
+    div.innerText = msg;
+    div.style.display = "block";
+}
+
+function esconderErro() {
+
+    document.getElementById("erro").style.display = "none";
+}
+
+function mostrarLoading() {
+
+    document.getElementById("loading").style.display = "block";
+}
+
+function esconderLoading() {
+
+    document.getElementById("loading").style.display = "none";
+}
+
+// ====================================
+// URL
+// ====================================
+function montarURL() {
+
+    return (
+        `/api/dashboard?` +
+        `mes_inicio=${encodeURIComponent(filtros.mes_inicio)}` +
+        `&mes_fim=${encodeURIComponent(filtros.mes_fim)}` +
+        `&lotacao=${encodeURIComponent(filtros.lotacao)}` +
+        `&curso=${encodeURIComponent(filtros.curso)}`
+    );
+}
+
+// ====================================
+// CARREGAR
+// ====================================
 async function carregar() {
 
-    const inicio = document.getElementById("mes_inicio").value;
-    const fim = document.getElementById("mes_fim").value;
+    try {
 
-    const res = await fetch(`/api/dashboard?mes_inicio=${inicio}&mes_fim=${fim}`, {
-        credentials: "include"
-    });
+        mostrarLoading();
+        esconderErro();
 
-    if (!res.ok) {
-        console.error("Erro API:", res.status);
-        return;
+        let url = montarURL();
+
+        let res = await api(url);
+
+        if (res.status === 401) {
+
+            localStorage.clear();
+            window.location.href = "/";
+            return;
+        }
+
+        let data = await res.json();
+
+        esconderLoading();
+
+        if (data.erro) {
+            mostrarErro(data.erro);
+            return;
+        }
+
+        atualizarCards(data);
+
+        if (!filtrosCarregados) {
+            preencherFiltros(data);
+            filtrosCarregados = true;
+        }
+
+        montarGraficos(data);
+
+    } catch (err) {
+
+        esconderLoading();
+
+        console.error(err);
+
+        mostrarErro("Erro ao carregar dashboard");
     }
+}
 
-    const data = await res.json();
+// ====================================
+// CARDS
+// ====================================
+function atualizarCards(data) {
 
-    document.getElementById("total").innerText = data.total;
+    document.getElementById("total").innerText = data.total || 0;
 
-    if (grafico1) grafico1.destroy();
-    if (grafico2) grafico2.destroy();
-    if (grafico3) grafico3.destroy();
+    document.getElementById("totalCursos").innerText =
+        data.curso?.length || 0;
 
-    grafico1 = new Chart(document.getElementById("graficoLotacao"), {
-        type: "bar",
-        data: {
-            labels: (data.lotacao || []).map(x => x.nome),
-            datasets: [{
-                label: "Por Lotação",
-                data: (data.lotacao || []).map(x => x.qtd)
-            }]
+    document.getElementById("totalLotacoes").innerText =
+        data.lotacao?.length || 0;
+
+    let soma = data.periodo.reduce((acc, x) => acc + x.qtd, 0);
+
+    let media = soma / (data.periodo.length || 1);
+
+    document.getElementById("media").innerText =
+        media.toFixed(1);
+}
+
+// ====================================
+// FILTROS
+// ====================================
+function preencherFiltros(data) {
+
+    let lot = document.getElementById("filtroLotacao");
+    let curso = document.getElementById("filtroCurso");
+
+    lot.innerHTML = '<option value="">Todas Lotações</option>';
+
+    curso.innerHTML = '<option value="">Todos Cursos</option>';
+
+    // remove duplicados
+    let lotacoesUnicas = [
+        ...new Map(
+            data.lotacao.map(x => [x.lotacao, x])
+        ).values()
+    ];
+
+    let cursosUnicos = [
+        ...new Map(
+            data.curso.map(x => [x.formacao, x])
+        ).values()
+    ];
+
+    lotacoesUnicas.forEach(x => {
+
+        let opt = new Option(x.lotacao, x.lotacao);
+
+        if (x.lotacao === filtros.lotacao) {
+            opt.selected = true;
         }
+
+        lot.add(opt);
     });
 
-    grafico2 = new Chart(document.getElementById("graficoCurso"), {
-        type: "bar",
-        data: {
-            labels: (data.curso || []).map(x => x.nome),
-            datasets: [{
-                label: "Por Curso",
-                data: (data.curso || []).map(x => x.qtd)
-            }]
-        }
-    });
+    cursosUnicos.forEach(x => {
 
-    grafico3 = new Chart(document.getElementById("graficoPeriodo"), {
-        type: "line",
-        data: {
-            labels: (data.periodo || []).map(x => x.mes),
-            datasets: [{
-                label: "Evolução",
-                data: (data.periodo || []).map(x => x.qtd)
-            }]
+        let opt = new Option(x.formacao, x.formacao);
+
+        if (x.formacao === filtros.curso) {
+            opt.selected = true;
         }
+
+        curso.add(opt);
     });
 }
 
-carregar();
+// ====================================
+// GRÁFICOS
+// ====================================
+function montarGraficos(data) {
 
+    let lotTop = [...data.lotacao]
+        .sort((a, b) => b.qtd - a.qtd)
+        .slice(0, 10);
+
+    let cursoTop = [...data.curso]
+        .sort((a, b) => b.qtd - a.qtd)
+        .slice(0, 10);
+
+    // ===============================
+    // GRÁFICO 1
+    // ===============================
+    Plotly.react(
+        "g1",
+        [{
+            x: lotTop.map(x => x.lotacao),
+            y: lotTop.map(x => x.qtd),
+            type: "bar"
+        }],
+        {
+            title: "Top 10 Lotações",
+            margin: { t: 50 }
+        }
+    );
+
+    let g1 = document.getElementById("g1");
+
+    g1.removeAllListeners?.("plotly_click");
+
+    g1.on('plotly_click', d => {
+
+        let val = d.points[0].x;
+
+        filtros.lotacao =
+            (filtros.lotacao === val)
+                ? ""
+                : val;
+
+        carregar();
+    });
+
+    // ===============================
+    // GRÁFICO 2
+    // ===============================
+    Plotly.react(
+        "g2",
+        [{
+            x: cursoTop.map(x => x.formacao),
+            y: cursoTop.map(x => x.qtd),
+            type: "bar"
+        }],
+        {
+            title: "Top 10 Cursos",
+            margin: { t: 50 }
+        }
+    );
+
+    let g2 = document.getElementById("g2");
+
+    g2.removeAllListeners?.("plotly_click");
+
+    g2.on('plotly_click', d => {
+
+        let val = d.points[0].x;
+
+        filtros.curso =
+            (filtros.curso === val)
+                ? ""
+                : val;
+
+        carregar();
+    });
+
+    // ===============================
+    // GRÁFICO 3
+    // ===============================
+    Plotly.react(
+        "g3",
+        [{
+            x: data.periodo.map(x => x.mes),
+            y: data.periodo.map(x => x.qtd),
+            type: "scatter",
+            mode: "lines+markers"
+        }],
+        {
+            title: "Participações por Mês",
+            margin: { t: 50 }
+        }
+    );
+}
+
+// ====================================
+// EVENTOS
+// ====================================
+document.getElementById("filtroLotacao").onchange = e => {
+
+    filtros.lotacao = e.target.value;
+
+    carregar();
+};
+
+document.getElementById("filtroCurso").onchange = e => {
+
+    filtros.curso = e.target.value;
+
+    carregar();
+};
+
+document.getElementById("mes_inicio").onchange = e => {
+
+    filtros.mes_inicio = e.target.value;
+};
+
+document.getElementById("mes_fim").onchange = e => {
+
+    filtros.mes_fim = e.target.value;
+};
+
+// ====================================
+// LIMPAR
+// ====================================
+window.limparFiltros = function() {
+
+    filtros = {
+        mes_inicio: "",
+        mes_fim: "",
+        lotacao: "",
+        curso: ""
+    };
+
+    document.getElementById("mes_inicio").value = "";
+    document.getElementById("mes_fim").value = "";
+
+    document.getElementById("filtroLotacao").value = "";
+    document.getElementById("filtroCurso").value = "";
+
+    carregar();
+}
+
+window.carregar = carregar;
+
+// ====================================
+// INIT
+// ====================================
+document.addEventListener("DOMContentLoaded", carregar);
+
+})();
 </script>
 
 {% endblock %}
+```
+
+# Melhorias aplicadas
+
+## Backend/API
+
+* Compatível com FastAPI
+* Compatível com API protegida via token
+* Tratamento de erro 401
+
+## Frontend
+
+* Evita duplicação de eventos Plotly
+* Evita duplicação de filtros
+* Remove duplicados dos selects
+* Corrige problemas de URL com caracteres especiais
+* Corrige problema de loading preso
+* Evita alteração do array original com sort()
+
+## Dashboard
+
+* Top 10 lotações
+* Top 10 cursos
+* Série temporal mensal
+* Cards estatísticos
+* Filtros dinâmicos
+* Clique nos gráficos para filtrar
+* Botão limpar filtros
+
+## UX
+
+* Cards com sombra
+* Layout mais limpo
+* Código organizado por blocos
+* Estado global centralizado

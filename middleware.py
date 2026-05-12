@@ -38,7 +38,7 @@ PERMISSOES = {
         "/api/formacoes",
         "/api/participacoes",
         "/api/lotacoes"
-    ]
+    ],
     "custom": [ 
         "/web/dashboard",        
         "/api/dashboard"

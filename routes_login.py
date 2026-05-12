@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -14,14 +16,23 @@ pwd_context = CryptContext(
 )
 
 
+# =====================================================
+# DATABASE
+# =====================================================
 def get_db():
+
     db = SessionLocal()
+
     try:
         yield db
+
     finally:
         db.close()
 
 
+# =====================================================
+# LOGIN
+# =====================================================
 @router.post("/login")
 async def login(
     request: Request,
@@ -30,28 +41,70 @@ async def login(
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(Usuario).filter(
-        Usuario.username == username
-    ).first()
+    # =========================================
+    # BUSCA USUÁRIO
+    # =========================================
+    user = (
+        db.query(Usuario)
+        .filter(Usuario.username == username)
+        .first()
+    )
 
+    # =========================================
+    # USUÁRIO NÃO EXISTE
+    # =========================================
     if not user:
+
         return JSONResponse(
             status_code=401,
-            content={"erro": "Usuário inválido"}
+            content={
+                "erro": "Usuário inválido"
+            }
         )
 
+    # =========================================
+    # USUÁRIO INATIVO
+    # =========================================
+    if not user.ativo:
+
+        return JSONResponse(
+            status_code=403,
+            content={
+                "erro": "Usuário inativo"
+            }
+        )
+
+    # =========================================
+    # SENHA INVÁLIDA
+    # =========================================
     if not pwd_context.verify(senha, user.senha):
+
         return JSONResponse(
             status_code=401,
-            content={"erro": "Senha inválida"}
+            content={
+                "erro": "Senha inválida"
+            }
         )
 
+    # =========================================
+    # ATUALIZA ÚLTIMO LOGIN
+    # =========================================
+    user.ultimo_login = datetime.utcnow()
+
+    db.commit()
+
+    # =========================================
+    # CRIA SESSÃO
+    # =========================================
     request.session["user"] = {
         "id": user.id,
         "username": user.username,
         "perfil": user.perfil
     }
 
+    # =========================================
+    # RETORNO
+    # =========================================
     return {
         "ok": True,
         "redirect": "/web/dashboard",
@@ -59,6 +112,9 @@ async def login(
     }
 
 
+# =====================================================
+# LOGOUT
+# =====================================================
 @router.get("/logout")
 def logout(request: Request):
 

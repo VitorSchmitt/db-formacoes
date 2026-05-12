@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Query
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from database import SessionLocal
-from models import Participacao, Servidor, Formacao, Lotacao
-from fastapi import Query
 from sqlalchemy import func
+from database import SessionLocal
+from models import Participacao, Formacao, Lotacao
 
 router = APIRouter()
+
 
 @router.get("/api/dashboard")
 def dashboard(
@@ -15,53 +14,142 @@ def dashboard(
     lotacao: str = Query(None),
     curso: str = Query(None),
 ):
+
     db = SessionLocal()
 
     try:
-        query = db.query(Participacao)\
-            .join(Formacao, Participacao.formacao_id == Formacao.id)\
-            .join(Lotacao, Participacao.lotacao_id == Lotacao.id)
 
+        # =====================================
+        # QUERY BASE
+        # =====================================
+        base = db.query(
+            Participacao,
+            Formacao,
+            Lotacao
+        )\
+        .join(Formacao, Participacao.formacao_id == Formacao.id)\
+        .join(Lotacao, Participacao.lotacao_id == Lotacao.id)
+
+        # =====================================
+        # FILTROS
+        # =====================================
         if mes_inicio:
-            query = query.filter(
-                func.to_char(Formacao.data_termino, 'YYYY-MM') >= mes_inicio
+            base = base.filter(
+                func.to_char(
+                    Formacao.data_termino,
+                    'YYYY-MM'
+                ) >= mes_inicio
             )
 
         if mes_fim:
-            query = query.filter(
-               func.to_char(Formacao.data_termino, 'YYYY-MM') <= mes_fim
+            base = base.filter(
+                func.to_char(
+                    Formacao.data_termino,
+                    'YYYY-MM'
+                ) <= mes_fim
             )
 
-        total = query.count()
+        if lotacao:
+            base = base.filter(
+                Lotacao.tipo == lotacao
+            )
 
-        lotacao_data = db.query(
+        if curso:
+            base = base.filter(
+                Formacao.descricao == curso
+            )
+
+        # =====================================
+        # TOTAL
+        # =====================================
+        total = base.count()
+
+        # =====================================
+        # LOTAÇÕES
+        # =====================================
+        lotacao_data = base.with_entities(
             Lotacao.tipo,
             func.count()
-        ).join(Participacao).join(Formacao).group_by(Lotacao.tipo).all()
+        )\
+        .group_by(Lotacao.tipo)\
+        .order_by(func.count().desc())\
+        .all()
 
-        curso_data = db.query(
+        # =====================================
+        # CURSOS
+        # =====================================
+        curso_data = base.with_entities(
             Formacao.descricao,
             func.count()
-        ).join(Participacao).join(Lotacao).group_by(Formacao.descricao).all()
+        )\
+        .group_by(Formacao.descricao)\
+        .order_by(func.count().desc())\
+        .all()
 
-        periodo_data = db.query(
-        func.to_char(Formacao.data_termino, 'YYYY-MM'),
-        func.count()
-        ).join(Participacao).join(Lotacao).group_by(
-        func.to_char(Formacao.data_termino, 'YYYY-MM')
-        ).all()
+        # =====================================
+        # PERÍODO
+        # =====================================
+        periodo_data = base.with_entities(
+            func.to_char(
+                Formacao.data_termino,
+                'YYYY-MM'
+            ),
+            func.count()
+        )\
+        .group_by(
+            func.to_char(
+                Formacao.data_termino,
+                'YYYY-MM'
+            )
+        )\
+        .order_by(
+            func.to_char(
+                Formacao.data_termino,
+                'YYYY-MM'
+            )
+        )\
+        .all()
 
+        # =====================================
+        # RESPONSE
+        # =====================================
         return {
+
             "total": total,
-            "lotacao": [{"nome": l[0], "qtd": l[1]} for l in lotacao_data],
-            "curso": [{"nome": c[0], "qtd": c[1]} for c in curso_data],
-            "periodo": [{"mes": p[0], "qtd": p[1]} for p in periodo_data],
+
+            "lotacao": [
+                {
+                    "lotacao": l[0],
+                    "qtd": l[1]
+                }
+                for l in lotacao_data
+            ],
+
+            "curso": [
+                {
+                    "formacao": c[0],
+                    "qtd": c[1]
+                }
+                for c in curso_data
+            ],
+
+            "periodo": [
+                {
+                    "mes": p[0],
+                    "qtd": p[1]
+                }
+                for p in periodo_data
+            ]
         }
 
     except Exception as e:
+
         import traceback
         traceback.print_exc()
-        return {"erro": str(e)}
+
+        return {
+            "erro": str(e)
+        }
 
     finally:
         db.close()

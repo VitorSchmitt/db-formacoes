@@ -1,145 +1,249 @@
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from passlib.hash import bcrypt
+from datetime import datetime
+
+from database import get_db
 from models import Usuario
-from passlib.context import CryptContext
 
 router = APIRouter()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-# ===============================
-# DB
-# ===============================
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-# ===============================
-# LOGIN (SESSÃO PURA)
-# ===============================
-@router.post("/login")
-def login(
-    request: Request,
-    username: str = Form(...),
-    senha: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    user = db.query(Usuario).filter_by(username=username).first()
-
-    if not user or not pwd_context.verify(senha, user.senha):
-        return {"erro": "Usuário ou senha inválidos"}
-
-    # 🔐 salva sessão
-    request.session["user"] = {
-        "id": user.id,
-        "username": user.username,
-        "perfil": user.perfil
-    }
-
-    return {
-        "ok": True,
-        "username": user.username,
-        "perfil": user.perfil
-    }
-
-
-# ===============================
+# =====================================================
 # LISTAR USUÁRIOS
-# ===============================
+# =====================================================
 @router.get("/api/usuarios")
-def listar(db: Session = Depends(get_db)):
-    dados = db.query(Usuario).order_by(Usuario.username).all()
+def listar_usuarios(db: Session = Depends(get_db)):
+
+    usuarios = (
+        db.query(Usuario)
+        .order_by(Usuario.username)
+        .all()
+    )
 
     return [
         {
             "id": u.id,
             "username": u.username,
-            "perfil": u.perfil
+            "perfil": u.perfil,
+            "email": u.email,
+            "ativo": u.ativo,
+            "criado_em": (
+                u.criado_em.strftime("%Y-%m-%d %H:%M")
+                if u.criado_em else None
+            ),
+            "ultimo_login": (
+                u.ultimo_login.strftime("%Y-%m-%d %H:%M")
+                if u.ultimo_login else None
+            )
         }
-        for u in dados
+        for u in usuarios
     ]
 
 
-# ===============================
+# =====================================================
 # CRIAR USUÁRIO
-# ===============================
+# =====================================================
 @router.post("/api/usuario")
-def criar(dados: dict, db: Session = Depends(get_db)):
+def criar_usuario(
+    dados: dict,
+    db: Session = Depends(get_db)
+):
 
-    if not all(k in dados for k in ["username", "senha", "perfil"]):
-        return {"erro": "Preencha todos os campos"}
+    username = dados.get("username", "").strip()
+    senha = dados.get("senha", "").strip()
+    perfil = dados.get("perfil", "").strip()
+    email = dados.get("email")
 
-    existe = db.query(Usuario).filter_by(username=dados["username"]).first()
-    if existe:
-        return {"erro": "Usuário já existe"}
-
-    try:
-        novo = Usuario(
-            username=dados["username"],
-            senha=pwd_context.hash(dados["senha"]),
-            perfil=dados["perfil"]
+    # -------------------------
+    # VALIDAÇÕES
+    # -------------------------
+    if not username:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Usuário obrigatório"}
         )
 
-        db.add(novo)
-        db.commit()
+    if not senha:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Senha obrigatória"}
+        )
 
-        return {"ok": True}
+    if not perfil:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Perfil obrigatório"}
+        )
 
-    except Exception as e:
-        db.rollback()
-        return {"erro": str(e)}
+    existe = (
+        db.query(Usuario)
+        .filter(Usuario.username == username)
+        .first()
+    )
+
+    if existe:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Usuário já existe"}
+        )
+
+    if email:
+
+        existe_email = (
+            db.query(Usuario)
+            .filter(Usuario.email == email)
+            .first()
+        )
+
+        if existe_email:
+            return JSONResponse(
+                status_code=400,
+                content={"erro": "E-mail já cadastrado"}
+            )
+
+    # -------------------------
+    # CRIAR
+    # -------------------------
+    usuario = Usuario(
+        username=username,
+        senha=bcrypt.hash(senha),
+        perfil=perfil,
+        email=email,
+        ativo=True,
+        criado_em=datetime.utcnow()
+    )
+
+    db.add(usuario)
+
+    db.commit()
+
+    return {
+        "ok": True,
+        "mensagem": "Usuário criado com sucesso"
+    }
 
 
-# ===============================
-# ATUALIZAR USUÁRIO
-# ===============================
+# =====================================================
+# EDITAR USUÁRIO
+# =====================================================
 @router.put("/api/usuario/{id}")
-def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
+def editar_usuario(
+    id: int,
+    dados: dict,
+    db: Session = Depends(get_db)
+):
 
-    u = db.get(Usuario, id)
+    usuario = (
+        db.query(Usuario)
+        .filter(Usuario.id == id)
+        .first()
+    )
 
-    if not u:
-        return {"erro": "Usuário não encontrado"}
+    if not usuario:
+        return JSONResponse(
+            status_code=404,
+            content={"erro": "Usuário não encontrado"}
+        )
 
-    try:
-        if dados.get("perfil"):
-            u.perfil = dados["perfil"]
+    username = dados.get("username", "").strip()
+    perfil = dados.get("perfil", "").strip()
+    email = dados.get("email")
+    senha = dados.get("senha", "").strip()
 
-        if dados.get("senha"):
-            u.senha = pwd_context.hash(dados["senha"])
+    # -------------------------
+    # VALIDAÇÕES
+    # -------------------------
+    if not username:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Usuário obrigatório"}
+        )
 
-        db.commit()
+    if not perfil:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Perfil obrigatório"}
+        )
 
-        return {"ok": True}
+    existe = (
+        db.query(Usuario)
+        .filter(
+            Usuario.username == username,
+            Usuario.id != id
+        )
+        .first()
+    )
 
-    except Exception as e:
-        db.rollback()
-        return {"erro": str(e)}
+    if existe:
+        return JSONResponse(
+            status_code=400,
+            content={"erro": "Usuário já existe"}
+        )
+
+    if email:
+
+        existe_email = (
+            db.query(Usuario)
+            .filter(
+                Usuario.email == email,
+                Usuario.id != id
+            )
+            .first()
+        )
+
+        if existe_email:
+            return JSONResponse(
+                status_code=400,
+                content={"erro": "E-mail já cadastrado"}
+            )
+
+    # -------------------------
+    # ATUALIZAR
+    # -------------------------
+    usuario.username = username
+    usuario.perfil = perfil
+    usuario.email = email
+
+    # Atualiza senha somente se informada
+    if senha:
+        usuario.senha = bcrypt.hash(senha)
+
+    db.commit()
+
+    return {
+        "ok": True,
+        "mensagem": "Usuário atualizado com sucesso"
+    }
 
 
-# ===============================
-# DELETAR USUÁRIO
-# ===============================
-@router.delete("/api/usuario/{id}")
-def deletar(id: int, db: Session = Depends(get_db)):
+# =====================================================
+# ALTERAR STATUS
+# =====================================================
+@router.put("/api/usuario/{id}/status")
+def alterar_status(
+    id: int,
+    dados: dict,
+    db: Session = Depends(get_db)
+):
 
-    u = db.get(Usuario, id)
+    usuario = (
+        db.query(Usuario)
+        .filter(Usuario.id == id)
+        .first()
+    )
 
-    if not u:
-        return {"erro": "Usuário não encontrado"}
+    if not usuario:
+        return JSONResponse(
+            status_code=404,
+            content={"erro": "Usuário não encontrado"}
+        )
 
-    try:
-        db.delete(u)
-        db.commit()
+    usuario.ativo = dados.get("ativo", True)
 
-        return {"ok": True}
+    db.commit()
 
-    except Exception as e:
-        db.rollback()
-        return {"erro": str(e)}
+    return {
+        "ok": True,
+        "mensagem": "Status atualizado com sucesso"
+    }

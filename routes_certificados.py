@@ -43,6 +43,7 @@ import os
 ASSINANTE = "Jamille de Freitas Serres"
 
 LOGO = "static/img/logo.png"
+FASE = "static/img/fase.png"
 
 ASSINATURA_IMG = "static/img/assinatura.png"
 
@@ -152,14 +153,28 @@ def gerar_pdf_certificado(
             height=2,5 * cm
         )
 
-        logo.hAlign = "CENTER"
+        logo.hAlign = "LEFT"
 
         elementos.append(logo)
 
         elementos.append(
             Spacer(1, 12)
         )
+    if os.path.exists(FASE):
 
+        logo = Image(
+            FASE,
+            width=5 * cm,
+            height=2,5 * cm
+        )
+
+        logo.hAlign = "RIGHT"
+
+        elementos.append(logo)
+
+        elementos.append(
+            Spacer(1, 12)
+        )
 
     # =========================
     # TÍTULO

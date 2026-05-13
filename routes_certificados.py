@@ -30,7 +30,8 @@ from reportlab.lib.enums import (
 import os
 
 ASSINANTE = "Jamille de Freitas Serres"
-
+LOGO = "static/img/logo.png"
+ASSINATURA_IMG = "static/img/assinatura.png"
 router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
@@ -111,6 +112,26 @@ def gerar_pdf_certificado(
     )
 
     elementos = []
+
+    # =========================
+# LOGO
+# =========================
+
+if os.path.exists(LOGO):
+
+    logo = Image(
+        LOGO,
+        width=5*cm,
+        height=5*cm
+    )
+
+    logo.hAlign = "CENTER"
+
+    elementos.append(logo)
+
+    elementos.append(
+        Spacer(1, 12)
+    )
 
 
     # =========================
@@ -242,9 +263,23 @@ def gerar_pdf_certificado(
     )
 
 
-    # =========================
-    # ASSINATURA
-    # =========================
+# =========================
+# ASSINATURA IMAGEM
+# =========================
+
+if os.path.exists(ASSINATURA_IMG):
+
+    assinatura = Image(
+        ASSINATURA_IMG,
+        width=6*cm,
+        height=2*cm
+    )
+
+    assinatura.hAlign = "LEFT"
+
+    elementos.append(assinatura)
+
+else:
 
     elementos.append(
         Paragraph(
@@ -253,17 +288,13 @@ def gerar_pdf_certificado(
         )
     )
 
-    elementos.append(
-        Paragraph(
-            ASSINANTE,
-            estilo_assinatura
-        )
+# Nome do assinante
+elementos.append(
+    Paragraph(
+        ASSINANTE,
+        estilo_assinatura
     )
-
-    elementos.append(
-        Spacer(1, 40)
-    )
-
+)
 
     # =========================
     # CÓDIGO

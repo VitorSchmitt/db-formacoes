@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, UniqueConstraint, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, UniqueConstraint, DateTime, Boolean,Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM
 from datetime import datetime
@@ -127,7 +127,7 @@ class Participacao(Base):
     matricula = Column(String(20), ForeignKey("servidor.matricula"), nullable=False)
     formacao_id = Column(Integer, ForeignKey("formacao.id"), nullable=False)
     lotacao_id = Column(Integer, ForeignKey("lotacao.id"), nullable=False)
-    aproveitamento = Column(String(50), nullable=True)  # Ex: "Aprovado", "Reprovado", etc
+    aproveitamento = Column(Float, nullable=True)
     criado_em = Column(DateTime, default=datetime.utcnow)    
     
     # Relationships

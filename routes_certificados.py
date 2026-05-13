@@ -1,18 +1,22 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
+
 from sqlalchemy.orm import Session
+
 from database import SessionLocal
 from models import Participacao, Formacao
-from reportlab.lib.units import cm
+
 from tempfile import NamedTemporaryFile
 from datetime import datetime
+
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
     Spacer,
     ListFlowable,
-    ListItem
+    ListItem,
+    Image
 )
 
 from reportlab.lib.styles import (
@@ -27,25 +31,47 @@ from reportlab.lib.enums import (
     TA_JUSTIFY
 )
 
+from reportlab.lib.units import cm
+
 import os
 
+
+# =========================
+# CONFIGURAÇÕES
+# =========================
+
 ASSINANTE = "Jamille de Freitas Serres"
+
 LOGO = "static/img/logo.png"
+
 ASSINATURA_IMG = "static/img/assinatura.png"
+
+
 router = APIRouter()
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(
+    directory="templates"
+)
 
 
 # =========================
 # DATABASE
 # =========================
+
 def get_db():
+
     db = SessionLocal()
+
     try:
         yield db
+
     finally:
         db.close()
+
+
+# =========================
+# GERAR PDF
+# =========================
 
 def gerar_pdf_certificado(
     dados,
@@ -94,7 +120,7 @@ def gerar_pdf_certificado(
         "assinatura",
         parent=styles["BodyText"],
         fontSize=12,
-        spaceBefore=40
+        spaceBefore=10
     )
 
 
@@ -113,25 +139,26 @@ def gerar_pdf_certificado(
 
     elementos = []
 
+
     # =========================
-# LOGO
-# =========================
+    # LOGO
+    # =========================
 
-if os.path.exists(LOGO):
+    if os.path.exists(LOGO):
 
-    logo = Image(
-        LOGO,
-        width=5*cm,
-        height=5*cm
-    )
+        logo = Image(
+            LOGO,
+            width=5 * cm,
+            height=5 * cm
+        )
 
-    logo.hAlign = "CENTER"
+        logo.hAlign = "CENTER"
 
-    elementos.append(logo)
+        elementos.append(logo)
 
-    elementos.append(
-        Spacer(1, 12)
-    )
+        elementos.append(
+            Spacer(1, 12)
+        )
 
 
     # =========================
@@ -174,7 +201,10 @@ if os.path.exists(LOGO):
     )
 
     elementos.append(
-        Paragraph(texto, estilo_texto)
+        Paragraph(
+            texto,
+            estilo_texto
+        )
     )
 
     elementos.append(
@@ -194,6 +224,7 @@ if os.path.exists(LOGO):
     )
 
     lista = ListFlowable(
+
         [
 
             ListItem(
@@ -235,6 +266,7 @@ if os.path.exists(LOGO):
             )
 
         ],
+
         bulletType="bullet",
         start="•"
     )
@@ -263,38 +295,43 @@ if os.path.exists(LOGO):
     )
 
 
-# =========================
-# ASSINATURA IMAGEM
-# =========================
+    # =========================
+    # ASSINATURA
+    # =========================
 
-if os.path.exists(ASSINATURA_IMG):
+    if os.path.exists(ASSINATURA_IMG):
 
-    assinatura = Image(
-        ASSINATURA_IMG,
-        width=6*cm,
-        height=2*cm
-    )
+        assinatura = Image(
+            ASSINATURA_IMG,
+            width=6 * cm,
+            height=2 * cm
+        )
 
-    assinatura.hAlign = "LEFT"
+        assinatura.hAlign = "LEFT"
 
-    elementos.append(assinatura)
+        elementos.append(assinatura)
 
-else:
+    else:
+
+        elementos.append(
+            Paragraph(
+                "_" * 40,
+                estilo_texto
+            )
+        )
+
 
     elementos.append(
         Paragraph(
-            "_" * 40,
-            estilo_texto
+            ASSINANTE,
+            estilo_assinatura
         )
     )
 
-# Nome do assinante
-elementos.append(
-    Paragraph(
-        ASSINANTE,
-        estilo_assinatura
+    elementos.append(
+        Spacer(1, 30)
     )
-)
+
 
     # =========================
     # CÓDIGO
@@ -308,14 +345,22 @@ elementos.append(
     )
 
 
+    # =========================
+    # GERAR PDF
+    # =========================
+
     doc.build(elementos)
+
+
 # =========================
 # TELA
 # =========================
+
 @router.get("/web/certificados")
 def tela_certificados(
     request: Request
 ):
+
     return templates.TemplateResponse(
         "certificados.html",
         {
@@ -327,6 +372,7 @@ def tela_certificados(
 # =========================
 # FORMAÇÕES
 # =========================
+
 @router.get("/api/certificados/formacoes")
 def listar_formacoes(
     db: Session = Depends(get_db)
@@ -340,10 +386,12 @@ def listar_formacoes(
     )
 
     return [
+
         {
             "id": f.id,
             "descricao": f.descricao
         }
+
         for f in dados
     ]
 
@@ -351,6 +399,7 @@ def listar_formacoes(
 # =========================
 # APTOS AO CERTIFICADO
 # =========================
+
 @router.get("/api/certificados/{formacao_id}")
 def listar_aptos(
     formacao_id: int,
@@ -358,11 +407,15 @@ def listar_aptos(
 ):
 
     participacoes = (
+
         db.query(Participacao)
+
         .join(Formacao)
+
         .filter(
             Participacao.formacao_id == formacao_id
         )
+
         .all()
     )
 
@@ -370,8 +423,23 @@ def listar_aptos(
 
     for p in participacoes:
 
-        carga_total = p.formacao.carga_horaria or 0
-        carga_realizada = p.aproveitamento or 0
+        try:
+            carga_total = float(
+                p.formacao.carga_horaria or 0
+            )
+
+        except:
+            carga_total = 0
+
+
+        try:
+            carga_realizada = float(
+                p.aproveitamento or 0
+            )
+
+        except:
+            carga_realizada = 0
+
 
         percentual = 0
 
@@ -385,49 +453,85 @@ def listar_aptos(
         if percentual >= 75:
 
             resultado.append({
-                "participacao_id": p.id,
-                "matricula": p.matricula,
-                "servidor": p.servidor.nome,
-                "formacao": p.formacao.descricao,
-                "carga_total": carga_total,
-                "carga_realizada": carga_realizada,
-                "percentual": percentual
+
+                "participacao_id":
+                    p.id,
+
+                "matricula":
+                    p.matricula,
+
+                "servidor":
+                    p.servidor.nome,
+
+                "formacao":
+                    p.formacao.descricao,
+
+                "carga_total":
+                    carga_total,
+
+                "carga_realizada":
+                    carga_realizada,
+
+                "percentual":
+                    percentual
             })
 
     return resultado
 
-@router.get("/api/certificados/pdf/{participacao_id}")
+
+# =========================
+# PDF
+# =========================
+
+@router.get(
+    "/api/certificados/pdf/{participacao_id}"
+)
+
 def gerar_certificado_pdf(
     participacao_id: int,
     db: Session = Depends(get_db)
 ):
 
     participacao = (
+
         db.query(Participacao)
+
         .filter(
             Participacao.id == participacao_id
         )
+
         .first()
     )
 
     if not participacao:
 
         return {
-            "erro": "Participação não encontrada"
+            "erro":
+                "Participação não encontrada"
         }
 
 
     # =========================
-    # DADOS
+    # CARGAS
     # =========================
 
-    carga_total = (
-        participacao.formacao.carga_horaria or 0
-    )
+    try:
+        carga_total = float(
+            participacao.formacao.carga_horaria or 0
+        )
 
-    carga_realizada = (
-        participacao.aproveitamento or 0
-    )
+    except:
+        carga_total = 0
+
+
+    try:
+        carga_realizada = float(
+            participacao.aproveitamento or 0
+        )
+
+    except:
+        carga_realizada = 0
+
 
     percentual = 0
 
@@ -439,11 +543,18 @@ def gerar_certificado_pdf(
         )
 
 
+    # =========================
+    # CÓDIGO
+    # =========================
+
     codigo = (
-        f"CERT-"
-        f"{participacao.id:06d}"
+        f"CERT-{participacao.id:06d}"
     )
 
+
+    # =========================
+    # DADOS
+    # =========================
 
     dados = {
 
@@ -454,7 +565,9 @@ def gerar_certificado_pdf(
             participacao.formacao.descricao,
 
         "fim":
-            participacao.formacao.data_termino.strftime("%d/%m/%Y")
+            participacao.formacao.data_termino.strftime(
+                "%d/%m/%Y"
+            )
             if participacao.formacao.data_termino
             else "",
 
@@ -505,12 +618,15 @@ def gerar_certificado_pdf(
 
 
     # =========================
-    # DOWNLOAD
+    # RETORNO
     # =========================
 
     return FileResponse(
+
         caminho_pdf,
+
         media_type="application/pdf",
+
         filename=(
             f"certificado_"
             f"{nome_arquivo}.pdf"

@@ -16,7 +16,8 @@ PUBLIC_PATHS = [
     "/web/formacoes",
     "/web/participacoes",
     "/web/usuarios",
-    "/web/lotacoes"
+    "/web/lotacoes",
+    "/web/certificados",
     
 ]
 
@@ -32,11 +33,13 @@ PERMISSOES = {
         "/web/formacoes",
         "/web/participacoes",
         "/web/lotacoes",
+        "/web/certificados",
         "/api/dashboard",
         "/api/servidores",
         "/api/formacoes",
         "/api/participacoes",
-        "/api/lotacoes"
+        "/api/lotacoes",
+        "/api/certificados"
     ],
     "custom": [ 
         "/web/dashboard",        

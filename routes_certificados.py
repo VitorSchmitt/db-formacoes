@@ -402,8 +402,8 @@ def gerar_certificado_pdf(
             participacao.formacao.descricao,
 
         "fim":
-            participacao.formacao.data_fim.strftime("%d/%m/%Y")
-            if participacao.formacao.data_fim
+            participacao.formacao.data_termino.strftime("%d/%m/%Y")
+            if participacao.formacao.data_termino
             else "",
 
         "carga_total":

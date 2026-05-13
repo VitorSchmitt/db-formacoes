@@ -14,6 +14,7 @@ from routes_formacao import router as formacao_router
 from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
 from routes_lotacao import router as lotacao_router
+from routes_certificados import router as certificado_router
 from middleware import AuthMiddleware
 
 
@@ -42,6 +43,7 @@ app.include_router(formacao_router)
 app.include_router(participacao_router)
 app.include_router(dashboard_router)
 app.include_router(lotacao_router)
+app.include_router(certificado_router)
 
 # ===============================
 # WEB

@@ -159,7 +159,7 @@ def gerar_pdf_certificado(
 
         logo_direita = Image(
             FASE,
-            width=5 * cm,
+            width=2.5 * cm,
             height=2.5 * cm
         )
 

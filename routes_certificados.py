@@ -83,7 +83,6 @@ def gerar_pdf_certificado(
 
     styles = getSampleStyleSheet()
 
-
     # =========================
     # ESTILOS
     # =========================
@@ -126,7 +125,6 @@ def gerar_pdf_certificado(
         spaceBefore=10
     )
 
-
     # =========================
     # DOCUMENTO
     # =========================
@@ -142,48 +140,48 @@ def gerar_pdf_certificado(
 
     elementos = []
 
+    # =========================
+    # LOGOS LADO A LADO
+    # =========================
 
- # =========================
-# LOGOS LADO A LADO
-# =========================
+    logo_esquerda = ""
+    logo_direita = ""
 
-logo_esquerda = ""
-logo_direita = ""
+    if os.path.exists(LOGO):
 
-if os.path.exists(LOGO):
+        logo_esquerda = Image(
+            LOGO,
+            width=5 * cm,
+            height=2.5 * cm
+        )
 
-    logo_esquerda = Image(
-        LOGO,
-        width=5 * cm,
-        height=2.5 * cm
+    if os.path.exists(FASE):
+
+        logo_direita = Image(
+            FASE,
+            width=5 * cm,
+            height=2.5 * cm
+        )
+
+    tabela_logos = Table(
+        [[logo_esquerda, logo_direita]],
+        colWidths=[9 * cm, 9 * cm]
     )
 
-if os.path.exists(FASE):
-
-    logo_direita = Image(
-        FASE,
-        width=5 * cm,
-        height=2.5 * cm
+    tabela_logos.setStyle(
+        TableStyle([
+            ("ALIGN", (0, 0), (0, 0), "LEFT"),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ])
     )
 
-tabela_logos = Table(
-    [[logo_esquerda, logo_direita]],
-    colWidths=[9 * cm, 9 * cm]
-)
+    elementos.append(tabela_logos)
 
-tabela_logos.setStyle(
-    TableStyle([
-        ("ALIGN", (0, 0), (0, 0), "LEFT"),
-        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-
-        # opcional:
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-    ])
-)
-
-elementos.append(tabela_logos)
-elementos.append(Spacer(1, 12))
+    elementos.append(
+        Spacer(1, 12)
+    )
 
     # =========================
     # TÍTULO
@@ -206,7 +204,6 @@ elementos.append(Spacer(1, 12))
     elementos.append(
         Spacer(1, 12)
     )
-
 
     # =========================
     # TEXTO
@@ -234,7 +231,6 @@ elementos.append(Spacer(1, 12))
     elementos.append(
         Spacer(1, 16)
     )
-
 
     # =========================
     # DETALHES
@@ -301,7 +297,6 @@ elementos.append(Spacer(1, 12))
         Spacer(1, 20)
     )
 
-
     # =========================
     # DATA
     # =========================
@@ -317,7 +312,6 @@ elementos.append(Spacer(1, 12))
     elementos.append(
         Spacer(1, 30)
     )
-
 
     # =========================
     # ASSINATURA
@@ -344,7 +338,6 @@ elementos.append(Spacer(1, 12))
             )
         )
 
-
     elementos.append(
         Paragraph(
             ASSINANTE,
@@ -356,7 +349,6 @@ elementos.append(Spacer(1, 12))
         Spacer(1, 30)
     )
 
-
     # =========================
     # CÓDIGO
     # =========================
@@ -367,7 +359,6 @@ elementos.append(Spacer(1, 12))
             estilo_texto
         )
     )
-
 
     # =========================
     # GERAR PDF
@@ -455,7 +446,6 @@ def listar_aptos(
         except:
             carga_total = 0
 
-
         try:
             carga_realizada = float(
                 p.aproveitamento or 0
@@ -463,7 +453,6 @@ def listar_aptos(
 
         except:
             carga_realizada = 0
-
 
         percentual = 0
 
@@ -510,7 +499,6 @@ def listar_aptos(
 @router.get(
     "/api/certificados/pdf/{participacao_id}"
 )
-
 def gerar_certificado_pdf(
     participacao_id: int,
     db: Session = Depends(get_db)
@@ -534,7 +522,6 @@ def gerar_certificado_pdf(
                 "Participação não encontrada"
         }
 
-
     # =========================
     # CARGAS
     # =========================
@@ -547,7 +534,6 @@ def gerar_certificado_pdf(
     except:
         carga_total = 0
 
-
     try:
         carga_realizada = float(
             participacao.aproveitamento or 0
@@ -555,7 +541,6 @@ def gerar_certificado_pdf(
 
     except:
         carga_realizada = 0
-
 
     percentual = 0
 
@@ -566,7 +551,6 @@ def gerar_certificado_pdf(
             2
         )
 
-
     # =========================
     # CÓDIGO
     # =========================
@@ -574,7 +558,6 @@ def gerar_certificado_pdf(
     codigo = (
         f"CERT-{participacao.id:06d}"
     )
-
 
     # =========================
     # DADOS
@@ -611,7 +594,6 @@ def gerar_certificado_pdf(
             datetime.now().strftime("%d/%m/%Y")
     }
 
-
     # =========================
     # ARQUIVO TEMPORÁRIO
     # =========================
@@ -630,7 +612,6 @@ def gerar_certificado_pdf(
 
     temp.close()
 
-
     # =========================
     # GERAR PDF
     # =========================
@@ -639,7 +620,6 @@ def gerar_certificado_pdf(
         dados,
         caminho_pdf
     )
-
 
     # =========================
     # RETORNO

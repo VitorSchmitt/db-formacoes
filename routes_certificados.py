@@ -1,11 +1,32 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Participacao, Formacao
 from reportlab.lib.units import cm
 from tempfile import NamedTemporaryFile
 from datetime import datetime
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    ListFlowable,
+    ListItem
+)
+
+from reportlab.lib.styles import (
+    getSampleStyleSheet,
+    ParagraphStyle
+)
+
+from reportlab.lib.pagesizes import A4
+
+from reportlab.lib.enums import (
+    TA_CENTER,
+    TA_JUSTIFY
+)
+
 import os
 
 ASSINANTE = "Jamille de Freitas Serres"

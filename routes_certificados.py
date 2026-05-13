@@ -149,7 +149,7 @@ def gerar_pdf_certificado(
         logo = Image(
             LOGO,
             width=5 * cm,
-            height=5 * cm
+            height=2,5 * cm
         )
 
         logo.hAlign = "CENTER"

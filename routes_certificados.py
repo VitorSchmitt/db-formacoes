@@ -16,7 +16,9 @@ from reportlab.platypus import (
     Spacer,
     ListFlowable,
     ListItem,
-    Image
+    Image,
+    Table,
+    TableStyle
 )
 
 from reportlab.lib.styles import (
@@ -141,40 +143,47 @@ def gerar_pdf_certificado(
     elementos = []
 
 
-    # =========================
-    # LOGO
-    # =========================
+ # =========================
+# LOGOS LADO A LADO
+# =========================
 
-    if os.path.exists(LOGO):
+logo_esquerda = ""
+logo_direita = ""
 
-        logo = Image(
-            LOGO,
-            width=5 * cm,
-            height=2,5 * cm
-        )
+if os.path.exists(LOGO):
 
-        logo.hAlign = "LEFT"
+    logo_esquerda = Image(
+        LOGO,
+        width=5 * cm,
+        height=2.5 * cm
+    )
 
-        elementos.append(logo)
+if os.path.exists(FASE):
 
-        elementos.append(
-            Spacer(1, 12)
-        )
-    if os.path.exists(FASE):
+    logo_direita = Image(
+        FASE,
+        width=5 * cm,
+        height=2.5 * cm
+    )
 
-        logo = Image(
-            FASE,
-            width=5 * cm,
-            height=2,5 * cm
-        )
+tabela_logos = Table(
+    [[logo_esquerda, logo_direita]],
+    colWidths=[9 * cm, 9 * cm]
+)
 
-        logo.hAlign = "RIGHT"
+tabela_logos.setStyle(
+    TableStyle([
+        ("ALIGN", (0, 0), (0, 0), "LEFT"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
 
-        elementos.append(logo)
+        # opcional:
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+    ])
+)
 
-        elementos.append(
-            Spacer(1, 12)
-        )
+elementos.append(tabela_logos)
+elementos.append(Spacer(1, 12))
 
     # =========================
     # TÍTULO

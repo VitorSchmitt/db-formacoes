@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from database import SessionLocal
 
-from models import Participacao, Servidor, Formacao
+from database import SessionLocal
+from models import Participacao, Formacao
 
 router = APIRouter()
 
@@ -27,8 +26,7 @@ def get_db():
 # =========================
 @router.get("/web/certificados")
 def tela_certificados(
-    request: Request,
-    db: Session = Depends(get_db)
+    request: Request
 ):
     return templates.TemplateResponse(
         "certificados.html",
@@ -39,7 +37,7 @@ def tela_certificados(
 
 
 # =========================
-# LISTA FORMAÇÕES
+# FORMAÇÕES
 # =========================
 @router.get("/api/certificados/formacoes")
 def listar_formacoes(
@@ -63,7 +61,7 @@ def listar_formacoes(
 
 
 # =========================
-# SERVIDORES APTOS
+# APTOS AO CERTIFICADO
 # =========================
 @router.get("/api/certificados/{formacao_id}")
 def listar_aptos(
@@ -72,13 +70,8 @@ def listar_aptos(
 ):
 
     participacoes = (
-        db.query(
-            Participacao,
-            Servidor,
-            Formacao
-        )
-        .join(Servidor, Participacao.servidor_id == Servidor.id)
-        .join(Formacao, Participacao.formacao_id == Formacao.id)
+        db.query(Participacao)
+        .join(Formacao)
         .filter(
             Participacao.formacao_id == formacao_id
         )
@@ -87,30 +80,29 @@ def listar_aptos(
 
     resultado = []
 
-    for participacao, servidor, formacao in participacoes:
+    for p in participacoes:
 
-        # =========================
-        # CÁLCULO DOS 75%
-        # =========================
-
-        carga_total = formacao.carga_horaria or 0
-        carga_presenca = participacao.carga_horaria or 0
+        carga_total = p.formacao.carga_horaria or 0
+        carga_realizada = p.aproveitamento or 0
 
         percentual = 0
 
         if carga_total > 0:
+
             percentual = round(
-                (carga_presenca / carga_total) * 100,
+                (carga_realizada / carga_total) * 100,
                 2
             )
 
         if percentual >= 75:
 
             resultado.append({
-                "participacao_id": participacao.id,
-                "servidor": servidor.nome,
+                "participacao_id": p.id,
+                "matricula": p.matricula,
+                "servidor": p.servidor.nome,
+                "formacao": p.formacao.descricao,
                 "carga_total": carga_total,
-                "carga_presenca": carga_presenca,
+                "carga_realizada": carga_realizada,
                 "percentual": percentual
             })
 

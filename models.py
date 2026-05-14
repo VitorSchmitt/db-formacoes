@@ -8,7 +8,8 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     UniqueConstraint,
-    Numeric
+    Numeric,
+    Float
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM

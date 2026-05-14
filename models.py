@@ -172,44 +172,11 @@ class PlanoAnual(Base):
 
     __tablename__ = "plano_anual"
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
-
-    ano = Column(
-        Integer,
-        nullable=False,
-        index=True
-    )
-
-    eixo = Column(
-        tipo_eixo,
-        nullable=False
-    )
-
-    objetivo = Column(
-        Text,
-        nullable=True
-    )
-
-    ementa = Column(
-        Text,
-        nullable=True
-    )
-
-    criado_em = Column(
-        DateTime,
-        default=datetime.utcnow
-    )
-
-    ativo = Column(
-        Boolean,
-        default=True
-    )
-
-    formacoes = relationship(
-        "Formacao",
-        back_populates="plano"
-    )
+    id = Column(Integer,primary_key=True,index=True)
+    ano = Column(Integer,nullable=False,index=True)
+    eixo = Column(tipo_eixo,nullable=False)
+    objetivo = Column(Text,nullable=True)
+    ementa = Column(Text,nullable=True)
+    criado_em = Column(DateTime,default=datetime.utcnow)
+    ativo = Column(Boolean,default=True)
+    formacoes = relationship("Formacao",back_populates="plano")

@@ -69,28 +69,110 @@ class Servidor(Base):
 class Formacao(Base):
     """
     Modelo de Formação (Curso/Treinamento)
-    
-    Representa as formações oferecidas pela prefeitura
+
+    Representa:
+    - planejamento institucional
+    - cronograma
+    - execução real
+    - indicadores
     """
+
     __tablename__ = "formacao"
-    
+
+    # =====================================
+    # IDENTIFICAÇÃO
+    # =====================================
+
     id = Column(Integer, primary_key=True, index=True)
+
     descricao = Column(String(500), nullable=False, index=True)
+
+    # =====================================
+    # DATAS
+    # =====================================
+
+    data_inicio = Column(Date, nullable=True)
+
     data_termino = Column(Date, nullable=True, index=True)
+
+    periodo = Column(String(100), nullable=True)
+
+    ano_planejamento = Column(Integer, nullable=True, index=True)
+
+    # =====================================
+    # DADOS DA FORMAÇÃO
+    # =====================================
+
     carga_horaria = Column(Integer, nullable=True)
+
     modalidade = Column(tipo_modalidade, nullable=True)
+
     eixo = Column(tipo_eixo, nullable=True)
+
+    publico_alvo = Column(String(300), nullable=True)
+
+    investimento = Column(Numeric(12, 2), nullable=True)
+
+    # =====================================
+    # METAS
+    # =====================================
+
+    meta_participantes = Column(Integer, default=0)
+
+    meta_certificacao = Column(Integer, default=75)
+
+    meta_carga_horaria = Column(Integer, default=0)
+
+    obrigatoria = Column(Boolean, default=False)
+
+    # =====================================
+    # STATUS OPERACIONAL
+    # =====================================
+
+    status = Column(String(30), default="Planejada")
+
+    # Planejada
+    # Em andamento
+    # Finalizada
+    # Cancelada
+    # Em construção
+
+    # =====================================
+    # PLANO ANUAL
+    # =====================================
+
+    plano_id = Column(Integer, ForeignKey("plano_anual.id"), nullable=True)
+
+    plano = relationship("PlanoAnual", back_populates="formacoes")
+
+    # =====================================
+    # SISTEMA
+    # =====================================
+
     criado_em = Column(DateTime, default=datetime.utcnow)
+
     ativo = Column(Boolean, default=True)
-    
-    # Relationships
+
+    # =====================================
+    # RELACIONAMENTOS
+    # =====================================
+
     participacoes = relationship("Participacao", back_populates="formacao")
-    
+
+    # =====================================
+    # CONSTRAINTS
+    # =====================================
+
     __table_args__ = (
-        UniqueConstraint('descricao', 'data_termino', name='uq_formacao'),
+        UniqueConstraint(
+            'descricao',
+            'data_termino',
+            name='uq_formacao'
+        ),
     )
-    
+
     def __repr__(self):
+
         return f"<Formacao {self.id}: {self.descricao}>"
 
 

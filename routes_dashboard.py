@@ -99,20 +99,21 @@ def dashboard(
 
 
         # =====================================
-        # TOTAL PARTICIPAÇÕES
+        # PARTICIPAÇÕES
         # =====================================
 
-        total = base.count()
+        participacoes = base.all()
+
+        total = len(participacoes)
 
 
         # =====================================
         # CERTIFICADOS
-        # >= 75%
         # =====================================
 
         certificados = 0
 
-        participacoes = base.all()
+        carga_realizada_total = 0
 
         for p, f, l in participacoes:
 
@@ -122,6 +123,10 @@ def dashboard(
 
             carga_realizada = (
                 p.aproveitamento or 0
+            )
+
+            carga_realizada_total += (
+                carga_realizada or 0
             )
 
             percentual = 0
@@ -145,7 +150,9 @@ def dashboard(
         # EVASÃO
         # =====================================
 
-        evasao = total - certificados
+        evasao = (
+            total - certificados
+        )
 
 
         # =====================================
@@ -165,25 +172,13 @@ def dashboard(
 
 
         # =====================================
-        # CARGA HORÁRIA
-        # =====================================
-
-        carga_realizada = 0
-
-        for p, f, l in participacoes:
-
-            carga_realizada += (
-                p.aproveitamento or 0
-            )
-
-
-        # =====================================
         # MÉDIA POR SERVIDOR
         # =====================================
 
         servidores_unicos = len(
 
             set(
+
                 [
                     p.matricula
                     for p, f, l
@@ -197,10 +192,8 @@ def dashboard(
         if servidores_unicos > 0:
 
             media_por_servidor = round(
-
                 total /
                 servidores_unicos,
-
                 2
             )
 
@@ -321,6 +314,84 @@ def dashboard(
 
 
         # =====================================
+        # PERÍODO X EIXO
+        # =====================================
+
+        periodo_eixo_data = (
+
+            base.with_entities(
+
+                func.to_char(
+                    Formacao.data_termino,
+                    'YYYY-MM'
+                ),
+
+                Formacao.eixo,
+
+                func.count()
+
+            )
+
+            .group_by(
+
+                func.to_char(
+                    Formacao.data_termino,
+                    'YYYY-MM'
+                ),
+
+                Formacao.eixo
+            )
+
+            .order_by(
+
+                func.to_char(
+                    Formacao.data_termino,
+                    'YYYY-MM'
+                )
+            )
+
+            .all()
+        )
+
+
+        # =====================================
+        # ANUAL
+        # =====================================
+
+        anual_data = (
+
+            base.with_entities(
+
+                func.extract(
+                    'year',
+                    Formacao.data_termino
+                ),
+
+                func.count()
+
+            )
+
+            .group_by(
+
+                func.extract(
+                    'year',
+                    Formacao.data_termino
+                )
+            )
+
+            .order_by(
+
+                func.extract(
+                    'year',
+                    Formacao.data_termino
+                )
+            )
+
+            .all()
+        )
+
+
+        # =====================================
         # RESPONSE
         # =====================================
 
@@ -345,7 +416,7 @@ def dashboard(
                     taxa_evasao,
 
                 "carga_realizada":
-                    carga_realizada,
+                    carga_realizada_total,
 
                 "media_por_servidor":
                     media_por_servidor
@@ -353,7 +424,7 @@ def dashboard(
 
 
             # =================================
-            # LOTAÇÕES
+            # LOTAÇÃO
             # =================================
 
             "lotacao": [
@@ -409,9 +480,39 @@ def dashboard(
                 }
 
                 for e in eixo_data
+            ],
+
+
+            # =================================
+            # PERÍODO X EIXO
+            # =================================
+
+            "periodo_eixo": [
+
+                {
+                    "mes": p[0],
+                    "eixo": p[1],
+                    "qtd": p[2]
+                }
+
+                for p in periodo_eixo_data
+            ],
+
+
+            # =================================
+            # ANUAL
+            # =================================
+
+            "anual": [
+
+                {
+                    "ano": int(a[0]),
+                    "qtd": a[1]
+                }
+
+                for a in anual_data
             ]
         }
-
 
     except Exception as e:
 
@@ -422,7 +523,6 @@ def dashboard(
         return {
             "erro": str(e)
         }
-
 
     finally:
 

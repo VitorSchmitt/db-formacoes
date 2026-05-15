@@ -104,11 +104,8 @@ class Formacao(Base):
     # =====================================
 
     data_inicio = Column(Date, nullable=True)
-
     data_termino = Column(Date, nullable=True, index=True)
-
     periodo = Column(String(100), nullable=True)
-
     ano_planejamento = Column(Integer, nullable=True, index=True)
 
     # =====================================
@@ -116,26 +113,16 @@ class Formacao(Base):
     # =====================================
 
     carga_horaria = Column(Integer, nullable=True)
-
     modalidade = Column(tipo_modalidade, nullable=True)
-
     eixo = Column(tipo_eixo, nullable=True)
-
     publico_alvo = Column(String(300), nullable=True)
-
     investimento = Column(Numeric(12, 2), nullable=True)
 
     # =====================================
     # METAS
     # =====================================
 
-    meta_participantes = Column(Integer, default=0)
-
-    meta_certificacao = Column(Integer, default=75)
-
-    meta_carga_horaria = Column(Integer, default=0)
-
-    obrigatoria = Column(Boolean, default=False)
+    meta_participantes = Column(Integer, default=0)    
 
     # =====================================
     # STATUS OPERACIONAL
@@ -154,7 +141,6 @@ class Formacao(Base):
     # =====================================
 
     plano_id = Column(Integer, ForeignKey("plano_anual.id"), nullable=True)
-
     plano = relationship("PlanoAnual", back_populates="formacoes")
 
     # =====================================
@@ -162,7 +148,6 @@ class Formacao(Base):
     # =====================================
 
     criado_em = Column(DateTime, default=datetime.utcnow)
-
     ativo = Column(Boolean, default=True)
 
     # =====================================

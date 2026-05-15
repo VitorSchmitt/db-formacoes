@@ -175,7 +175,7 @@ class Formacao(Base):
 
         UniqueConstraint(
             "descricao",
-            "ano_planejamento",
+            "data_termino",
             name="uq_formacao_ano"
         ),
 

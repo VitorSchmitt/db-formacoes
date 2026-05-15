@@ -12,40 +12,19 @@
     <div class="row mb-3">
 
         <div class="col-md-4">
-            <input
-                type="text"
-                id="descricao"
-                class="form-control"
-                placeholder="Descrição"
-                required
-            >
+            <input type="text" id="descricao" class="form-control" placeholder="Descrição" required>
         </div>
 
         <div class="col-md-2">
-            <input
-                type="date"
-                id="data_inicio"
-                class="form-control"
-            >
+            <input type="date" id="data_inicio" class="form-control">
         </div>
 
         <div class="col-md-2">
-            <input
-                type="date"
-                id="data_termino"
-                class="form-control"
-                required
-            >
+            <input type="date" id="data_termino" class="form-control" required>
         </div>
 
         <div class="col-md-2">
-            <input
-                type="number"
-                id="carga"
-                class="form-control"
-                placeholder="Carga Horária"
-                min="1"
-            >
+            <input type="number" id="carga" class="form-control" placeholder="Carga Horária" min="1">
         </div>
 
     </div>
@@ -56,29 +35,19 @@
     <div class="row mb-3">
 
         <div class="col-md-3">
-            <select
-                id="modalidade"
-                class="form-select"
-                required
-            ></select>
+            <select id="modalidade" class="form-select" required></select>
         </div>
 
         <div class="col-md-3">
-            <input
-                type="text"
-                id="periodo"
-                class="form-control"
-                placeholder="Período"
-            >
+            <input type="text" id="periodo" class="form-control" placeholder="Período">
         </div>
 
         <div class="col-md-3">
-            <input
-                type="text"
-                id="publico_alvo"
-                class="form-control"
-                placeholder="Público-Alvo"
-            >
+            <input type="text" id="publico_alvo" class="form-control" placeholder="Público-Alvo">
+        </div>
+
+        <div class="col-md-3">
+            <select id="plano_anual_id" class="form-select"></select>
         </div>
 
     </div>
@@ -89,22 +58,11 @@
     <div class="row mb-3">
 
         <div class="col-md-3">
-            <input
-                type="number"
-                id="meta_participantes"
-                class="form-control"
-                placeholder="Meta Participantes"
-            >
+            <input type="number" id="meta_participantes" class="form-control" placeholder="Meta Participantes">
         </div>
 
         <div class="col-md-3">
-            <input
-                type="number"
-                step="0.01"
-                id="investimento"
-                class="form-control"
-                placeholder="Investimento"
-            >
+            <input type="number" step="0.01" id="investimento" class="form-control" placeholder="Investimento">
         </div>
 
     </div>
@@ -115,10 +73,7 @@
     <div class="row mb-3">
 
         <div class="col-md-4">
-            <select
-                id="status"
-                class="form-select"
-            >
+            <select id="status" class="form-select">
                 <option value="Planejada">Planejada</option>
                 <option value="Em andamento">Em andamento</option>
                 <option value="Finalizada">Finalizada</option>
@@ -129,10 +84,7 @@
 
     </div>
 
-    <button class="btn btn-primary">
-        Salvar
-    </button>
-
+    <button class="btn btn-primary">Salvar</button>
 </form>
 
 <div id="msg" class="mt-2"></div>
@@ -145,21 +97,11 @@
 <div class="row mb-3">
 
     <div class="col-md-6">
-        <input
-            type="text"
-            id="busca"
-            class="form-control"
-            placeholder="Buscar..."
-            onkeyup="resetarPagina()"
-        >
+        <input type="text" id="busca" class="form-control" placeholder="Buscar..." onkeyup="resetarPagina()">
     </div>
 
     <div class="col-md-2">
-        <select
-            id="limite"
-            class="form-select"
-            onchange="resetarPagina()"
-        >
+        <select id="limite" class="form-select" onchange="resetarPagina()">
             <option value="10">10</option>
             <option value="20" selected>20</option>
             <option value="50">50</option>
@@ -172,22 +114,16 @@
 
 <div class="d-flex justify-content-between mt-3">
 
-    <button class="btn btn-secondary" onclick="anterior()">
-        ⬅ Anterior
-    </button>
+    <button class="btn btn-secondary" onclick="anterior()">⬅ Anterior</button>
 
     <span id="pagina_info"></span>
 
-    <button class="btn btn-secondary" onclick="proxima()">
-        Próximo ➡
-    </button>
+    <button class="btn btn-secondary" onclick="proxima()">Próximo ➡</button>
 
 </div>
 
 <style>
-.table {
-    font-size: 0.82rem;
-}
+.table { font-size: 0.82rem; }
 </style>
 
 <script>
@@ -203,17 +139,13 @@ let totalPaginas = 1;
 async function carregarEnums() {
 
     try {
-
         let res = await fetch("/api/enums");
         let data = await res.json();
 
         let m = document.getElementById("modalidade");
+        if (m && data.modalidade) {
 
-        if (!m) return;
-
-        m.innerHTML = `<option value="">Modalidade</option>`;
-
-        if (Array.isArray(data.modalidade)) {
+            m.innerHTML = `<option value="">Modalidade</option>`;
 
             data.modalidade.forEach(x =>
                 m.add(new Option(x, x))
@@ -226,19 +158,48 @@ async function carregarEnums() {
 }
 
 // ====================================
+// PLANOS ANUAIS
+// ====================================
+async function carregarPlanos() {
+
+    try {
+
+        let res = await fetch("/api/planos-anual");
+        let data = await res.json();
+
+        let p = document.getElementById("plano_anual_id");
+
+        if (!p) return;
+
+        p.innerHTML = `<option value="">Plano Anual</option>`;
+
+        data.forEach(x => {
+
+            p.add(new Option(
+                `${x.ano} - ${x.eixo}`,
+                x.id
+            ));
+        });
+
+    } catch (err) {
+        console.error("Erro planos:", err);
+    }
+}
+
+// ====================================
 // TOGGLE
 // ====================================
 window.toggleFormacao = async function(id) {
 
     try {
 
-        await fetch(`/api/formacoes/toggle/${id}`, {
+        let res = await fetch(`/api/formacoes/toggle/${id}`, {
             method: "PATCH"
         });
 
-        mostrarMsg({
-            message: "Status alterado com sucesso"
-        });
+        await res.json();
+
+        mostrarMsg({ message: "Status alterado com sucesso" });
 
         carregarTabela();
 
@@ -293,18 +254,10 @@ async function carregarTabela() {
                 <td>${f.status || ""}</td>
                 <td>${ativo}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning"
-                        onclick='editar(${JSON.stringify(f)})'>
-                        ✏️
-                    </button>
-
-                    <button class="btn btn-sm ${btnClasse}"
-                        onclick="toggleFormacao(${f.id})">
-                        ${btnTexto}
-                    </button>
+                    <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(f)})'>✏️</button>
+                    <button class="btn btn-sm ${btnClasse}" onclick="toggleFormacao(${f.id})">${btnTexto}</button>
                 </td>
-            </tr>
-            `;
+            </tr>`;
         });
 
         html += `</tbody></table>`;
@@ -344,10 +297,94 @@ window.resetarPagina = function() {
 }
 
 // ====================================
-// INIT
+// SALVAR
 // ====================================
+window.salvar = async function(event) {
+
+    event.preventDefault();
+
+    let dados = {
+        descricao: document.getElementById("descricao").value.trim(),
+        data_inicio: document.getElementById("data_inicio").value || null,
+        data_termino: document.getElementById("data_termino").value || null,
+        carga_horaria: parseInt(document.getElementById("carga").value) || 0,
+        modalidade: document.getElementById("modalidade").value,
+        periodo: document.getElementById("periodo").value,
+        publico_alvo: document.getElementById("publico_alvo").value,
+        investimento: parseFloat(document.getElementById("investimento").value) || 0,
+        meta_participantes: parseInt(document.getElementById("meta_participantes").value) || 0,
+        status: document.getElementById("status").value,
+        plano_anual_id: document.getElementById("plano_anual_id").value || null
+    };
+
+    let url = "/api/formacao";
+    let method = "POST";
+
+    if (editandoId) {
+        url = `/api/formacao/${editandoId}`;
+        method = "PUT";
+    }
+
+    let res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+    });
+
+    let r = await res.json();
+
+    mostrarMsg(r);
+
+    if (r.ok) {
+        limpar();
+        carregarTabela();
+    }
+}
+
+// ====================================
+// EDITAR
+// ====================================
+window.editar = function(f) {
+
+    editandoId = f.id;
+
+    document.getElementById("descricao").value = f.descricao || "";
+    document.getElementById("data_inicio").value = f.data_inicio || "";
+    document.getElementById("data_termino").value = f.data_termino || "";
+    document.getElementById("carga").value = f.carga_horaria || "";
+    document.getElementById("modalidade").value = f.modalidade || "";
+    document.getElementById("periodo").value = f.periodo || "";
+    document.getElementById("publico_alvo").value = f.publico_alvo || "";
+    document.getElementById("investimento").value = f.investimento || "";
+    document.getElementById("meta_participantes").value = f.meta_participantes || "";
+    document.getElementById("status").value = f.status || "Planejada";
+
+    document.querySelector(".btn-primary").innerText = "Atualizar";
+}
+
+// ====================================
+// UI
+// ====================================
+function mostrarMsg(r) {
+
+    let msg = document.getElementById("msg");
+
+    msg.innerHTML = r.erro
+        ? `<div class="alert alert-danger">${r.erro}</div>`
+        : `<div class="alert alert-success">${r.message || "OK"}</div>`;
+
+    setTimeout(() => msg.innerHTML = "", 2500);
+}
+
+function limpar() {
+    editandoId = null;
+    document.querySelector("form").reset();
+    document.querySelector(".btn-primary").innerText = "Salvar";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     carregarEnums();
+    carregarPlanos();
     carregarTabela();
 });
 

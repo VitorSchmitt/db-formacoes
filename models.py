@@ -32,6 +32,20 @@ tipo_eixo = ENUM(
     name="tipo_eixo",
     create_type=False  # ⚠️ Importante: já existe no banco
 )
+tipo_status_formacao = Enum(
+    "Planejada",
+    "Em andamento",
+    "Finalizada",
+    "Cancelada",
+    "Em construção",
+    name="tipo_status_formacao"
+)
+
+status = Column(
+    tipo_status_formacao,
+    nullable=False,
+    default="Planejada"
+)
 
 # ===============================
 # MODELS
@@ -77,17 +91,17 @@ class Servidor(Base):
     def __repr__(self):
         return f"<Servidor {self.matricula}: {self.nome}>"
 
+tipo_status_formacao = Enum(
+    "Planejada",
+    "Em andamento",
+    "Finalizada",
+    "Cancelada",
+    "Em construção",
+    name="tipo_status_formacao"
+)
+
 
 class Formacao(Base):
-    """
-    Modelo de Formação (Curso/Treinamento)
-
-    Representa:
-    - planejamento institucional
-    - cronograma
-    - execução real
-    - indicadores
-    """
 
     __tablename__ = "formacao"
 
@@ -97,15 +111,18 @@ class Formacao(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    descricao = Column(String(500), nullable=False, index=True)
+    descricao = Column(String(255), nullable=False, index=True)
 
     # =====================================
     # DATAS
     # =====================================
 
     data_inicio = Column(Date, nullable=True)
+
     data_termino = Column(Date, nullable=True, index=True)
+
     periodo = Column(String(100), nullable=True)
+
     ano_planejamento = Column(Integer, nullable=True, index=True)
 
     # =====================================
@@ -113,64 +130,80 @@ class Formacao(Base):
     # =====================================
 
     carga_horaria = Column(Integer, nullable=True)
+
     modalidade = Column(tipo_modalidade, nullable=True)
+
     eixo = Column(tipo_eixo, nullable=True)
+
     publico_alvo = Column(String(300), nullable=True)
+
     investimento = Column(Numeric(12, 2), nullable=True)
 
     # =====================================
     # METAS
     # =====================================
 
-    meta_participantes = Column(Integer, default=0)    
+    meta_participantes = Column(Integer, nullable=False, default=0)
 
     # =====================================
     # STATUS OPERACIONAL
     # =====================================
 
-    status = Column(String(30), default="Planejada")
-
-    # Planejada
-    # Em andamento
-    # Finalizada
-    # Cancelada
-    # Em construção
+    status = Column(tipo_status_formacao, nullable=False, default="Planejada", index=True)
 
     # =====================================
     # PLANO ANUAL
     # =====================================
 
-    plano_id = Column(Integer, ForeignKey("plano_anual.id"), nullable=True)
+    plano_id = Column(Integer, ForeignKey("plano_anual.id"), nullable=True, index=True)
+
     plano = relationship("PlanoAnual", back_populates="formacoes")
 
     # =====================================
     # SISTEMA
     # =====================================
 
-    criado_em = Column(DateTime, default=datetime.utcnow)
-    ativo = Column(Boolean, default=True)
+    criado_em = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    ativo = Column(Boolean, nullable=False, default=True, index=True)
 
     # =====================================
     # RELACIONAMENTOS
     # =====================================
 
-    participacoes = relationship("Participacao", back_populates="formacao")
+    participacoes = relationship(
+        "Participacao",
+        back_populates="formacao"
+    )
 
     # =====================================
     # CONSTRAINTS
     # =====================================
 
     __table_args__ = (
+
         UniqueConstraint(
-            'descricao',
-            'data_termino',
-            name='uq_formacao'
+            "descricao",
+            "ano_planejamento",
+            name="uq_formacao_ano"
+        ),
+
+        CheckConstraint(
+            """
+            data_termino IS NULL
+            OR data_inicio IS NULL
+            OR data_termino >= data_inicio
+            """,
+            name="ck_formacao_datas_validas"
         ),
     )
 
-    def __repr__(self):
+    # =====================================
+    # REPRESENTAÇÃO
+    # =====================================
 
-        return f"<Formacao {self.id}: {self.descricao}>"
+    def __repr__(self):
+        return f"<Formacao(id={self.id}, descricao='{self.descricao}', status='{self.status}')>"
 
 
 class Lotacao(Base):

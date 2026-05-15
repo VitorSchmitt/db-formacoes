@@ -114,24 +114,7 @@
             >
         </div>
 
-        <div class="col-md-3">
-            <input
-                type="number"
-                id="meta_certificacao"
-                class="form-control"
-                placeholder="Meta Certificação %"
-                value="75"
-            >
-        </div>
-
-        <div class="col-md-3">
-            <input
-                type="number"
-                id="meta_carga_horaria"
-                class="form-control"
-                placeholder="Meta CH"
-            >
-        </div>
+        
 
         <div class="col-md-3">
             <input
@@ -162,28 +145,6 @@
                 <option value="Em construção">Em construção</option>
             </select>
         </div>
-
-        <div class="col-md-4 d-flex align-items-center">
-
-            <div class="form-check mt-2">
-
-                <input
-                    class="form-check-input"
-                    type="checkbox"
-                    id="obrigatoria"
-                >
-
-                <label
-                    class="form-check-label"
-                    for="obrigatoria"
-                >
-                    Formação obrigatória
-                </label>
-
-            </div>
-
-        </div>
-
     </div>
 
     <button class="btn btn-primary">
@@ -538,26 +499,9 @@ window.salvar = async function(event) {
                 document.getElementById("meta_participantes")
                 .value
             ) || 0,
-
-        meta_certificacao:
-            parseInt(
-                document.getElementById("meta_certificacao")
-                .value
-            ) || 75,
-
-        meta_carga_horaria:
-            parseInt(
-                document.getElementById("meta_carga_horaria")
-                .value
-            ) || 0,
-
         status:
             document.getElementById("status")
-            .value,
-
-        obrigatoria:
-            document.getElementById("obrigatoria")
-            .checked
+            .value,        
     };
 
     if (!dados.descricao) {
@@ -644,19 +588,10 @@ window.editar = function(f) {
         .value = f.ano_planejamento || "";
 
     document.getElementById("meta_participantes")
-        .value = f.meta_participantes || "";
-
-    document.getElementById("meta_certificacao")
-        .value = f.meta_certificacao || 75;
-
-    document.getElementById("meta_carga_horaria")
-        .value = f.meta_carga_horaria || "";
+        .value = f.meta_participantes || "";    
 
     document.getElementById("status")
         .value = f.status || "Planejada";
-
-    document.getElementById("obrigatoria")
-        .checked = f.obrigatoria || false;
 
     document.querySelector(".btn-primary")
         .innerText = "Atualizar";

@@ -210,16 +210,32 @@ let totalPaginas = 1;
 // ====================================
 // ENUMS
 // ====================================
-if (!data.modalidade)
-    return;
+// ====================================
+// ENUMS
+// ====================================
+async function carregarEnums() {
 
-let m = document.getElementById("modalidade");
+    try {
 
-m.innerHTML = `<option value="">Modalidade</option>`;
+        let res = await fetch("/api/enums");
+        let data = await res.json();
 
-data.modalidade.forEach(x =>
-    m.add(new Option(x, x))
-);
+        if (!data.modalidade)
+            return;
+
+        let m = document.getElementById("modalidade");
+
+        m.innerHTML = `<option value="">Modalidade</option>`;
+
+        data.modalidade.forEach(x =>
+            m.add(new Option(x, x))
+        );
+
+    } catch (err) {
+
+        console.error(err);
+    }
+}
 
 // ====================================
 // TOGGLE

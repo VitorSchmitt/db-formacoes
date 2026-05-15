@@ -50,7 +50,7 @@ def dashboard(
             )
             .join(
                 PlanoAnual,
-                Formacao.plano_anual_id == PlanoAnual.id
+                Formacao.plano_id == PlanoAnual.id
             )
         )
 

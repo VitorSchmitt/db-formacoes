@@ -160,18 +160,35 @@ function preencherFiltros(data) {
     curso.innerHTML = `<option value="">Todos</option>`;
     eixo.innerHTML = `<option value="">Todos</option>`;
 
-    data.lotacao.forEach(x => {
-        lotacao.add(new Option(x.lotacao, x.lotacao));
-    });
+    (data.lotacao || []).forEach(x => {
 
-    data.curso.forEach(x => {
-        curso.add(new Option(x.formacao, x.formacao));
-    });
+    let opt = new Option(
+        x.lotacao,
+        x.lotacao
+    );
 
-    // 🔥 FIX PRINCIPAL AQUI
-    data.plano_eixo.forEach(x => {
-        eixo.add(new Option(x.eixo, x.eixo));
-    });
+    document.getElementById("filtroLotacao").add(opt);
+});
+
+    (data.curso || []).forEach(x => {
+
+    let opt = new Option(
+        x.formacao,
+        x.formacao
+    );
+
+    document.getElementById("filtroCurso").add(opt);
+});
+
+    /(data.eixo || []).forEach(x => {
+
+    let opt = new Option(
+        x.eixo,
+        x.eixo
+    );
+
+    document.getElementById("filtroEixo").add(opt);
+});
 }
 
 function montarGraficos(data) {

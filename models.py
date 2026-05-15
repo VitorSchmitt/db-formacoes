@@ -22,17 +22,16 @@ from database import Base
 tipo_modalidade = ENUM(
     "presencial", "online", "hibrido",
     name="tipo_modalidade",
-    create_type=False  # ⚠️ Importante: já existe no banco
+    create_type=False  
 )
-
 tipo_eixo = ENUM(
     "Ambientação Institucional/Formação Inicial",
     "Gestão do Trabalho/Saúde Mental e Bem Estar",
     "Qualificação da Prática Socioeducativa Temas Transversais",
     name="tipo_eixo",
-    create_type=False  # ⚠️ Importante: já existe no banco
+    create_type=False  
 )
-tipo_status_formacao = Enum(
+tipo_status_formacao = ENUM(
     "Planejada",
     "Em andamento",
     "Finalizada",
@@ -90,16 +89,6 @@ class Servidor(Base):
     
     def __repr__(self):
         return f"<Servidor {self.matricula}: {self.nome}>"
-
-tipo_status_formacao = Enum(
-    "Planejada",
-    "Em andamento",
-    "Finalizada",
-    "Cancelada",
-    "Em construção",
-    name="tipo_status_formacao"
-)
-
 
 class Formacao(Base):
 

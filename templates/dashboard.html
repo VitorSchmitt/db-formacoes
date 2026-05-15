@@ -2,9 +2,7 @@
 
 {% block content %}
 
-<h2 class="mb-4">
-    📊 Dashboard de Formações
-</h2>
+<h2 class="mb-4">📊 Dashboard de Formações</h2>
 
 <div id="erro" class="alert alert-danger" style="display:none"></div>
 
@@ -125,9 +123,7 @@ function montarURL() {
 }
 
 async function carregar() {
-
     try {
-
         let res = await fetch(montarURL());
         let data = await res.json();
 
@@ -142,12 +138,12 @@ async function carregar() {
 
 function atualizarCards(data) {
 
-    document.getElementById("total").innerText = data.cards.participacoes || 0;
-    document.getElementById("certificados").innerText = data.cards.certificados || 0;
-    document.getElementById("evasao").innerText = data.cards.evasao || 0;
-    document.getElementById("taxaEvasao").innerText = (data.cards.taxa_evasao || 0) + "%";
-    document.getElementById("cargaRealizada").innerText = (data.cards.carga_realizada || 0) + "h";
-    document.getElementById("mediaServidor").innerText = data.cards.media_por_servidor || 0;
+    document.getElementById("total").innerText = data.cards?.participacoes || 0;
+    document.getElementById("certificados").innerText = data.cards?.certificados || 0;
+    document.getElementById("evasao").innerText = data.cards?.evasao || 0;
+    document.getElementById("taxaEvasao").innerText = (data.cards?.taxa_evasao || 0) + "%";
+    document.getElementById("cargaRealizada").innerText = (data.cards?.carga_realizada || 0) + "h";
+    document.getElementById("mediaServidor").innerText = data.cards?.media_por_servidor || 0;
 }
 
 function preencherFiltros(data) {
@@ -161,61 +157,60 @@ function preencherFiltros(data) {
     eixo.innerHTML = `<option value="">Todos</option>`;
 
     (data.lotacao || []).forEach(x => {
-
-    let opt = new Option(
-        x.lotacao,
-        x.lotacao
-    );
-
-    document.getElementById("filtroLotacao").add(opt);
-});
+        lotacao.add(new Option(x.lotacao, x.lotacao));
+    });
 
     (data.curso || []).forEach(x => {
+        curso.add(new Option(x.formacao, x.formacao));
+    });
 
-    let opt = new Option(
-        x.formacao,
-        x.formacao
-    );
-
-    document.getElementById("filtroCurso").add(opt);
-});
-
-    /(data.eixo || []).forEach(x => {
-
-    let opt = new Option(
-        x.eixo,
-        x.eixo
-    );
-
-    document.getElementById("filtroEixo").add(opt);
-});
+    (data.eixo || []).forEach(x => {
+        eixo.add(new Option(x.eixo, x.eixo));
+    });
 }
 
 function montarGraficos(data) {
 
-    Plotly.react("g1", [{ x: data.lotacao.map(x => x.lotacao), y: data.lotacao.map(x => x.qtd), type: "bar" }], { title: "Top Lotações" });
+    Plotly.react("g1", [{
+        x: (data.lotacao || []).map(x => x.lotacao),
+        y: (data.lotacao || []).map(x => x.qtd),
+        type: "bar"
+    }], { title: "Top Lotações" });
 
-    Plotly.react("g2", [{ x: data.curso.map(x => x.formacao), y: data.curso.map(x => x.qtd), type: "bar" }], { title: "Top Cursos" });
+    Plotly.react("g2", [{
+        x: (data.curso || []).map(x => x.formacao),
+        y: (data.curso || []).map(x => x.qtd),
+        type: "bar"
+    }], { title: "Top Cursos" });
 
-    Plotly.react("g3", [{ x: data.periodo.map(x => x.mes), y: data.periodo.map(x => x.qtd), type: "scatter", mode: "lines+markers" }], { title: "Participações por Mês" });
+    Plotly.react("g3", [{
+        x: (data.periodo || []).map(x => x.mes),
+        y: (data.periodo || []).map(x => x.qtd),
+        type: "scatter",
+        mode: "lines+markers"
+    }], { title: "Participações por Mês" });
 
     Plotly.react("g4", [{
         labels: ["Certificados", "Evasão"],
-        values: [data.cards.certificados, data.cards.evasao],
+        values: [
+            data.cards?.certificados || 0,
+            data.cards?.evasao || 0
+        ],
         type: "pie"
     }], { title: "Conclusão x Evasão" });
 
+    // ✔ FIX PRINCIPAL AQUI (sem plano_eixo)
     Plotly.react("g5", [{
-        x: data.plano_eixo.map(x => x.eixo),
-        y: data.plano_eixo.map(x => x.qtd),
+        x: (data.eixo || []).map(x => x.eixo),
+        y: (data.eixo || []).map(x => x.qtd),
         type: "bar"
     }], { title: "Participações por Eixo" });
 
-    let eixos = [...new Set(data.periodo_eixo.map(x => x.eixo))];
+    let eixos = [...new Set((data.periodo_eixo || []).map(x => x.eixo))];
 
     let traces = eixos.map(eixo => {
 
-        let dados = data.periodo_eixo.filter(x => x.eixo === eixo);
+        let dados = (data.periodo_eixo || []).filter(x => x.eixo === eixo);
 
         return {
             x: dados.map(x => x.mes),
@@ -225,11 +220,14 @@ function montarGraficos(data) {
         };
     });
 
-    Plotly.react("g6", traces, { barmode: "stack", title: "Participações por Mês e Eixo" });
+    Plotly.react("g6", traces, {
+        barmode: "stack",
+        title: "Participações por Mês e Eixo"
+    });
 
     Plotly.react("g7", [{
-        x: data.anual.map(x => x.ano),
-        y: data.anual.map(x => x.qtd),
+        x: (data.anual || []).map(x => x.ano),
+        y: (data.anual || []).map(x => x.qtd),
         type: "scatter",
         mode: "lines+markers"
     }], { title: "Comparativo Anual" });

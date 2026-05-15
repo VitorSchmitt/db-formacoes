@@ -6,13 +6,9 @@
     📊 Dashboard de Formações
 </h2>
 
-<div id="erro"
-     class="alert alert-danger"
-     style="display:none">
-</div>
+<div id="erro" class="alert alert-danger" style="display:none"></div>
 
-<div id="loading"
-     style="display:none;font-weight:bold;">
+<div id="loading" style="display:none;font-weight:bold;">
     Carregando...
 </div>
 
@@ -23,104 +19,45 @@
 <div class="row mb-4">
 
     <div class="col-md-2">
-
-        <label class="form-label">
-            Mês Inicial
-        </label>
-
-        <input type="month"
-               id="mes_inicio"
-               class="form-control">
-
+        <label class="form-label">Mês Inicial</label>
+        <input type="month" id="mes_inicio" class="form-control">
     </div>
 
     <div class="col-md-2">
-
-        <label class="form-label">
-            Mês Final
-        </label>
-
-        <input type="month"
-               id="mes_fim"
-               class="form-control">
-
+        <label class="form-label">Mês Final</label>
+        <input type="month" id="mes_fim" class="form-control">
     </div>
 
     <div class="col-md-2">
-
-        <label class="form-label">
-            Lotação
-        </label>
-
-        <select id="filtroLotacao"
-                class="form-control">
-
-            <option value="">
-                Todas
-            </option>
-
+        <label class="form-label">Lotação</label>
+        <select id="filtroLotacao" class="form-control">
+            <option value="">Todas</option>
         </select>
-
     </div>
 
     <div class="col-md-2">
-
-        <label class="form-label">
-            Curso
-        </label>
-
-        <select id="filtroCurso"
-                class="form-control">
-
-            <option value="">
-                Todos
-            </option>
-
+        <label class="form-label">Curso</label>
+        <select id="filtroCurso" class="form-control">
+            <option value="">Todos</option>
         </select>
-
     </div>
 
     <div class="col-md-2">
-
-        <label class="form-label">
-            Eixo
-        </label>
-
-        <select id="filtroEixo"
-                class="form-control">
-
-            <option value="">
-                Todos
-            </option>
-
+        <label class="form-label">Eixo</label>
+        <select id="filtroEixo" class="form-control">
+            <option value="">Todos</option>
         </select>
-
     </div>
 
     <div class="col-md-1 d-flex align-items-end">
-
-        <button onclick="carregar()"
-                class="btn btn-dark w-100">
-
-            OK
-
-        </button>
-
+        <button onclick="carregar()" class="btn btn-dark w-100">OK</button>
     </div>
 
     <div class="col-md-1 d-flex align-items-end">
-
-        <button onclick="limparFiltros()"
-                class="btn btn-secondary w-100">
-
-            ⟲
-
-        </button>
-
+        <button onclick="limparFiltros()" class="btn btn-secondary w-100">⟲</button>
     </div>
 
 </div>
-
 
 <!-- ===================================== -->
 <!-- CARDS -->
@@ -128,849 +65,162 @@
 
 <div class="row mb-4">
 
-    <div class="col-md-2 mb-3">
+    <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Participações</h6><h2 id="total">0</h2></div></div></div>
 
-        <div class="card shadow-sm text-center">
+    <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Certificados</h6><h2 id="certificados">0</h2></div></div></div>
 
-            <div class="card-body">
+    <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Evasão</h6><h2 id="evasao">0</h2></div></div></div>
 
-                <h6>
-                    Participações
-                </h6>
+    <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Taxa Evasão</h6><h2 id="taxaEvasao">0%</h2></div></div></div>
 
-                <h2 id="total">
-                    0
-                </h2>
+    <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Carga Horária</h6><h2 id="cargaRealizada">0h</h2></div></div></div>
 
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-2 mb-3">
-
-        <div class="card shadow-sm text-center">
-
-            <div class="card-body">
-
-                <h6>
-                    Certificados
-                </h6>
-
-                <h2 id="certificados">
-                    0
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-2 mb-3">
-
-        <div class="card shadow-sm text-center">
-
-            <div class="card-body">
-
-                <h6>
-                    Evasão
-                </h6>
-
-                <h2 id="evasao">
-                    0
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-2 mb-3">
-
-        <div class="card shadow-sm text-center">
-
-            <div class="card-body">
-
-                <h6>
-                    Taxa Evasão
-                </h6>
-
-                <h2 id="taxaEvasao">
-                    0%
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-2 mb-3">
-
-        <div class="card shadow-sm text-center">
-
-            <div class="card-body">
-
-                <h6>
-                    Carga Horária
-                </h6>
-
-                <h2 id="cargaRealizada">
-                    0h
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-2 mb-3">
-
-        <div class="card shadow-sm text-center">
-
-            <div class="card-body">
-
-                <h6>
-                    Média
-                </h6>
-
-                <h2 id="mediaServidor">
-                    0
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
+    <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Média</h6><h2 id="mediaServidor">0</h2></div></div></div>
 
 </div>
-
 
 <!-- ===================================== -->
 <!-- GRÁFICOS -->
 <!-- ===================================== -->
 
 <div class="row">
-
-    <div class="col-md-6 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g1"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-6 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g2"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g1"></div></div></div></div>
+    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g2"></div></div></div></div>
 </div>
-
 
 <div class="row">
-
-    <div class="col-md-12 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g3"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g3"></div></div></div></div>
 </div>
-
 
 <div class="row">
-
-    <div class="col-md-6 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g4"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="col-md-6 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g5"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g4"></div></div></div></div>
+    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g5"></div></div></div></div>
 </div>
-
 
 <div class="row">
-
-    <div class="col-md-12 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g6"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g6"></div></div></div></div>
 </div>
-
 
 <div class="row">
-
-    <div class="col-md-12 mb-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <div id="g7"></div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+    <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g7"></div></div></div></div>
 </div>
-
 
 <script>
-
 (() => {
 
-
-// =====================================
-// ESTADO GLOBAL
-// =====================================
-
 let filtros = {
-
     mes_inicio: "",
-
     mes_fim: "",
-
     lotacao: "",
-
     curso: "",
-
     eixo: ""
 };
 
-
-// =====================================
-// HELPERS
-// =====================================
-
-function mostrarErro(msg) {
-
-    let div = document.getElementById(
-        "erro"
-    );
-
-    div.innerText = msg;
-
-    div.style.display = "block";
-}
-
-
-function esconderErro() {
-
-    document.getElementById(
-        "erro"
-    ).style.display = "none";
-}
-
-
-function mostrarLoading() {
-
-    document.getElementById(
-        "loading"
-    ).style.display = "block";
-}
-
-
-function esconderLoading() {
-
-    document.getElementById(
-        "loading"
-    ).style.display = "none";
-}
-
-
-// =====================================
-// URL
-// =====================================
-
 function montarURL() {
-
-    return (
-
-        `/api/dashboard?` +
-
-        `mes_inicio=${encodeURIComponent(filtros.mes_inicio)}` +
-
-        `&mes_fim=${encodeURIComponent(filtros.mes_fim)}` +
-
-        `&lotacao=${encodeURIComponent(filtros.lotacao)}` +
-
-        `&curso=${encodeURIComponent(filtros.curso)}` +
-
-        `&eixo=${encodeURIComponent(filtros.eixo)}`
-    );
+    return `/api/dashboard?mes_inicio=${encodeURIComponent(filtros.mes_inicio)}`
+        + `&mes_fim=${encodeURIComponent(filtros.mes_fim)}`
+        + `&lotacao=${encodeURIComponent(filtros.lotacao)}`
+        + `&curso=${encodeURIComponent(filtros.curso)}`
+        + `&eixo=${encodeURIComponent(filtros.eixo)}`;
 }
-
-
-// =====================================
-// CARREGAR
-// =====================================
 
 async function carregar() {
 
     try {
 
-        mostrarLoading();
-
-        esconderErro();
-
-        let res = await api(
-            montarURL()
-        );
-
-        if (res.status === 401) {
-
-            localStorage.clear();
-
-            window.location.href = "/";
-
-            return;
-        }
-
+        let res = await fetch(montarURL());
         let data = await res.json();
 
-        esconderLoading();
-
-        if (data.erro) {
-
-            mostrarErro(
-                data.erro
-            );
-
-            return;
-        }
-
         atualizarCards(data);
-
         preencherFiltros(data);
-
         montarGraficos(data);
 
     } catch (err) {
-
-        esconderLoading();
-
         console.error(err);
-
-        mostrarErro(
-            "Erro ao carregar dashboard"
-        );
     }
 }
 
-
-// =====================================
-// CARDS
-// =====================================
-
 function atualizarCards(data) {
 
-    document.getElementById(
-        "total"
-    ).innerText =
-        data.cards.participacoes || 0;
-
-    document.getElementById(
-        "certificados"
-    ).innerText =
-        data.cards.certificados || 0;
-
-    document.getElementById(
-        "evasao"
-    ).innerText =
-        data.cards.evasao || 0;
-
-    document.getElementById(
-        "taxaEvasao"
-    ).innerText =
-        (data.cards.taxa_evasao || 0) + "%";
-
-    document.getElementById(
-        "cargaRealizada"
-    ).innerText =
-        (data.cards.carga_realizada || 0) + "h";
-
-    document.getElementById(
-        "mediaServidor"
-    ).innerText =
-        data.cards.media_por_servidor || 0;
+    document.getElementById("total").innerText = data.cards.participacoes || 0;
+    document.getElementById("certificados").innerText = data.cards.certificados || 0;
+    document.getElementById("evasao").innerText = data.cards.evasao || 0;
+    document.getElementById("taxaEvasao").innerText = (data.cards.taxa_evasao || 0) + "%";
+    document.getElementById("cargaRealizada").innerText = (data.cards.carga_realizada || 0) + "h";
+    document.getElementById("mediaServidor").innerText = data.cards.media_por_servidor || 0;
 }
-
-
-// =====================================
-// FILTROS
-// =====================================
 
 function preencherFiltros(data) {
 
-    let lotacao = document.getElementById(
-        "filtroLotacao"
-    );
+    let lotacao = document.getElementById("filtroLotacao");
+    let curso = document.getElementById("filtroCurso");
+    let eixo = document.getElementById("filtroEixo");
 
-    let curso = document.getElementById(
-        "filtroCurso"
-    );
-
-    let eixo = document.getElementById(
-        "filtroEixo"
-    );
-
-    lotacao.innerHTML =
-        '<option value="">Todas</option>';
-
-    curso.innerHTML =
-        '<option value="">Todos</option>';
-
-    eixo.innerHTML =
-        '<option value="">Todos</option>';
-
-
-    // =================================
-    // LOTAÇÕES
-    // =================================
+    lotacao.innerHTML = `<option value="">Todas</option>`;
+    curso.innerHTML = `<option value="">Todos</option>`;
+    eixo.innerHTML = `<option value="">Todos</option>`;
 
     data.lotacao.forEach(x => {
-
-        let opt = new Option(
-            x.lotacao,
-            x.lotacao
-        );
-
-        lotacao.add(opt);
+        lotacao.add(new Option(x.lotacao, x.lotacao));
     });
-
-
-    // =================================
-    // CURSOS
-    // =================================
 
     data.curso.forEach(x => {
-
-        let opt = new Option(
-            x.formacao,
-            x.formacao
-        );
-
-        curso.add(opt);
+        curso.add(new Option(x.formacao, x.formacao));
     });
 
-
-    // =================================
-    // EIXOS
-    // =================================
-
-    data.eixo.forEach(x => {
-
-        let opt = new Option(
-            x.eixo,
-            x.eixo
-        );
-
-        eixo.add(opt);
+    // 🔥 FIX PRINCIPAL AQUI
+    data.plano_eixo.forEach(x => {
+        eixo.add(new Option(x.eixo, x.eixo));
     });
 }
 
-
-// =====================================
-// GRÁFICOS
-// =====================================
-
 function montarGraficos(data) {
 
-    // =================================
-    // LOTAÇÕES
-    // =================================
+    Plotly.react("g1", [{ x: data.lotacao.map(x => x.lotacao), y: data.lotacao.map(x => x.qtd), type: "bar" }], { title: "Top Lotações" });
 
-    Plotly.react(
+    Plotly.react("g2", [{ x: data.curso.map(x => x.formacao), y: data.curso.map(x => x.qtd), type: "bar" }], { title: "Top Cursos" });
 
-        "g1",
+    Plotly.react("g3", [{ x: data.periodo.map(x => x.mes), y: data.periodo.map(x => x.qtd), type: "scatter", mode: "lines+markers" }], { title: "Participações por Mês" });
 
-        [{
+    Plotly.react("g4", [{
+        labels: ["Certificados", "Evasão"],
+        values: [data.cards.certificados, data.cards.evasao],
+        type: "pie"
+    }], { title: "Conclusão x Evasão" });
 
-            x: data.lotacao.map(
-                x => x.lotacao
-            ),
+    Plotly.react("g5", [{
+        x: data.plano_eixo.map(x => x.eixo),
+        y: data.plano_eixo.map(x => x.qtd),
+        type: "bar"
+    }], { title: "Participações por Eixo" });
 
-            y: data.lotacao.map(
-                x => x.qtd
-            ),
-
-            type: "bar"
-        }],
-
-        {
-            title: "Top Lotações"
-        }
-    );
-
-
-    // =================================
-    // CURSOS
-    // =================================
-
-    Plotly.react(
-
-        "g2",
-
-        [{
-
-            x: data.curso.map(
-                x => x.formacao
-            ),
-
-            y: data.curso.map(
-                x => x.qtd
-            ),
-
-            type: "bar"
-        }],
-
-        {
-            title: "Top Cursos"
-        }
-    );
-
-
-    // =================================
-    // PERÍODO
-    // =================================
-
-    Plotly.react(
-
-        "g3",
-
-        [{
-
-            x: data.periodo.map(
-                x => x.mes
-            ),
-
-            y: data.periodo.map(
-                x => x.qtd
-            ),
-
-            type: "scatter",
-
-            mode: "lines+markers"
-        }],
-
-        {
-            title: "Participações por Mês"
-        }
-    );
-
-
-    // =================================
-    // CERTIFICAÇÃO
-    // =================================
-
-    Plotly.react(
-
-        "g4",
-
-        [{
-
-            labels: [
-                "Certificados",
-                "Evasão"
-            ],
-
-            values: [
-
-                data.cards.certificados,
-
-                data.cards.evasao
-            ],
-
-            type: "pie"
-        }],
-
-        {
-            title: "Conclusão x Evasão"
-        }
-    );
-
-
-    // =================================
-    // EIXOS
-    // =================================
-
-    Plotly.react(
-
-        "g5",
-
-        [{
-
-            x: data.eixo.map(
-                x => x.eixo
-            ),
-
-            y: data.eixo.map(
-                x => x.qtd
-            ),
-
-            type: "bar"
-        }],
-
-        {
-            title: "Participações por Eixo"
-        }
-    );
-
-
-    // =================================
-    // MÊS X EIXO
-    // =================================
-
-    let eixos = [
-
-        ...new Set(
-
-            data.periodo_eixo.map(
-                x => x.eixo
-            )
-        )
-    ];
+    let eixos = [...new Set(data.periodo_eixo.map(x => x.eixo))];
 
     let traces = eixos.map(eixo => {
 
-        let dados = data.periodo_eixo
-            .filter(
-                x => x.eixo === eixo
-            );
+        let dados = data.periodo_eixo.filter(x => x.eixo === eixo);
 
         return {
-
-            x: dados.map(
-                x => x.mes
-            ),
-
-            y: dados.map(
-                x => x.qtd
-            ),
-
+            x: dados.map(x => x.mes),
+            y: dados.map(x => x.qtd),
             name: eixo,
-
             type: "bar"
         };
     });
 
-    Plotly.react(
+    Plotly.react("g6", traces, { barmode: "stack", title: "Participações por Mês e Eixo" });
 
-        "g6",
-
-        traces,
-
-        {
-
-            barmode: "stack",
-
-            title:
-                "Participações por Mês e Eixo"
-        }
-    );
-
-
-    // =================================
-    // ANUAL
-    // =================================
-
-    Plotly.react(
-
-        "g7",
-
-        [{
-
-            x: data.anual.map(
-                x => x.ano
-            ),
-
-            y: data.anual.map(
-                x => x.qtd
-            ),
-
-            type: "scatter",
-
-            mode: "lines+markers"
-        }],
-
-        {
-            title: "Comparativo Anual"
-        }
-    );
+    Plotly.react("g7", [{
+        x: data.anual.map(x => x.ano),
+        y: data.anual.map(x => x.qtd),
+        type: "scatter",
+        mode: "lines+markers"
+    }], { title: "Comparativo Anual" });
 }
-
-
-// =====================================
-// EVENTOS
-// =====================================
-
-document.getElementById(
-    "mes_inicio"
-).onchange = e => {
-
-    filtros.mes_inicio =
-        e.target.value;
-};
-
-
-document.getElementById(
-    "mes_fim"
-).onchange = e => {
-
-    filtros.mes_fim =
-        e.target.value;
-};
-
-
-document.getElementById(
-    "filtroLotacao"
-).onchange = e => {
-
-    filtros.lotacao =
-        e.target.value;
-
-    carregar();
-};
-
-
-document.getElementById(
-    "filtroCurso"
-).onchange = e => {
-
-    filtros.curso =
-        e.target.value;
-
-    carregar();
-};
-
-
-document.getElementById(
-    "filtroEixo"
-).onchange = e => {
-
-    filtros.eixo =
-        e.target.value;
-
-    carregar();
-};
-
-
-// =====================================
-// LIMPAR FILTROS
-// =====================================
-
-window.limparFiltros = function() {
-
-    filtros = {
-
-        mes_inicio: "",
-
-        mes_fim: "",
-
-        lotacao: "",
-
-        curso: "",
-
-        eixo: ""
-    };
-
-    document.getElementById(
-        "mes_inicio"
-    ).value = "";
-
-    document.getElementById(
-        "mes_fim"
-    ).value = "";
-
-    document.getElementById(
-        "filtroLotacao"
-    ).value = "";
-
-    document.getElementById(
-        "filtroCurso"
-    ).value = "";
-
-    document.getElementById(
-        "filtroEixo"
-    ).value = "";
-
-    carregar();
-}
-
-
-// =====================================
-// INIT
-// =====================================
 
 window.carregar = carregar;
 
-document.addEventListener(
-    "DOMContentLoaded",
-    carregar
-);
+document.addEventListener("DOMContentLoaded", carregar);
 
 })();
 </script>

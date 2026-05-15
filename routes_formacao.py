@@ -88,10 +88,7 @@ def listar(
                     else None,
 
                 "periodo":
-                    f.periodo,
-
-                "ano_planejamento":
-                    f.ano_planejamento,
+                    f.periodo,               
 
                 # =====================
                 # FORMAÇÃO
@@ -102,12 +99,7 @@ def listar(
                 "modalidade":
                     str(f.modalidade)
                     if f.modalidade
-                    else None,
-
-                "eixo":
-                    str(f.eixo)
-                    if f.eixo
-                    else None,
+                    else None,                
 
                 "publico_alvo":
                     f.publico_alvo,
@@ -186,19 +178,13 @@ def criar(
                 dados.get("data_termino"),
 
             periodo=
-                dados.get("periodo"),
-
-            ano_planejamento=
-                dados.get("ano_planejamento"),
+                dados.get("periodo"),          
 
             carga_horaria=
                 dados.get("carga_horaria"),
 
             modalidade=
-                dados.get("modalidade"),
-
-            eixo=
-                dados.get("eixo"),
+                dados.get("modalidade"),           
 
             publico_alvo=
                 dados.get("publico_alvo"),
@@ -382,16 +368,7 @@ def enums():
             "online",
             "hibrido"
 
-        ],
-
-        "eixo": [
-
-            "Ambientação Institucional/Formação Inicial",
-
-            "Gestão do Trabalho/Saúde Mental e Bem Estar",
-
-            "Qualificação da Prática Socioeducativa Temas Transversais"
-        ],
+        ],       
 
         "status": [
 

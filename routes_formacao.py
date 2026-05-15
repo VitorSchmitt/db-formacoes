@@ -122,25 +122,14 @@ def listar(
                 # =====================
                 "meta_participantes":
                     f.meta_participantes,
-
-                "meta_certificacao":
-                    f.meta_certificacao,
-
-                "meta_carga_horaria":
-                    f.meta_carga_horaria,
-
-                "obrigatoria":
-                    f.obrigatoria,
-
+                
                 # =====================
                 # STATUS
                 # =====================
                 "status":
                     f.status,
-
                 "ativo":
                     f.ativo
-
             }
 
             for f in dados
@@ -218,16 +207,7 @@ def criar(
                 dados.get("investimento"),
 
             meta_participantes=
-                dados.get("meta_participantes", 0),
-
-            meta_certificacao=
-                dados.get("meta_certificacao", 75),
-
-            meta_carga_horaria=
-                dados.get("meta_carga_horaria", 0),
-
-            obrigatoria=
-                dados.get("obrigatoria", False),
+                dados.get("meta_participantes", 0),            
 
             status=
                 dados.get("status", "Planejada"),

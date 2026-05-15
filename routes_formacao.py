@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
-
 from database import SessionLocal
 from models import Formacao
 from schemas import FormacaoUpdate
@@ -118,8 +116,7 @@ def listar(
                 # =====================
                 # STATUS
                 # =====================
-                "status":
-                    f.status,
+                "status": str(f.status),
                 "ativo":
                     f.ativo
             }
@@ -151,8 +148,8 @@ def criar(
     existe = (
         db.query(Formacao)
         .filter(
-            Formacao.descricao == dados["descricao"],
-            Formacao.data_termino == dados["data_termino"]
+            Formacao.descricao == dados.get["descricao"],
+            Formacao.data_termino == dados.get["data_termino"]
         )
         .first()
     )

@@ -101,7 +101,6 @@ class Formacao(Base):
     # =====================================
 
     id = Column(Integer, primary_key=True, index=True)
-
     descricao = Column(String(255), nullable=False, index=True)
 
     # =====================================
@@ -109,25 +108,16 @@ class Formacao(Base):
     # =====================================
 
     data_inicio = Column(Date, nullable=True)
-
     data_termino = Column(Date, nullable=True, index=True)
-
     periodo = Column(String(100), nullable=True)
-
-    ano_planejamento = Column(Integer, nullable=True, index=True)
 
     # =====================================
     # DADOS DA FORMAÇÃO
     # =====================================
 
     carga_horaria = Column(Integer, nullable=True)
-
     modalidade = Column(tipo_modalidade, nullable=True)
-
-    eixo = Column(tipo_eixo, nullable=True)
-
     publico_alvo = Column(String(300), nullable=True)
-
     investimento = Column(Numeric(12, 2), nullable=True)
 
     # =====================================
@@ -147,7 +137,6 @@ class Formacao(Base):
     # =====================================
 
     plano_id = Column(Integer, ForeignKey("plano_anual.id"), nullable=True, index=True)
-
     plano = relationship("PlanoAnual", back_populates="formacoes")
 
     # =====================================
@@ -155,7 +144,6 @@ class Formacao(Base):
     # =====================================
 
     criado_em = Column(DateTime, nullable=False, default=datetime.utcnow)
-
     ativo = Column(Boolean, nullable=False, default=True, index=True)
 
     # =====================================
@@ -175,8 +163,8 @@ class Formacao(Base):
 
         UniqueConstraint(
             "descricao",
-            "data_termino",
-            name="uq_formacao_ano"
+            "plano_id",
+            name="uq_formacao_plano"
         ),
 
         CheckConstraint(

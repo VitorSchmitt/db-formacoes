@@ -47,15 +47,7 @@
                 min="1"
             >
         </div>
-
-        <div class="col-md-2">
-            <input
-                type="number"
-                id="ano_planejamento"
-                class="form-control"
-                placeholder="Ano"
-            >
-        </div>
+       
 
     </div>
 
@@ -70,15 +62,7 @@
                 class="form-select"
                 required
             ></select>
-        </div>
-
-        <div class="col-md-3">
-            <select
-                id="eixo"
-                class="form-select"
-                required
-            ></select>
-        </div>
+        </div>        
 
         <div class="col-md-3">
             <input
@@ -323,8 +307,7 @@ async function carregarTabela() {
 
                     <th>Descrição</th>
                     <th>Início</th>
-                    <th>Término</th>
-                    <th>Eixo</th>
+                    <th>Término</th>                    
                     <th>Status</th>
                     <th>Ativa</th>
                     <th>Ações</th>
@@ -359,9 +342,7 @@ async function carregarTabela() {
 
                 <td>${f.data_inicio || ""}</td>
 
-                <td>${f.data_termino || ""}</td>
-
-                <td>${f.eixo || ""}</td>
+                <td>${f.data_termino || ""}</td>                
 
                 <td>${f.status || ""}</td>
 
@@ -468,11 +449,7 @@ window.salvar = async function(event) {
 
         modalidade:
             document.getElementById("modalidade")
-            .value,
-
-        eixo:
-            document.getElementById("eixo")
-            .value,
+            .value,        
 
         periodo:
             document.getElementById("periodo")
@@ -486,13 +463,7 @@ window.salvar = async function(event) {
             parseFloat(
                 document.getElementById("investimento")
                 .value
-            ) || 0,
-
-        ano_planejamento:
-            parseInt(
-                document.getElementById("ano_planejamento")
-                .value
-            ) || null,
+            ) || 0,        
 
         meta_participantes:
             parseInt(

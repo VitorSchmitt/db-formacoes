@@ -9,7 +9,9 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     Numeric,
-    Float
+    Float,
+    CheckConstraint
+
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM

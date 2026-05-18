@@ -68,7 +68,8 @@ def listar(
 
             {
 
-                "id":f.id,
+                "id":
+                    f.id,
 
                 "descricao":
                     f.descricao,
@@ -106,7 +107,9 @@ def listar(
                     f.meta_participantes,
 
                 "status":
-                    str(f.status),
+                    str(f.status)
+                    if f.status
+                    else None,
 
                 "plano_anual_id":
                     f.plano_anual_id,
@@ -120,19 +123,14 @@ def listar(
 
         ],
 
-        "total":total,
+        "total":
+            total,
 
         "total_paginas":
 
-        (
-
-            total // limite
-
+            (total // limite)
             +
-
             (1 if total % limite else 0)
-
-        )
 
     }
 
@@ -147,7 +145,7 @@ def criar(
     db: Session = Depends(get_db)
 ):
 
-    campos_obrigatorios=[
+    campos_obrigatorios = [
 
         "descricao",
         "data_inicio",
@@ -163,13 +161,14 @@ def criar(
 
     ]
 
-    faltando=[
+    faltando = [
 
         campo
 
         for campo in campos_obrigatorios
 
-        if not dados.get(campo)
+        if dados.get(campo) is None
+        or dados.get(campo) == ""
 
     ]
 
@@ -182,19 +181,16 @@ def criar(
 
         }
 
-
-    existe=(
+    existe = (
 
         db.query(Formacao)
 
         .filter(
 
-            Formacao.descricao
-            ==
+            Formacao.descricao ==
             dados.get("descricao"),
 
-            Formacao.data_termino
-            ==
+            Formacao.data_termino ==
             dados.get("data_termino")
 
         )
@@ -261,8 +257,9 @@ def criar(
 
         return {
 
-            "ok":True,
-            "id":nova.id
+            "ok": True,
+            "id": nova.id,
+            "message": "Formação cadastrada"
 
         }
 
@@ -290,21 +287,93 @@ def criar(
 
 
 # =========================================
+# ATUALIZAR
+# =========================================
+
+@router.put("/api/formacao/{id}")
+def atualizar(
+    id: int,
+    dados: FormacaoUpdate,
+    db: Session = Depends(get_db)
+):
+
+    formacao = db.get(
+        Formacao,
+        id
+    )
+
+    if not formacao:
+
+        return {
+
+            "erro":
+            "Formação não encontrada"
+
+        }
+
+    try:
+
+        for campo, valor in (
+
+            dados.dict(
+                exclude_unset=True
+            ).items()
+
+        ):
+
+            setattr(
+                formacao,
+                campo,
+                valor
+            )
+
+        db.commit()
+
+        db.refresh(formacao)
+
+        return {
+
+            "ok": True,
+            "message": "Formação atualizada"
+
+        }
+
+    except IntegrityError:
+
+        db.rollback()
+
+        return {
+
+            "erro":
+            "Erro ao atualizar"
+
+        }
+
+    except Exception as e:
+
+        db.rollback()
+
+        return {
+
+            "erro":
+            str(e)
+
+        }
+
+
+# =========================================
 # ATIVAR / DESATIVAR
 # =========================================
 
 @router.patch(
-"/api/formacoes/toggle/{formacao_id}"
+    "/api/formacoes/toggle/{formacao_id}"
 )
-
 def toggle_formacao(
-
-    formacao_id:int,
-    db:Session=Depends(get_db)
-
+    formacao_id: int,
+    db: Session = Depends(get_db)
 ):
 
-    formacao=db.get(
+    formacao = db.get(
         Formacao,
         formacao_id
     )
@@ -318,16 +387,18 @@ def toggle_formacao(
 
         )
 
-    formacao.ativo=(
+    formacao.ativo = (
         not formacao.ativo
     )
 
     db.commit()
 
+    db.refresh(formacao)
+
     return {
 
-        "ok":True,
-        "ativo":formacao.ativo
+        "ok": True,
+        "ativo": formacao.ativo
 
     }
 

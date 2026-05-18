@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+
 from database import SessionLocal
 from models import Formacao
 from schemas import FormacaoUpdate
@@ -11,6 +12,7 @@ router = APIRouter()
 # =========================================
 # DATABASE
 # =========================================
+
 def get_db():
 
     db = SessionLocal()
@@ -25,6 +27,7 @@ def get_db():
 # =========================================
 # LISTAR
 # =========================================
+
 @router.get("/api/formacoes")
 def listar(
     busca: str = Query(None),
@@ -35,9 +38,6 @@ def listar(
 
     query = db.query(Formacao)
 
-    # =====================================
-    # FILTRO
-    # =====================================
     if busca:
 
         query = query.filter(
@@ -49,6 +49,7 @@ def listar(
     total = query.count()
 
     dados = (
+
         query
         .order_by(
             Formacao.data_termino.desc()
@@ -58,19 +59,16 @@ def listar(
         )
         .limit(limite)
         .all()
+
     )
 
     return {
 
-        "dados": [
+        "dados":[
 
             {
 
-                # =====================
-                # BÁSICO
-                # =====================
-                "id":
-                    f.id,
+                "id":f.id,
 
                 "descricao":
                     f.descricao,
@@ -86,18 +84,15 @@ def listar(
                     else None,
 
                 "periodo":
-                    f.periodo,               
+                    f.periodo,
 
-                # =====================
-                # FORMAÇÃO
-                # =====================
                 "carga_horaria":
                     f.carga_horaria,
 
                 "modalidade":
                     str(f.modalidade)
                     if f.modalidade
-                    else None,                
+                    else None,
 
                 "publico_alvo":
                     f.publico_alvo,
@@ -107,95 +102,119 @@ def listar(
                     if f.investimento
                     else 0,
 
-                # =====================
-                # METAS
-                # =====================
                 "meta_participantes":
                     f.meta_participantes,
-                
-                # =====================
-                # STATUS
-                # =====================
-                "status": str(f.status),
+
+                "status":
+                    str(f.status),
+
+                "plano_anual_id":
+                    f.plano_anual_id,
+
                 "ativo":
                     f.ativo
+
             }
 
             for f in dados
+
         ],
 
-        "total":
-            total,
+        "total":total,
 
         "total_paginas":
-            (
-                (total // limite)
-                +
-                (1 if total % limite else 0)
-            )
+
+        (
+
+            total // limite
+
+            +
+
+            (1 if total % limite else 0)
+
+        )
+
     }
 
 
 # =========================================
 # CRIAR
 # =========================================
+
 @router.post("/api/formacao")
 def criar(
     dados: dict,
     db: Session = Depends(get_db)
 ):
 
-    existe = (
+    campos_obrigatorios=[
+
+        "descricao",
+        "data_inicio",
+        "data_termino",
+        "carga_horaria",
+        "modalidade",
+        "periodo",
+        "publico_alvo",
+        "meta_participantes",
+        "investimento",
+        "status",
+        "plano_anual_id"
+
+    ]
+
+    faltando=[
+
+        campo
+
+        for campo in campos_obrigatorios
+
+        if not dados.get(campo)
+
+    ]
+
+    if faltando:
+
+        return {
+
+            "erro":
+            f"Campos obrigatórios: {', '.join(faltando)}"
+
+        }
+
+
+    existe=(
+
         db.query(Formacao)
+
         .filter(
-            Formacao.descricao == dados.get["descricao"],
-            Formacao.data_termino == dados.get["data_termino"]
+
+            Formacao.descricao
+            ==
+            dados.get("descricao"),
+
+            Formacao.data_termino
+            ==
+            dados.get("data_termino")
+
         )
+
         .first()
+
     )
 
     if existe:
 
         return {
+
             "erro":
-                "Formação já cadastrada"
+            "Formação já cadastrada"
+
         }
 
     try:
 
         nova = Formacao(
-        campos_obrigatorios = [
-
-            "descricao",
-            "data_inicio",
-            "data_termino",
-            "carga_horaria",
-            "modalidade",
-            "periodo",
-            "publico_alvo",
-            "meta_participantes",
-            "investimento",
-            "status",
-            "plano_anual_id"
-        
-        ]
-
-        faltando = [
-        
-            campo
-            for campo in campos_obrigatorios
-            if not dados.get(campo)
-        
-        ]
-
-        if faltando:
-        
-            return {
-        
-                "erro":
-                f"Campos obrigatórios: {', '.join(faltando)}"
-        
-            }
 
             descricao=
                 dados.get("descricao"),
@@ -207,13 +226,13 @@ def criar(
                 dados.get("data_termino"),
 
             periodo=
-                dados.get("periodo"),          
+                dados.get("periodo"),
 
             carga_horaria=
                 dados.get("carga_horaria"),
 
             modalidade=
-                dados.get("modalidade"),           
+                dados.get("modalidade"),
 
             publico_alvo=
                 dados.get("publico_alvo"),
@@ -222,12 +241,16 @@ def criar(
                 dados.get("investimento"),
 
             meta_participantes=
-                dados.get("meta_participantes", 0),            
+                dados.get("meta_participantes"),
 
             status=
-                dados.get("status", "Planejada"),
+                dados.get("status"),
+
+            plano_anual_id=
+                dados.get("plano_anual_id"),
 
             ativo=True
+
         )
 
         db.add(nova)
@@ -237,8 +260,10 @@ def criar(
         db.refresh(nova)
 
         return {
-            "ok": True,
-            "id": nova.id
+
+            "ok":True,
+            "id":nova.id
+
         }
 
     except IntegrityError:
@@ -246,8 +271,10 @@ def criar(
         db.rollback()
 
         return {
+
             "erro":
-                "Erro ao salvar (possível duplicidade)"
+            "Erro ao salvar"
+
         }
 
     except Exception as e:
@@ -255,74 +282,29 @@ def criar(
         db.rollback()
 
         return {
-            "erro": str(e)
-        }
 
-
-# =========================================
-# ATUALIZAR
-# =========================================
-@router.put("/api/formacao/{id}")
-def atualizar(
-    id: int,
-    dados: FormacaoUpdate,
-    db: Session = Depends(get_db)
-):
-
-    f = db.get(Formacao, id)
-
-    if not f:
-
-        return {
             "erro":
-                "Não encontrado"
-        }
+            str(e)
 
-    try:
-
-        for k, v in dados.dict(
-            exclude_unset=True
-        ).items():
-
-            setattr(f, k, v)
-
-        db.commit()
-
-        db.refresh(f)
-
-        return {
-            "ok": True
-        }
-
-    except IntegrityError:
-
-        db.rollback()
-
-        return {
-            "erro":
-                "Duplicidade ao atualizar"
-        }
-
-    except Exception as e:
-
-        db.rollback()
-
-        return {
-            "erro":
-                str(e)
         }
 
 
 # =========================================
-# TOGGLE
+# ATIVAR / DESATIVAR
 # =========================================
-@router.patch("/api/formacoes/toggle/{formacao_id}")
+
+@router.patch(
+"/api/formacoes/toggle/{formacao_id}"
+)
+
 def toggle_formacao(
-    formacao_id: int,
-    db: Session = Depends(get_db)
+
+    formacao_id:int,
+    db:Session=Depends(get_db)
+
 ):
 
-    formacao = db.get(
+    formacao=db.get(
         Formacao,
         formacao_id
     )
@@ -330,11 +312,13 @@ def toggle_formacao(
     if not formacao:
 
         raise HTTPException(
+
             status_code=404,
             detail="Formação não encontrada"
+
         )
 
-    formacao.ativo = (
+    formacao.ativo=(
         not formacao.ativo
     )
 
@@ -342,73 +326,37 @@ def toggle_formacao(
 
     return {
 
-        "ok": True,
+        "ok":True,
+        "ativo":formacao.ativo
 
-        "ativo":
-            formacao.ativo
-    }
-
-
-# =========================================
-# DESATIVAR
-# =========================================
-@router.delete("/api/formacoes/{formacao_id}")
-def desativar_formacao(
-    formacao_id: int,
-    db: Session = Depends(get_db)
-):
-
-    formacao = db.get(
-        Formacao,
-        formacao_id
-    )
-
-    if not formacao:
-
-        return {
-            "erro":
-                "Formação não encontrada"
-        }
-
-    formacao.ativo = False
-
-    db.commit()
-
-    return {
-
-        "ok": True,
-
-        "message":
-            "Formação desativada"
     }
 
 
 # =========================================
 # ENUMS
 # =========================================
+
 @router.get("/api/enums")
 def enums():
 
     return {
 
-        "modalidade": [
+        "modalidade":[
 
             "presencial",
             "online",
             "hibrido"
 
-        ],       
+        ],
 
-        "status": [
+        "status":[
 
             "Planejada",
-
             "Em andamento",
-
             "Finalizada",
-
             "Cancelada",
-
             "Em construção"
+
         ]
+
     }

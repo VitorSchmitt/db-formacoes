@@ -165,25 +165,46 @@ async function carregarPlanos() {
     try {
 
         let res = await fetch("/api/planos_anual");
+
         let data = await res.json();
 
-        let p = document.getElementById("plano_anual_id");
+        let select =
+        document.getElementById(
+            "plano_anual_id"
+        );
 
-        if (!p) return;
+        if (!select) return;
 
-        p.innerHTML = `<option value="">Plano Anual</option>`;
+        select.innerHTML =
+        `<option value="">
+            Plano Anual
+        </option>`;
 
-        data.forEach(x => {
+        data.forEach(plano => {
 
-            p.add(new Option(
-                `${x.ano} - ${x.eixo}`,
-                x.id
-            ));
+            let texto =
+            `${plano.ano} - ${plano.eixo}`;
+
+            select.add(
+                new Option(
+                    texto,
+                    plano.id
+                )
+            );
+
         });
 
-    } catch (err) {
-        console.error("Erro planos:", err);
     }
+
+    catch(err){
+
+        console.error(
+            "Erro carregando planos:",
+            err
+        );
+
+    }
+
 }
 
 // ====================================

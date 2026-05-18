@@ -42,88 +42,111 @@
 
 
     <!-- LINHA 2 -->
-    <div class="row mb-3">
+    <!-- LINHA 2 -->
 
-        <div class="col-md-3">
-            <select id="modalidade"
-                    class="form-select"
-                    required></select>
-        </div>
+<div class="col-md-3">
 
-        <div class="col-md-3">
-            <input type="text"
-                   id="periodo"
-                   class="form-control"
-                   placeholder="Período">
-        </div>
+<select id="modalidade"
+        class="form-select"
+        required>
 
-        <div class="col-md-3">
-            <input type="text"
-                   id="publico_alvo"
-                   class="form-control"
-                   placeholder="Público-Alvo">
-        </div>
+</select>
 
-        <div class="col-md-3">
-            <select id="plano_anual_id"
-                    class="form-select"></select>
-        </div>
+</div>
 
-    </div>
+<div class="col-md-3">
+
+<input type="text"
+       id="periodo"
+       class="form-control"
+       placeholder="Período"
+       required>
+
+</div>
+
+<div class="col-md-3">
+
+<input type="text"
+       id="publico_alvo"
+       class="form-control"
+       placeholder="Público-Alvo"
+       required>
+
+</div>
+
+<div class="col-md-3">
+
+<select id="plano_anual_id"
+        class="form-select"
+        required>
+
+</select>
+
+</div>
 
 
     <!-- LINHA 3 -->
-    <div class="row mb-3">
+    <!-- LINHA 3 -->
 
-        <div class="col-md-3">
-            <input type="number"
-                   id="meta_participantes"
-                   class="form-control"
-                   placeholder="Meta Participantes">
-        </div>
+<div class="col-md-3">
 
-        <div class="col-md-3">
-            <input type="number"
-                   step="0.01"
-                   id="investimento"
-                   class="form-control"
-                   placeholder="Investimento">
-        </div>
+<input type="number"
+       id="meta_participantes"
+       class="form-control"
+       placeholder="Meta Participantes"
+       min="1"
+       required>
 
-    </div>
+</div>
+
+<div class="col-md-3">
+
+<input type="number"
+       step="0.01"
+       id="investimento"
+       class="form-control"
+       placeholder="Investimento"
+       min="0"
+       required>
+
+</div>
 
 
     <!-- LINHA 4 -->
     <div class="row mb-3">
 
-        <div class="col-md-4">
+        <!-- LINHA 1 -->
 
-            <select id="status"
-                    class="form-select">
+<div class="col-md-4">
+    <input type="text"
+           id="descricao"
+           class="form-control"
+           placeholder="Descrição"
+           required>
+</div>
 
-                <option value="Planejada">
-                    Planejada
-                </option>
+<div class="col-md-2">
+    <input type="date"
+           id="data_inicio"
+           class="form-control"
+           required>
+</div>
 
-                <option value="Em andamento">
-                    Em andamento
-                </option>
+<div class="col-md-2">
+    <input type="date"
+           id="data_termino"
+           class="form-control"
+           required>
+</div>
 
-                <option value="Finalizada">
-                    Finalizada
-                </option>
-
-                <option value="Cancelada">
-                    Cancelada
-                </option>
-
-                <option value="Em construção">
-                    Em construção
-                </option>
-
-            </select>
-
-        </div>
+<div class="col-md-2">
+    <input type="number"
+           id="carga"
+           class="form-control"
+           placeholder="Carga Horária"
+           min="1"
+           required>
+</div>
 
     </div>
 

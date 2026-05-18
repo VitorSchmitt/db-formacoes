@@ -15,6 +15,9 @@ from routes_participacao import router as participacao_router
 from routes_dashboard import router as dashboard_router
 from routes_lotacao import router as lotacao_router
 from routes_certificados import router as certificado_router
+from routes_plano_anual import router as plano_anual_router
+
+
 from middleware import AuthMiddleware
 
 
@@ -44,6 +47,7 @@ app.include_router(participacao_router)
 app.include_router(dashboard_router)
 app.include_router(lotacao_router)
 app.include_router(certificado_router)
+app.include_router(plano_anual_router)
 
 # ===============================
 # WEB

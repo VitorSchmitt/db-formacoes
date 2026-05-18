@@ -145,41 +145,54 @@ def criar(
     db: Session = Depends(get_db)
 ):
 
-    campos_obrigatorios = [
+    # ============================
+    # CAMPOS OBRIGATÓRIOS
+    # ============================
 
-        "descricao",
-        "data_inicio",
-        "data_termino",
-        "carga_horaria",
-        "modalidade",
-        "periodo",
-        "publico_alvo",
-        "meta_participantes",
-        "investimento",
-        "status",
-        "plano_anual_id"
+    campos_obrigatorios = {
 
-    ]
+        "descricao": "Descrição",
+        "data_inicio": "Data início",
+        "data_termino": "Data término",
+        "carga_horaria": "Carga horária",
+        "modalidade": "Modalidade",
+        "periodo": "Período",
+        "publico_alvo": "Público-alvo",
+        "meta_participantes": "Meta participantes",
+        "investimento": "Investimento",
+        "status": "Status",
+        "plano_anual_id": "Plano anual"
 
-    faltando = [
+    }
 
-        campo
+    faltando = []
 
-        for campo in campos_obrigatorios
+    for chave, nome in campos_obrigatorios.items():
 
-        if dados.get(campo) is None
-        or dados.get(campo) == ""
+        valor = dados.get(chave)
 
-    ]
+        if valor is None:
+
+            faltando.append(nome)
+
+        elif isinstance(valor, str):
+
+            if valor.strip() == "":
+                faltando.append(nome)
 
     if faltando:
 
         return {
 
             "erro":
-            f"Campos obrigatórios: {', '.join(faltando)}"
+            "Preencha os campos: "
+            + ", ".join(faltando)
 
         }
+
+    # ============================
+    # DUPLICIDADE
+    # ============================
 
     existe = (
 
@@ -212,39 +225,17 @@ def criar(
 
         nova = Formacao(
 
-            descricao=
-                dados.get("descricao"),
-
-            data_inicio=
-                dados.get("data_inicio"),
-
-            data_termino=
-                dados.get("data_termino"),
-
-            periodo=
-                dados.get("periodo"),
-
-            carga_horaria=
-                dados.get("carga_horaria"),
-
-            modalidade=
-                dados.get("modalidade"),
-
-            publico_alvo=
-                dados.get("publico_alvo"),
-
-            investimento=
-                dados.get("investimento"),
-
-            meta_participantes=
-                dados.get("meta_participantes"),
-
-            status=
-                dados.get("status"),
-
-            plano_anual_id=
-                dados.get("plano_anual_id"),
-
+            descricao=dados.get("descricao"),
+            data_inicio=dados.get("data_inicio"),
+            data_termino=dados.get("data_termino"),
+            periodo=dados.get("periodo"),
+            carga_horaria=dados.get("carga_horaria"),
+            modalidade=dados.get("modalidade"),
+            publico_alvo=dados.get("publico_alvo"),
+            investimento=dados.get("investimento"),
+            meta_participantes=dados.get("meta_participantes"),
+            status=dados.get("status"),
+            plano_anual_id=dados.get("plano_anual_id"),
             ativo=True
 
         )
@@ -258,19 +249,8 @@ def criar(
         return {
 
             "ok": True,
-            "id": nova.id,
-            "message": "Formação cadastrada"
-
-        }
-
-    except IntegrityError:
-
-        db.rollback()
-
-        return {
-
-            "erro":
-            "Erro ao salvar"
+            "message": "Formação cadastrada",
+            "id": nova.id
 
         }
 
@@ -280,8 +260,7 @@ def criar(
 
         return {
 
-            "erro":
-            str(e)
+            "erro": str(e)
 
         }
 

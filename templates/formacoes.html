@@ -9,148 +9,151 @@
     <!-- LINHA 1 -->
     <div class="row mb-3">
 
-        <!-- LINHA 1 -->
+        <div class="col-md-4">
+            <input type="text"
+                   id="descricao"
+                   class="form-control"
+                   placeholder="Descrição"
+                   required>
+        </div>
 
-<div class="col-md-4">
-    <input type="text"
-           id="descricao"
-           class="form-control"
-           placeholder="Descrição"
-           required>
-</div>
+        <div class="col-md-2">
+            <input type="date"
+                   id="data_inicio"
+                   class="form-control"
+                   required>
+        </div>
 
-<div class="col-md-2">
-    <input type="date"
-           id="data_inicio"
-           class="form-control"
-           required>
-</div>
+        <div class="col-md-2">
+            <input type="date"
+                   id="data_termino"
+                   class="form-control"
+                   required>
+        </div>
 
-<div class="col-md-2">
-    <input type="date"
-           id="data_termino"
-           class="form-control"
-           required>
-</div>
-
-<div class="col-md-2">
-    <input type="number"
-           id="carga"
-           class="form-control"
-           placeholder="Carga Horária"
-           min="1"
-           required>
-</div>
+        <div class="col-md-2">
+            <input type="number"
+                   id="carga"
+                   class="form-control"
+                   placeholder="Carga Horária"
+                   min="1"
+                   required>
+        </div>
 
     </div>
 
 
-    
     <!-- LINHA 2 -->
+    <div class="row mb-3">
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<select id="modalidade"
-        class="form-select"
-        required>
+            <select id="modalidade"
+                    class="form-select"
+                    required>
 
-</select>
+            </select>
 
-</div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<input type="text"
-       id="periodo"
-       class="form-control"
-       placeholder="Período"
-       required>
+            <input type="text"
+                   id="periodo"
+                   class="form-control"
+                   placeholder="Período"
+                   required>
 
-</div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<input type="text"
-       id="publico_alvo"
-       class="form-control"
-       placeholder="Público-Alvo"
-       required>
+            <input type="text"
+                   id="publico_alvo"
+                   class="form-control"
+                   placeholder="Público-Alvo"
+                   required>
 
-</div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<select id="plano_anual_id"
-        class="form-select"
-        required>
+            <select id="plano_anual_id"
+                    class="form-select"
+                    required>
 
-</select>
+            </select>
 
-</div>
+        </div>
+
+    </div>
 
 
-    
     <!-- LINHA 3 -->
+    <div class="row mb-3">
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<input type="number"
-       id="meta_participantes"
-       class="form-control"
-       placeholder="Meta Participantes"
-       min="1"
-       required>
+            <input type="number"
+                   id="meta_participantes"
+                   class="form-control"
+                   placeholder="Meta Participantes"
+                   min="1"
+                   required>
 
-</div>
+        </div>
 
-<div class="col-md-3">
+        <div class="col-md-3">
 
-<input type="number"
-       step="0.01"
-       id="investimento"
-       class="form-control"
-       placeholder="Investimento"
-       min="0"
-       required>
+            <input type="number"
+                   step="0.01"
+                   id="investimento"
+                   class="form-control"
+                   placeholder="Investimento"
+                   min="0"
+                   required>
 
-</div>
+        </div>
+
+    </div>
 
 
     <!-- LINHA 4 -->
     <div class="row mb-3">
 
-        <!-- LINHA 1 -->
+        <div class="col-md-4">
 
-<div class="col-md-4">
-    <input type="text"
-           id="descricao"
-           class="form-control"
-           placeholder="Descrição"
-           required>
-</div>
+            <select id="status"
+                    class="form-select"
+                    required>
 
-<div class="col-md-2">
-    <input type="date"
-           id="data_inicio"
-           class="form-control"
-           required>
-</div>
+                <option value="">
+                    Selecione
+                </option>
 
-<div class="col-md-2">
-    <input type="date"
-           id="data_termino"
-           class="form-control"
-           required>
-</div>
+                <option value="Planejada">
+                    Planejada
+                </option>
 
-<div class="col-md-2">
-    <input type="number"
-           id="carga"
-           class="form-control"
-           placeholder="Carga Horária"
-           min="1"
-           required>
-</div>
+                <option value="Em andamento">
+                    Em andamento
+                </option>
+
+                <option value="Finalizada">
+                    Finalizada
+                </option>
+
+                <option value="Cancelada">
+                    Cancelada
+                </option>
+
+                <option value="Em construção">
+                    Em construção
+                </option>
+
+            </select>
+
+        </div>
 
     </div>
 

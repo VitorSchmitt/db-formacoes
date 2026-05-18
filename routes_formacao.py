@@ -164,6 +164,38 @@ def criar(
     try:
 
         nova = Formacao(
+        campos_obrigatorios = [
+
+            "descricao",
+            "data_inicio",
+            "data_termino",
+            "carga_horaria",
+            "modalidade",
+            "periodo",
+            "publico_alvo",
+            "meta_participantes",
+            "investimento",
+            "status",
+            "plano_anual_id"
+        
+        ]
+
+        faltando = [
+        
+            campo
+            for campo in campos_obrigatorios
+            if not dados.get(campo)
+        
+        ]
+
+        if faltando:
+        
+            return {
+        
+                "erro":
+                f"Campos obrigatórios: {', '.join(faltando)}"
+        
+            }
 
             descricao=
                 dados.get("descricao"),

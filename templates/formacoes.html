@@ -47,43 +47,33 @@
     <div class="row mb-3">
 
         <div class="col-md-3">
-
             <select id="modalidade"
                     class="form-select"
                     required>
-
             </select>
-
         </div>
 
         <div class="col-md-3">
-
             <input type="text"
                    id="periodo"
                    class="form-control"
                    placeholder="Período"
                    required>
-
         </div>
 
         <div class="col-md-3">
-
             <input type="text"
                    id="publico_alvo"
                    class="form-control"
                    placeholder="Público-Alvo"
                    required>
-
         </div>
 
         <div class="col-md-3">
-
             <select id="plano_anual_id"
                     class="form-select"
                     required>
-
             </select>
-
         </div>
 
     </div>
@@ -93,18 +83,15 @@
     <div class="row mb-3">
 
         <div class="col-md-3">
-
             <input type="number"
                    id="meta_participantes"
                    class="form-control"
                    placeholder="Meta Participantes"
                    min="1"
                    required>
-
         </div>
 
         <div class="col-md-3">
-
             <input type="number"
                    step="0.01"
                    id="investimento"
@@ -112,7 +99,6 @@
                    placeholder="Investimento"
                    min="0"
                    required>
-
         </div>
 
     </div>
@@ -157,11 +143,15 @@
 
     </div>
 
-    <button class="btn btn-primary">
+    <button type="submit"
+            class="btn btn-primary">
+
         Salvar
+
     </button>
 
 </form>
+
 
 <div id="msg" class="mt-2"></div>
 
@@ -202,21 +192,25 @@
 
 <div class="d-flex justify-content-between mt-3">
 
-    <button class="btn btn-secondary"
-            onclick="anterior()">
+<button type="button"
+        class="btn btn-secondary"
+        onclick="anterior()">
 
-        ⬅ Anterior
+⬅ Anterior
 
-    </button>
+</button>
 
-    <span id="pagina_info"></span>
 
-    <button class="btn btn-secondary"
-            onclick="proxima()">
+<span id="pagina_info"></span>
 
-        Próximo ➡
 
-    </button>
+<button type="button"
+        class="btn btn-secondary"
+        onclick="proxima()">
+
+Próximo ➡
+
+</button>
 
 </div>
 
@@ -240,91 +234,31 @@ let totalPaginas=1;
 let dadosTabela=[];
 
 
-// =====================
 // ENUMS
-// =====================
-
 async function carregarEnums(){
 
 try{
 
-    let res=
-    await fetch("/api/enums");
+let res=await fetch("/api/enums");
+let data=await res.json();
 
-    let data=
-    await res.json();
+let m=document.getElementById("modalidade");
 
-    let m=
-    document.getElementById(
-        "modalidade"
-    );
+m.innerHTML=`
+<option value="">
+Modalidade
+</option>
+`;
 
-    m.innerHTML=
-    `<option value="">
-        Modalidade
-    </option>`;
+data.modalidade.forEach(x=>{
 
-    data.modalidade.forEach(x=>{
+m.add(
+new Option(x,x)
+);
 
-        m.add(
-            new Option(x,x)
-        );
+});
 
-    });
-
-}
-
-catch(err){
-
-    console.log(err);
-
-}
-
-}
-
-
-// =====================
-// PLANOS
-// =====================
-
-async function carregarPlanos(){
-
-try{
-
-    let res=
-    await fetch(
-        "/api/planos_anual"
-    );
-
-    let data=
-    await res.json();
-
-    let select=
-    document.getElementById(
-        "plano_anual_id"
-    );
-
-    select.innerHTML=
-    `<option value="">
-        Plano Anual
-    </option>`;
-
-    data.forEach(plano=>{
-
-        select.add(
-
-            new Option(
-                `${plano.ano} | ${plano.eixo}`,
-                plano.id
-            )
-
-        );
-
-    });
-
-}
-
-catch(err){
+}catch(err){
 
 console.log(err);
 
@@ -333,10 +267,51 @@ console.log(err);
 }
 
 
-// =====================
-// LISTAR
-// =====================
+// PLANOS
+async function carregarPlanos(){
 
+try{
+
+let res=
+await fetch("/api/planos_anual");
+
+let data=
+await res.json();
+
+let select=
+document.getElementById(
+"plano_anual_id"
+);
+
+select.innerHTML=`
+<option value="">
+Plano Anual
+</option>
+`;
+
+data.forEach(plano=>{
+
+select.add(
+
+new Option(
+`${plano.ano} | ${plano.eixo}`,
+plano.id
+)
+
+);
+
+});
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+// LISTAR
 async function carregarTabela(){
 
 try{
@@ -352,13 +327,11 @@ document.getElementById(
 ).value;
 
 
-let res=
-await fetch(
+let res=await fetch(
 
 `/api/formacoes?busca=${busca}&pagina=${paginaFormacao}&limite=${limite}`
 
 );
-
 
 let data=
 await res.json();
@@ -389,7 +362,6 @@ let html=`
 <tbody>
 
 `;
-
 
 dadosTabela.forEach(f=>{
 
@@ -425,7 +397,6 @@ onclick="editar(${f.id})">
 
 </button>
 
-
 <button
 class="btn ${classe} btn-sm"
 onclick="toggleFormacao(${f.id})">
@@ -447,24 +418,19 @@ html+=`
 </table>
 `;
 
-document
-.getElementById(
+document.getElementById(
 "tabela"
-)
-.innerHTML=html;
+).innerHTML=html;
 
 
 totalPaginas=
 data.total_paginas||1;
 
-document
-.getElementById(
+document.getElementById(
 "pagina_info"
-)
-.innerText=
+).innerText=
 
 `Página ${paginaFormacao} de ${totalPaginas}`;
-
 
 }catch(err){
 
@@ -475,10 +441,7 @@ console.log(err);
 }
 
 
-// =====================
 // EDITAR
-// =====================
-
 window.editar=function(id){
 
 let f=
@@ -487,7 +450,6 @@ x=>x.id==id
 );
 
 if(!f)return;
-
 
 editandoId=f.id;
 
@@ -500,7 +462,7 @@ document.getElementById("periodo").value=f.periodo||"";
 document.getElementById("publico_alvo").value=f.publico_alvo||"";
 document.getElementById("investimento").value=f.investimento||"";
 document.getElementById("meta_participantes").value=f.meta_participantes||"";
-document.getElementById("status").value=f.status||"Planejada";
+document.getElementById("status").value=f.status||"";
 document.getElementById("plano_anual_id").value=f.plano_anual_id||"";
 
 document.querySelector(
@@ -510,27 +472,45 @@ document.querySelector(
 };
 
 
-// =====================
 // SALVAR
-// =====================
-
 window.salvar=async function(event){
 
 event.preventDefault();
 
 let dados={
 
-descricao:descricao.value.trim(),
-data_inicio:data_inicio.value||null,
-data_termino:data_termino.value||null,
-carga_horaria:parseInt(carga.value)||0,
-modalidade:modalidade.value,
-periodo:periodo.value,
-publico_alvo:publico_alvo.value,
-investimento:parseFloat(investimento.value)||0,
-meta_participantes:parseInt(meta_participantes.value)||0,
-status:status.value,
-plano_anual_id:plano_anual_id.value||null
+descricao:
+document.getElementById("descricao").value.trim(),
+
+data_inicio:
+document.getElementById("data_inicio").value||null,
+
+data_termino:
+document.getElementById("data_termino").value||null,
+
+carga_horaria:
+parseInt(document.getElementById("carga").value)||0,
+
+modalidade:
+document.getElementById("modalidade").value,
+
+periodo:
+document.getElementById("periodo").value,
+
+publico_alvo:
+document.getElementById("publico_alvo").value,
+
+investimento:
+parseFloat(document.getElementById("investimento").value)||0,
+
+meta_participantes:
+parseInt(document.getElementById("meta_participantes").value)||0,
+
+status:
+document.getElementById("status").value,
+
+plano_anual_id:
+document.getElementById("plano_anual_id").value||null
 
 };
 
@@ -545,8 +525,7 @@ method="PUT";
 
 }
 
-let res=
-await fetch(url,{
+let res=await fetch(url,{
 
 method,
 headers:{
@@ -556,8 +535,7 @@ body:JSON.stringify(dados)
 
 });
 
-let r=
-await res.json();
+let r=await res.json();
 
 mostrarMsg(r);
 
@@ -571,10 +549,7 @@ carregarTabela();
 };
 
 
-// =====================
 // TOGGLE
-// =====================
-
 window.toggleFormacao=
 async function(id){
 
@@ -590,65 +565,49 @@ carregarTabela();
 }
 
 
-// =====================
-// UTIL
-// =====================
-
+// PAGINAÇÃO
 window.proxima=()=>{
 
-if(
-paginaFormacao<
-totalPaginas
-){
+if(paginaFormacao<totalPaginas){
 
 paginaFormacao++;
-
 carregarTabela();
 
 }
 
 };
-
 
 window.anterior=()=>{
 
-if(
-paginaFormacao>1
-){
+if(paginaFormacao>1){
 
 paginaFormacao--;
-
 carregarTabela();
 
 }
 
 };
-
 
 window.resetarPagina=()=>{
 
 paginaFormacao=1;
-
 carregarTabela();
 
 };
 
 
+// UTIL
 function limpar(){
 
 editandoId=null;
 
-document
-.querySelector(
+document.querySelector(
 "form"
-)
-.reset();
+).reset();
 
-document
-.querySelector(
+document.querySelector(
 ".btn-primary"
-)
-.innerText="Salvar";
+).innerText="Salvar";
 
 }
 
@@ -656,9 +615,7 @@ document
 function mostrarMsg(r){
 
 let msg=
-document.getElementById(
-"msg"
-);
+document.getElementById("msg");
 
 msg.innerHTML=
 
@@ -667,7 +624,6 @@ r.erro
 ?`<div class="alert alert-danger">${r.erro}</div>`
 
 :`<div class="alert alert-success">${r.message||"OK"}</div>`;
-
 
 setTimeout(()=>{
 

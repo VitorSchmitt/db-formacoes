@@ -18,6 +18,7 @@ PUBLIC_PATHS = [
     "/web/usuarios",
     "/web/lotacoes",
     "/web/certificados",
+    "/web/planos_anuais",
     
 ]
 

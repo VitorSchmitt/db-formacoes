@@ -127,3 +127,15 @@ def tela_lotacoes(request: Request):
         "lotacao.html",
         {"request": request}
     )
+    
+@router.get("/web/plano_anual")
+def tela_plano(
+    request: Request
+):
+
+    return templates.TemplateResponse(
+        "plano_anual.html",
+        {
+            "request":request
+        }
+    )

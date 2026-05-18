@@ -181,3 +181,35 @@ def alterar_status(
         "sucesso": True,
         "ativo": plano.ativo
     }
+
+# =========================================
+# LISTA PARA SELECT
+# =========================================
+@router.get("/api/planos_anual")
+def listar_planos_select(
+    db: Session = Depends(get_db)
+):
+
+    dados = (
+        db.query(PlanoAnual)
+        .filter(
+            PlanoAnual.ativo == True
+        )
+        .order_by(
+            PlanoAnual.ano.desc(),
+            PlanoAnual.eixo
+        )
+        .all()
+    )
+
+    return [
+
+        {
+            "id": p.id,
+            "ano": p.ano,
+            "eixo": str(p.eixo),
+            "descricao": f"{p.ano} - {p.eixo}"
+        }
+
+        for p in dados
+    ]

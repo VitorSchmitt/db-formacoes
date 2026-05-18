@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>📘 Plano Anual</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <form onsubmit="salvar(event)">
+
+            <input type="hidden" id="id">
+
+            <div class="row">
+
+                <div class="col-md-2 mb-3">
+                    <label>Ano</label>
+
+                    <input
+                        type="number"
+                        id="ano"
+                        class="form-control"
+                        required
+                    >
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label>Eixo</label>
+
+                    <select
+                        id="eixo"
+                        class="form-select"
+                        required
+                    >
+                        <option value="">Selecione</option>
+                        <option value="PEDAGOGICO">
+                            Pedagógico
+                        </option>
+
+                        <option value="GESTAO">
+                            Gestão
+                        </option>
+
+                        <option value="TECNOLOGIA">
+                            Tecnologia
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="mb-3">
+
+                <label>Objetivo</label>
+
+                <textarea
+                    id="objetivo"
+                    class="form-control"
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label>Ementa</label>
+
+                <textarea
+                    id="ementa"
+                    class="form-control"
+                    rows="4"
+                ></textarea>
+
+            </div>
+
+            <button
+                class="btn btn-success"
+                type="submit"
+            >
+                Salvar
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="limpar()"
+            >
+                Novo
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="row mb-3">
+
+<div class="col-md-3">
+
+<input
+    type="number"
+    id="filtroAno"
+    class="form-control"
+    placeholder="Filtrar ano"
+    onkeyup="carregar()"
+>
+
+</div>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-hover">
+
+<thead>
+
+<tr>
+    <th>Ano</th>
+    <th>Eixo</th>
+    <th>Objetivo</th>
+    <th>Status</th>
+    <th width="180">
+        Ações
+    </th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+let dados=[]
+
+
+async function carregar(){
+
+    let resposta =
+    await fetch("/api/plano_anual")
+
+    dados=
+    await resposta.json()
+
+
+    let anoFiltro=
+    document
+    .getElementById("filtroAno")
+    .value
+
+
+    if(anoFiltro){
+
+        dados=
+        dados.filter(
+            p=>p.ano==anoFiltro
+        )
+
+    }
+
+
+    let html=""
+
+
+    dados.forEach(p=>{
+
+        let status=
+        p.ativo
+        ? "🟢 Ativo"
+        : "🔴 Inativo"
+
+
+        let botao=
+        p.ativo
+        ? "Desativar"
+        : "Ativar"
+
+        let classe=
+        p.ativo
+        ? "btn-danger"
+        : "btn-success"
+
+
+        html+=`
+
+        <tr>
+
+            <td>${p.ano}</td>
+
+            <td>${p.eixo}</td>
+
+            <td>
+
+            ${
+            p.objetivo
+            ?
+            p.objetivo.substring(0,60)
+            :
+            ""
+            }
+
+            </td>
+
+            <td>${status}</td>
+
+            <td>
+
+                <button
+                class="btn btn-warning btn-sm"
+                onclick="editar(${p.id})"
+                >
+                Editar
+                </button>
+
+
+                <button
+                class="btn ${classe} btn-sm"
+                onclick="status(${p.id})"
+                >
+                ${botao}
+                </button>
+
+            </td>
+
+        </tr>
+
+        `
+
+    })
+
+    document
+    .getElementById("tabela")
+    .innerHTML=html
+
+}
+
+
+
+async function salvar(event){
+
+event.preventDefault()
+
+let id=
+document
+.getElementById("id")
+.value
+
+
+let dados={
+
+    ano:
+    document.getElementById("ano").value,
+
+    eixo:
+    document.getElementById("eixo").value,
+
+    objetivo:
+    document.getElementById("objetivo").value,
+
+    ementa:
+    document.getElementById("ementa").value
+
+}
+
+
+let url="/api/plano_anual"
+let metodo="POST"
+
+
+if(id){
+
+    url+=`/${id}`
+    metodo="PUT"
+
+}
+
+
+await fetch(
+    url,
+    {
+        method:metodo,
+        headers:{
+            "Content-Type":
+            "application/json"
+        },
+        body:JSON.stringify(dados)
+    }
+)
+
+limpar()
+
+carregar()
+
+}
+
+
+
+function editar(id){
+
+let p=
+dados.find(
+x=>x.id==id
+)
+
+
+document
+.getElementById("id")
+.value=p.id
+
+document
+.getElementById("ano")
+.value=p.ano
+
+document
+.getElementById("eixo")
+.value=p.eixo
+
+document
+.getElementById("objetivo")
+.value=p.objetivo || ""
+
+document
+.getElementById("ementa")
+.value=p.ementa || ""
+
+}
+
+
+
+async function status(id){
+
+await fetch(
+
+`/api/plano_anual/status/${id}`,
+
+{
+method:"PUT"
+}
+
+)
+
+carregar()
+
+}
+
+
+
+function limpar(){
+
+document
+.getElementById("id")
+.value=""
+
+document
+.getElementById("ano")
+.value=""
+
+document
+.getElementById("eixo")
+.value=""
+
+document
+.getElementById("objetivo")
+.value=""
+
+document
+.getElementById("ementa")
+.value=""
+
+}
+
+
+carregar()
+
+</script>
+
+{% endblock %}

@@ -1,249 +1,378 @@
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from passlib.hash import bcrypt
-from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
-from database import get_db
-from models import Usuario
+from database import SessionLocal
+from models import Formacao
+from schemas import FormacaoUpdate
 
 router = APIRouter()
 
-# =====================================================
-# LISTAR USUÁRIOS
-# =====================================================
-@router.get("/api/usuarios")
-def listar_usuarios(db: Session = Depends(get_db)):
 
-    usuarios = (
-        db.query(Usuario)
-        .order_by(Usuario.username)
+# =========================================
+# DATABASE
+# =========================================
+
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+        yield db
+
+    finally:
+        db.close()
+
+
+# =========================================
+# LISTAR
+# =========================================
+
+@router.get("/api/formacoes")
+def listar(
+    busca: str = Query(None),
+    pagina: int = 1,
+    limite: int = 20,
+    db: Session = Depends(get_db)
+):
+
+    query = db.query(Formacao)
+
+    if busca:
+
+        query = query.filter(
+            Formacao.descricao.ilike(
+                f"%{busca}%"
+            )
+        )
+
+    total = query.count()
+
+    dados = (
+
+        query
+        .order_by(
+            Formacao.data_termino.desc()
+        )
+        .offset(
+            (pagina - 1) * limite
+        )
+        .limit(limite)
         .all()
+
     )
-
-    return [
-        {
-            "id": u.id,
-            "username": u.username,
-            "perfil": u.perfil,
-            "email": u.email,
-            "ativo": u.ativo,
-            "criado_em": (
-                u.criado_em.strftime("%Y-%m-%d %H:%M")
-                if u.criado_em else None
-            ),
-            "ultimo_login": (
-                u.ultimo_login.strftime("%Y-%m-%d %H:%M")
-                if u.ultimo_login else None
-            )
-        }
-        for u in usuarios
-    ]
-
-
-# =====================================================
-# CRIAR USUÁRIO
-# =====================================================
-@router.post("/api/usuario")
-def criar_usuario(
-    dados: dict,
-    db: Session = Depends(get_db)
-):
-
-    username = dados.get("username", "").strip()
-    senha = dados.get("senha", "").strip()
-    perfil = dados.get("perfil", "").strip()
-    email = dados.get("email")
-
-    # -------------------------
-    # VALIDAÇÕES
-    # -------------------------
-    if not username:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Usuário obrigatório"}
-        )
-
-    if not senha:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Senha obrigatória"}
-        )
-
-    if not perfil:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Perfil obrigatório"}
-        )
-
-    existe = (
-        db.query(Usuario)
-        .filter(Usuario.username == username)
-        .first()
-    )
-
-    if existe:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Usuário já existe"}
-        )
-
-    if email:
-
-        existe_email = (
-            db.query(Usuario)
-            .filter(Usuario.email == email)
-            .first()
-        )
-
-        if existe_email:
-            return JSONResponse(
-                status_code=400,
-                content={"erro": "E-mail já cadastrado"}
-            )
-
-    # -------------------------
-    # CRIAR
-    # -------------------------
-    usuario = Usuario(
-        username=username,
-        senha=bcrypt.hash(senha),
-        perfil=perfil,
-        email=email,
-        ativo=True,
-        criado_em=datetime.utcnow()
-    )
-
-    db.add(usuario)
-
-    db.commit()
 
     return {
-        "ok": True,
-        "mensagem": "Usuário criado com sucesso"
+
+        "dados":[
+
+            {
+
+                "id":
+                    f.id,
+
+                "descricao":
+                    f.descricao,
+
+                "data_inicio":
+                    f.data_inicio.strftime("%Y-%m-%d")
+                    if f.data_inicio
+                    else None,
+
+                "data_termino":
+                    f.data_termino.strftime("%Y-%m-%d")
+                    if f.data_termino
+                    else None,
+
+                "periodo":
+                    f.periodo,
+
+                "carga_horaria":
+                    f.carga_horaria,
+
+                "modalidade":
+                    str(f.modalidade)
+                    if f.modalidade
+                    else None,
+
+                "publico_alvo":
+                    f.publico_alvo,
+
+                "investimento":
+                    float(f.investimento)
+                    if f.investimento
+                    else 0,
+
+                "meta_participantes":
+                    f.meta_participantes,
+
+                "status":
+                    str(f.status)
+                    if f.status
+                    else None,
+
+                "plano_anual_id":
+                    f.plano_anual_id,
+
+                "ativo":
+                    f.ativo
+
+            }
+
+            for f in dados
+
+        ],
+
+        "total":
+            total,
+
+        "total_paginas":
+
+            (total // limite)
+
+            +
+
+            (1 if total % limite else 0)
+
     }
 
 
-# =====================================================
-# EDITAR USUÁRIO
-# =====================================================
-@router.put("/api/usuario/{id}")
-def editar_usuario(
-    id: int,
+# =========================================
+# CRIAR
+# =========================================
+
+@router.post("/api/formacao")
+def criar(
     dados: dict,
     db: Session = Depends(get_db)
 ):
 
-    usuario = (
-        db.query(Usuario)
-        .filter(Usuario.id == id)
-        .first()
-    )
-
-    if not usuario:
-        return JSONResponse(
-            status_code=404,
-            content={"erro": "Usuário não encontrado"}
-        )
-
-    username = dados.get("username", "").strip()
-    perfil = dados.get("perfil", "").strip()
-    email = dados.get("email")
-    senha = dados.get("senha", "").strip()
-
-    # -------------------------
-    # VALIDAÇÕES
-    # -------------------------
-    if not username:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Usuário obrigatório"}
-        )
-
-    if not perfil:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Perfil obrigatório"}
-        )
-
     existe = (
-        db.query(Usuario)
+
+        db.query(Formacao)
+
         .filter(
-            Usuario.username == username,
-            Usuario.id != id
+
+            Formacao.descricao ==
+            dados.get("descricao"),
+
+            Formacao.data_termino ==
+            dados.get("data_termino")
+
         )
+
         .first()
+
     )
 
     if existe:
-        return JSONResponse(
-            status_code=400,
-            content={"erro": "Usuário já existe"}
+
+        return {
+
+            "erro":
+            "Formação já cadastrada"
+
+        }
+
+    try:
+
+        nova = Formacao(
+
+            descricao=
+                dados.get("descricao"),
+
+            data_inicio=
+                dados.get("data_inicio"),
+
+            data_termino=
+                dados.get("data_termino"),
+
+            periodo=
+                dados.get("periodo"),
+
+            carga_horaria=
+                dados.get("carga_horaria"),
+
+            modalidade=
+                dados.get("modalidade"),
+
+            publico_alvo=
+                dados.get("publico_alvo"),
+
+            investimento=
+                dados.get("investimento"),
+
+            meta_participantes=
+                dados.get("meta_participantes"),
+
+            status=
+                dados.get("status"),
+
+            plano_anual_id=
+                dados.get("plano_anual_id"),
+
+            ativo=True
+
         )
 
-    if email:
+        db.add(nova)
 
-        existe_email = (
-            db.query(Usuario)
-            .filter(
-                Usuario.email == email,
-                Usuario.id != id
-            )
-            .first()
-        )
+        db.commit()
 
-        if existe_email:
-            return JSONResponse(
-                status_code=400,
-                content={"erro": "E-mail já cadastrado"}
-            )
+        db.refresh(nova)
 
-    # -------------------------
-    # ATUALIZAR
-    # -------------------------
-    usuario.username = username
-    usuario.perfil = perfil
-    usuario.email = email
+        return {
 
-    # Atualiza senha somente se informada
-    if senha:
-        usuario.senha = bcrypt.hash(senha)
+            "ok": True,
+            "id": nova.id
 
-    db.commit()
+        }
 
-    return {
-        "ok": True,
-        "mensagem": "Usuário atualizado com sucesso"
-    }
+    except IntegrityError:
+
+        db.rollback()
+
+        return {
+
+            "erro":
+            "Erro ao salvar"
+
+        }
+
+    except Exception as e:
+
+        db.rollback()
+
+        return {
+
+            "erro":
+            str(e)
+
+        }
 
 
-# =====================================================
-# ALTERAR STATUS
-# =====================================================
-@router.put("/api/usuario/{id}/status")
-def alterar_status(
+# =========================================
+# ATUALIZAR
+# =========================================
+
+@router.put("/api/formacao/{id}")
+def atualizar(
     id: int,
-    dados: dict,
+    dados: FormacaoUpdate,
     db: Session = Depends(get_db)
 ):
 
-    usuario = (
-        db.query(Usuario)
-        .filter(Usuario.id == id)
-        .first()
+    formacao = db.get(
+        Formacao,
+        id
     )
 
-    if not usuario:
-        return JSONResponse(
+    if not formacao:
+
+        return {
+
+            "erro":
+            "Formação não encontrada"
+
+        }
+
+    try:
+
+        for campo, valor in (
+
+            dados.dict(
+                exclude_unset=True
+            ).items()
+
+        ):
+
+            setattr(
+                formacao,
+                campo,
+                valor
+            )
+
+        db.commit()
+
+        db.refresh(formacao)
+
+        return {
+
+            "ok": True
+
+        }
+
+    except Exception as e:
+
+        db.rollback()
+
+        return {
+
+            "erro":
+            str(e)
+
+        }
+
+
+# =========================================
+# TOGGLE
+# =========================================
+
+@router.patch(
+    "/api/formacoes/toggle/{formacao_id}"
+)
+def toggle_formacao(
+    formacao_id: int,
+    db: Session = Depends(get_db)
+):
+
+    formacao = db.get(
+        Formacao,
+        formacao_id
+    )
+
+    if not formacao:
+
+        raise HTTPException(
             status_code=404,
-            content={"erro": "Usuário não encontrado"}
+            detail="Formação não encontrada"
         )
 
-    usuario.ativo = dados.get("ativo", True)
+    formacao.ativo = (
+        not formacao.ativo
+    )
 
     db.commit()
 
     return {
+
         "ok": True,
-        "mensagem": "Status atualizado com sucesso"
+        "ativo": formacao.ativo
+
+    }
+
+
+# =========================================
+# ENUMS
+# =========================================
+
+@router.get("/api/enums")
+def enums():
+
+    return {
+
+        "modalidade":[
+            "presencial",
+            "online",
+            "hibrido"
+        ],
+
+        "status":[
+            "Planejada",
+            "Em andamento",
+            "Finalizada",
+            "Cancelada",
+            "Em construção"
+        ]
+
     }

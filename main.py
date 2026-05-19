@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import JSONResponse
 
 from database import SessionLocal
-
+from models import Usuario
 
 # imports dos seus arquivos atuais
 from routes_login import router as login_router

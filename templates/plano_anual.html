@@ -30,19 +30,19 @@
                     <select
                         id="eixo"
                         class="form-select"
-                        required
-                    >
+                        required>
                         <option value="">Selecione</option>
-                        <option value="PEDAGOGICO">
-                            Pedagógico
-                        </option>
 
-                        <option value="GESTAO">
-                            Gestão
+                        <option value="Ambientação Institucional/Formação Inicial">
+                            Ambientação Institucional/Formação Inicial
                         </option>
-
-                        <option value="TECNOLOGIA">
-                            Tecnologia
+                
+                        <option value="Gestão do Trabalho/Saúde Mental e Bem Estar">
+                            Gestão do Trabalho / Saúde Mental e Bem Estar
+                        </option>
+                
+                        <option value="Qualificação da Prática Socioeducativa Temas Transversais">
+                            Qualificação da Prática Socioeducativa Temas Transversais
                         </option>
 
                     </select>
@@ -268,8 +268,9 @@ document
 
 let dados={
 
-    ano:
-    document.getElementById("ano").value,
+    ano: parseInt(
+        document.getElementById("ano").value
+    ),
 
     eixo:
     document.getElementById("eixo").value,

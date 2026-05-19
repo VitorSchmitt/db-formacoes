@@ -18,6 +18,37 @@ from sqlalchemy.dialects.postgresql import ENUM
 from datetime import datetime
 
 from database import Base
+
+# ===============================
+# ENUMS
+# ===============================
+
+tipo_modalidade = ENUM(
+    "presencial",
+    "online",
+    "hibrido",
+    name="tipo_modalidade",
+    create_type=False
+)
+
+tipo_eixo = ENUM(
+    "Ambientação Institucional/Formação Inicial",
+    "Gestão do Trabalho/Saúde Mental e Bem Estar",
+    "Qualificação da Prática Socioeducativa Temas Transversais",
+    name="tipo_eixo",
+    create_type=False
+)
+
+tipo_status_formacao = ENUM(
+    "Planejada",
+    "Em andamento",
+    "Finalizada",
+    "Cancelada",
+    "Em construção",
+    name="tipo_status_formacao",
+    create_type=False
+)
+
 # ===============================
 # CARGO
 # ===============================

@@ -111,8 +111,8 @@ def listar(
                     if f.status
                     else None,
 
-                "plano_anual_id":
-                    f.plano_anual_id,
+                "plano_id":
+                    f.plano_id,
 
                 "ativo":
                     f.ativo
@@ -161,7 +161,7 @@ def criar(
         "meta_participantes": "Meta participantes",
         "investimento": "Investimento",
         "status": "Status",
-        "plano_anual_id": "Plano anual"
+        "plano_id": "Plano anual"
 
     }
 
@@ -235,7 +235,7 @@ def criar(
             investimento=dados.get("investimento"),
             meta_participantes=dados.get("meta_participantes"),
             status=dados.get("status"),
-            plano_anual_id=dados.get("plano_anual_id"),
+            plano_id=dados.get("plano_id"),
             ativo=True
 
         )

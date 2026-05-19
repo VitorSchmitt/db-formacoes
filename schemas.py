@@ -2,22 +2,39 @@ from pydantic import BaseModel
 from datetime import date
 from typing import Optional
 
+
+# ===============================
+# FORMAÇÃO
+# ===============================
 class FormacaoBase(BaseModel):
     descricao: str
-    data_termino: date
-    carga_horaria: int
-    modalidade: str
-    eixo: str
+    data_termino: Optional[date] = None
+    carga_horaria: Optional[int] = None
+    modalidade: Optional[str] = None
+
+    data_inicio: Optional[date] = None
+    periodo: Optional[str] = None
+    publico_alvo: Optional[str] = None
+    investimento: Optional[float] = None
+    meta_participantes: Optional[int] = 0
+    plano_id: Optional[int] = None
+
 
 class FormacaoCreate(FormacaoBase):
     pass
 
+
 class FormacaoUpdate(BaseModel):
-    descricao: Optional[str]
-    data_termino: Optional[date]
-    carga_horaria: Optional[int]
-    modalidade: Optional[str]
-    eixo: Optional[str]
+    descricao: Optional[str] = None
+    data_inicio: Optional[date] = None
+    data_termino: Optional[date] = None
+    periodo: Optional[str] = None
+    carga_horaria: Optional[int] = None
+    modalidade: Optional[str] = None
+    publico_alvo: Optional[str] = None
+    investimento: Optional[float] = None
+    meta_participantes: Optional[int] = None
+    plano_id: Optional[int] = None
 # ===============================
 # SERVIDOR
 # ===============================

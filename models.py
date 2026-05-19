@@ -1,152 +1,177 @@
-from pydantic import BaseModel
-from datetime import date
-from typing import Optional
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Text,
+    UniqueConstraint,
+    Numeric,
+    Float,
+    CheckConstraint
+)
 
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import ENUM
+from datetime import datetime
 
+from database import Base
 # ===============================
-# FORMAÇÃO
+# CARGO
 # ===============================
 
-class FormacaoBase(BaseModel):
-    descricao: str
+class Cargo(Base):
 
-    data_inicio: Optional[date] = None
-    data_termino: Optional[date] = None
-    periodo: Optional[str] = None
+    __tablename__ = "cargo"
 
-    carga_horaria: Optional[int] = None
-    modalidade: Optional[str] = None
-    eixo: Optional[str] = None
-    publico_alvo: Optional[str] = None
-
-    investimento: Optional[float] = None
-    meta_participantes: Optional[int] = 0
-
-    plano_id: Optional[int] = None
-
-
-class FormacaoCreate(FormacaoBase):
-    pass
-
-
-class FormacaoUpdate(BaseModel):
-    descricao: Optional[str] = None
-
-    data_inicio: Optional[date] = None
-    data_termino: Optional[date] = None
-    periodo: Optional[str] = None
-
-    carga_horaria: Optional[int] = None
-    modalidade: Optional[str] = None
-    eixo: Optional[str] = None
-    publico_alvo: Optional[str] = None
-
-    investimento: Optional[float] = None
-    meta_participantes: Optional[int] = None
-
-    plano_id: Optional[int] = None
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String(255), unique=True, nullable=False, index=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    servidores = relationship("Servidor", back_populates="cargo")
 
 
 # ===============================
 # SERVIDOR
 # ===============================
 
-class ServidorCreate(BaseModel):
-    matricula: str
-    nome: str
-    cargo_id: Optional[int] = None
+class Servidor(Base):
 
+    __tablename__ = "servidor"
 
-class ServidorUpdate(BaseModel):
-    nome: Optional[str] = None
-    cargo_id: Optional[int] = None
-
-
-# ===============================
-# CARGO
-# ===============================
-
-class CargoCreate(BaseModel):
-    descricao: str
-
-
-class CargoUpdate(BaseModel):
-    descricao: Optional[str] = None
-
-
-# ===============================
-# LOTAÇÃO
-# ===============================
-
-class LotacaoCreate(BaseModel):
-    descricao: str
-    tipo: str
-
-
-class LotacaoUpdate(BaseModel):
-    descricao: Optional[str] = None
-    tipo: Optional[str] = None
-    ativo: Optional[bool] = None
-
-
-# ===============================
-# PARTICIPAÇÃO
-# ===============================
-
-class ParticipacaoCreate(BaseModel):
-    matricula: str
-    formacao_id: int
-    lotacao_id: int
-    aproveitamento: Optional[float] = None
-
-
-class ParticipacaoUpdate(BaseModel):
-    lotacao_id: Optional[int] = None
-    aproveitamento: Optional[float] = None
-
-
-# ===============================
-# USUÁRIO
-# ===============================
-
-class UsuarioCreate(BaseModel):
-    username: str
-    senha: str
-    perfil: str
-    email: Optional[str] = None
-
-
-class UsuarioUpdate(BaseModel):
-    username: Optional[str] = None
-    senha: Optional[str] = None
-    perfil: Optional[str] = None
-    email: Optional[str] = None
-    ativo: Optional[bool] = None
-
-
-# ===============================
-# LOGIN
-# ===============================
-
-class LoginSchema(BaseModel):
-    username: str
-    senha: str
+    matricula = Column(String(20), primary_key=True, index=True)
+    nome = Column(String(255), nullable=False, index=True)
+    cargo_id = Column(Integer, ForeignKey("cargo.id"))
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ativo = Column(Boolean, default=True)
+    cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
+    participacoes = relationship("Participacao", back_populates="servidor")
 
 
 # ===============================
 # PLANO ANUAL
 # ===============================
 
-class PlanoAnualCreate(BaseModel):
-    ano: int
-    eixo: str
-    objetivo: Optional[str] = None
-    ementa: Optional[str] = None
+class PlanoAnual(Base):
+
+    __tablename__ = "plano_anual"
+
+    id = Column(Integer, primary_key=True, index=True)
+    ano = Column(Integer, nullable=False, index=True)
+    eixo = Column(tipo_eixo, nullable=False)
+    objetivo = Column(Text)
+    ementa = Column(Text)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ativo = Column(Boolean, default=True)
+    formacoes = relationship("Formacao", back_populates="plano")
 
 
-class PlanoAnualUpdate(BaseModel):
-    ano: Optional[int] = None
-    eixo: Optional[str] = None
-    objetivo: Optional[str] = None
-    ementa: Optional[str] = None
-    ativo: Optional[bool] = None
+# ===============================
+# FORMAÇÃO
+# ===============================
+
+class Formacao(Base):
+
+    __tablename__ = "formacao"
+
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String(255), nullable=False, index=True)
+    data_inicio = Column(Date)
+    data_termino = Column(Date, index=True)
+    periodo = Column(String(100))
+    carga_horaria = Column(Integer)
+    modalidade = Column(tipo_modalidade)    
+    publico_alvo = Column(String(300))
+    investimento = Column(Numeric(12,2))
+    meta_participantes = Column(Integer, nullable=False, default=0)
+    status = Column(
+        tipo_status_formacao,
+        nullable=False,
+        default="Planejada",
+        index=True
+    )
+    plano_id = Column(Integer, ForeignKey("plano_anual.id"), index=True)
+    plano = relationship("PlanoAnual", back_populates="formacoes")
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ativo = Column(Boolean, default=True, index=True)
+    participacoes = relationship("Participacao", back_populates="formacao")
+
+    __table_args__ = (
+
+        UniqueConstraint(
+            "descricao",
+            "plano_id",
+            name="uq_formacao_plano"
+        ),
+
+        CheckConstraint(
+            """
+            data_termino IS NULL
+            OR data_inicio IS NULL
+            OR data_termino >= data_inicio
+            """,
+            name="ck_formacao_datas_validas"
+        )
+    )
+
+
+# ===============================
+# LOTAÇÃO
+# ===============================
+
+class Lotacao(Base):
+
+    __tablename__ = "lotacao"
+
+    id = Column(Integer, primary_key=True, index=True)
+    descricao = Column(String(255), nullable=False, index=True)
+    tipo = Column(String(100), nullable=False, index=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ativo = Column(Boolean, default=True)
+    participacoes = relationship("Participacao", back_populates="lotacao")
+
+
+# ===============================
+# PARTICIPAÇÃO
+# ===============================
+
+class Participacao(Base):
+
+    __tablename__ = "participacao"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    matricula = Column(String(20), ForeignKey("servidor.matricula"), nullable=False)
+    formacao_id = Column(Integer, ForeignKey("formacao.id"), nullable=False)
+    lotacao_id = Column(Integer, ForeignKey("lotacao.id"), nullable=False)
+    aproveitamento = Column(Float)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    servidor = relationship("Servidor", back_populates="participacoes", lazy="joined")
+    formacao = relationship("Formacao", back_populates="participacoes", lazy="joined")
+    lotacao = relationship("Lotacao", back_populates="participacoes", lazy="joined")
+    __table_args__ = (
+        UniqueConstraint(
+            "matricula",
+            "formacao_id",
+            name="uq_participacao"
+        ),
+    )
+
+
+# ===============================
+# USUÁRIO
+# ===============================
+
+class Usuario(Base):
+
+    __tablename__ = "usuario"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    senha = Column(String(255), nullable=False)
+    perfil = Column(String(50), nullable=False, default="custom")
+    email = Column(String(255), unique=True)
+    ativo = Column(Boolean, default=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+    ultimo_login = Column(DateTime)

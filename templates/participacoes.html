@@ -423,6 +423,22 @@ async function deletar(id) {
         mostrarMsg({ erro: "Erro de conexão ao deletar" });
     }
 }
+// =====================
+// MENSAGENS (FIX)
+// =====================
+function mostrarMsg(r) {
+
+    let msg = document.getElementById("msg");
+    if (!msg) return;
+
+    if (r.erro) {
+        msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
+    } else {
+        msg.innerHTML = `<div class="alert alert-success">${r.ok ? "Sucesso" : "OK"}</div>`;
+    }
+
+    setTimeout(() => msg.innerHTML = "", 2500);
+}
 
 // =====================
 // UI

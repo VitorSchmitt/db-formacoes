@@ -38,10 +38,22 @@
         </div>
 
         <!-- LOTAÇÃO -->
-        <div class="col-md-4">
-            <select id="lotacao" class="form-select" required>
-                <option value="">Selecione a lotação</option>
-            </select>
+       <div class="col-md-4">
+
+        <input
+            type="text"
+            id="lotacao_busca"
+            class="form-control"
+            placeholder="Digite a lotação"
+            list="lista_lotacoes"
+            autocomplete="off"
+            required
+        >
+
+        <datalist id="lista_lotacoes"></datalist>
+
+        <input type="hidden" id="lotacao">
+
         </div>
 
         <!-- APROVEITAMENTO -->

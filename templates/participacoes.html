@@ -87,47 +87,26 @@ let timeoutMatricula;
 
 document.getElementById("matricula").addEventListener("input", async function () {
 
-    clearTimeout(timeoutMatricula);
+    let matricula = this.value.trim();
+    if (!matricula) return;
 
-    timeoutMatricula = setTimeout(async () => {
+    let res = await fetch(`/api/servidor/matricula/${matricula}`);
+    let data = await res.json();
 
-        let matricula = this.value.trim();
+    if (data.encontrado) {
 
-        if (!matricula) {
-            document.getElementById("nome_servidor").innerHTML = "";
-            return;
-        }
+        // ✔ seleciona pelo value (matrícula)
+        document.getElementById("servidor").value = data.matricula;
 
-        try {
+        // ✔ mostra nome
+        document.getElementById("nome_servidor").innerHTML =
+            `👤 ${data.nome}`;
 
-            let res = await fetch(`/api/servidor/matricula/${matricula}`);
-            let data = await res.json();
+    } else {
 
-            if (data.encontrado) {
-
-                // seleciona no dropdown
-                document.getElementById("servidor").value = data.id;
-
-                // MOSTRA O NOME NA TELA 👇
-                document.getElementById("nome_servidor").innerHTML =
-                    `👤 ${data.nome}`;
-
-            } else {
-
-                document.getElementById("nome_servidor").innerHTML =
-                    `<span class="text-danger">Servidor não encontrado</span>`;
-
-                document.getElementById("servidor").value = "";
-            }
-
-        } catch (err) {
-
-            console.error(err);
-
-        }
-
-    }, 300);
-
+        document.getElementById("nome_servidor").innerHTML =
+            `<span class="text-danger">Servidor não encontrado</span>`;
+    }
 });
 
     

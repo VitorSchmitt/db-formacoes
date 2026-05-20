@@ -202,6 +202,11 @@ async function carregarServidores() {
 // =====================
 // LOTAÇÕES
 // =====================
+let lotacoesCache = [];
+
+// =====================
+// LOTAÇÕES
+// =====================
 async function carregarLotacoes() {
 
     try {
@@ -215,13 +220,22 @@ async function carregarLotacoes() {
             });
         }
 
-        let select = document.getElementById("lotacao");
-        if (!select) return;
+        lotacoesCache = data || [];
 
-        select.innerHTML = `<option value="">Selecione a lotação</option>`;
+        let lista = document.getElementById("lista_lotacoes");
 
-        (data || []).forEach(l => {
-            select.add(new Option(l.descricao, l.id));
+        if (!lista) return;
+
+        lista.innerHTML = "";
+
+        lotacoesCache.forEach(l => {
+
+            let option = document.createElement("option");
+
+            option.value = l.descricao;
+            option.dataset.id = l.id;
+
+            lista.appendChild(option);
         });
 
     } catch (err) {

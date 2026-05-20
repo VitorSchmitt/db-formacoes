@@ -235,7 +235,7 @@ def criar(
             investimento=dados.get("investimento"),
             meta_participantes=dados.get("meta_participantes"),
             status=dados.get("status"),
-            plano_id=dados.get("plano_id"),
+            plano_id=dados.get("plano_anual_id"),
             ativo=True
 
         )

@@ -3,7 +3,6 @@
 {% block content %}
 
 <h2>📊 Participação em Formação</h2>
-
 <!-- ===================== -->
 <!-- FORMAÇÃO -->
 <!-- ===================== -->
@@ -24,18 +23,34 @@
 <form onsubmit="salvar(event)">
     <div class="row mb-3">
 
-        <div class="col-md-3">
-            <select id="servidor" class="form-select" required>
-            <option value="">Selecione o servidor</option>
-        </select>
-        </div>
-
+        <!-- MATRÍCULA + SERVIDOR -->
         <div class="col-md-4">
-            <select id="lotacao" class="form-select" required></select>
+
+            <input type="text"
+                   id="matricula"
+                   class="form-control mb-2"
+                   placeholder="Digite a matrícula">
+
+            <select id="servidor" class="form-select" required>
+                <option value="">Selecione o servidor</option>
+            </select>
+
         </div>
 
-        <div class="col-md-3">
-            <input type="text" id="aproveitamento" class="form-control" placeholder="Aproveitamento" required>
+        <!-- LOTAÇÃO -->
+        <div class="col-md-4">
+            <select id="lotacao" class="form-select" required>
+                <option value="">Selecione a lotação</option>
+            </select>
+        </div>
+
+        <!-- APROVEITAMENTO -->
+        <div class="col-md-4">
+            <input type="text"
+                   id="aproveitamento"
+                   class="form-control"
+                   placeholder="Aproveitamento"
+                   required>
         </div>
 
     </div>

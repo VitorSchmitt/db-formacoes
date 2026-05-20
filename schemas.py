@@ -23,7 +23,7 @@ class FormacaoBase(BaseModel):
     meta_participantes: Optional[int] = 0
 
     plano_id: Optional[int] = None
-
+    status: Optional[str] = None
 
 class FormacaoCreate(FormacaoBase):
     pass
@@ -45,7 +45,7 @@ class FormacaoUpdate(BaseModel):
     meta_participantes: Optional[int] = None
 
     plano_id: Optional[int] = None
-
+    status: Optional[str] = None
 
 # ===============================
 # SERVIDOR

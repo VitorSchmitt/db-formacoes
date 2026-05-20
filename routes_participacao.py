@@ -211,3 +211,21 @@ def listar_formacoes_ativas(db: Session = Depends(get_db)):
         }
         for f in dados
     ]
+    
+@router.get("/api/servidor/matricula/{matricula}")
+def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
+
+    servidor = db.query(Servidor).filter(
+        Servidor.matricula == matricula
+    ).first()
+
+    if not servidor:
+        return {"encontrado": False}
+
+    return {
+        "encontrado": True,
+        "id": servidor.id,
+        "nome": servidor.nome,
+        "matricula": servidor.matricula,
+        "lotacao": servidor.lotacao
+    }

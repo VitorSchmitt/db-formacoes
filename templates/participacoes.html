@@ -3,6 +3,7 @@
 {% block content %}
 
 <h2>📊 Participação em Formação</h2>
+
 <!-- ===================== -->
 <!-- FORMAÇÃO -->
 <!-- ===================== -->
@@ -30,7 +31,9 @@
                    id="matricula"
                    class="form-control mb-2"
                    placeholder="Digite a matrícula">
+
             <div id="nome_servidor" class="text-primary small mb-2"></div>
+
             <select id="servidor" class="form-select" required>
                 <option value="">Selecione o servidor</option>
             </select>
@@ -38,21 +41,21 @@
         </div>
 
         <!-- LOTAÇÃO -->
-       <div class="col-md-4">
+        <div class="col-md-4">
 
-        <input
-            type="text"
-            id="lotacao_busca"
-            class="form-control"
-            placeholder="Digite a lotação"
-            list="lista_lotacoes"
-            autocomplete="off"
-            required
-        >
+            <input
+                type="text"
+                id="lotacao_busca"
+                class="form-control"
+                placeholder="Digite a lotação"
+                list="lista_lotacoes"
+                autocomplete="off"
+                required
+            >
 
-        <datalist id="lista_lotacoes"></datalist>
+            <datalist id="lista_lotacoes"></datalist>
 
-        <input type="hidden" id="lotacao">
+            <input type="hidden" id="lotacao">
 
         </div>
 
@@ -82,18 +85,20 @@
 <input type="text" id="busca" class="form-control mb-3" placeholder="Buscar..." onkeyup="carregarTabela()">
 
 <div id="tabela"></div>
+
 <style>
 .table{
     font-size: 0.82rem;
 }
 </style>
+
 <script>
 
 let formacaoAtual = null;
 let timeoutMatricula = null;
 
 // =====================
-// AUTOCOMPLETE MATRÍCULA (COM DEBOUNCE)
+// AUTOCOMPLETE MATRÍCULA
 // =====================
 const inputMatricula = document.getElementById("matricula");
 
@@ -118,7 +123,6 @@ if (inputMatricula) {
                 if (data?.encontrado) {
 
                     document.getElementById("servidor").value = data.matricula;
-
                     nomeEl.innerHTML = `👤 ${data.nome}`;
 
                 } else {
@@ -200,48 +204,71 @@ async function carregarServidores() {
 }
 
 // =====================
-// LOTAÇÕES
+// LOTAÇÃO (AUTOCOMPLETE DINÂMICO)
 // =====================
-let lotacoesCache = [];
+const inputLotacao = document.getElementById("lotacao_busca");
 
-// =====================
-// LOTAÇÕES
-// =====================
-async function carregarLotacoes() {
+if (inputLotacao) {
 
-    try {
+    inputLotacao.addEventListener("input", async function () {
 
-        let res = await api("/api/lotacoes/ativas");
-        let data = await res.json();
+        let termo = this.value.trim();
 
-        if (!res.ok) {
-            return mostrarMsg({
-                erro: data.erro || "Erro ao carregar lotações"
+        document.getElementById("lotacao").value = "";
+
+        if (termo.length < 3) return;
+
+        try {
+
+            let res = await api(`/api/lotacoes?termo=${encodeURIComponent(termo)}`);
+            let data = await res.json();
+
+            let lista = document.getElementById("lista_lotacoes");
+            lista.innerHTML = "";
+
+            (data || []).forEach(l => {
+
+                let option = document.createElement("option");
+                option.value = l.descricao;
+                lista.appendChild(option);
             });
+
+            let encontrada = (data || []).find(l =>
+                l.descricao.toLowerCase() === termo.toLowerCase()
+            );
+
+            if (encontrada) {
+                document.getElementById("lotacao").value = encontrada.id;
+            }
+
+        } catch (err) {
+            console.error(err);
         }
+    });
 
-        lotacoesCache = data || [];
+    inputLotacao.addEventListener("change", async function () {
 
-        let lista = document.getElementById("lista_lotacoes");
+        let termo = this.value.trim();
 
-        if (!lista) return;
+        if (!termo) return;
 
-        lista.innerHTML = "";
+        try {
 
-        lotacoesCache.forEach(l => {
+            let res = await api(`/api/lotacoes?termo=${encodeURIComponent(termo)}`);
+            let data = await res.json();
 
-            let option = document.createElement("option");
+            let encontrada = (data || []).find(l =>
+                l.descricao.toLowerCase() === termo.toLowerCase()
+            );
 
-            option.value = l.descricao;
-            option.dataset.id = l.id;
+            if (encontrada) {
+                document.getElementById("lotacao").value = encontrada.id;
+            }
 
-            lista.appendChild(option);
-        });
-
-    } catch (err) {
-        console.error(err);
-        mostrarMsg({ erro: "Erro de conexão (lotações)" });
-    }
+        } catch (err) {
+            console.error(err);
+        }
+    });
 }
 
 // =====================
@@ -405,27 +432,13 @@ function limpar() {
     document.getElementById("servidor").value = "";
     document.getElementById("aproveitamento").value = "";
     document.getElementById("lotacao").value = "";
-}
-
-function mostrarMsg(r) {
-
-    let msg = document.getElementById("msg");
-    if (!msg) return;
-
-    if (r.erro) {
-        msg.innerHTML = `<div class="alert alert-danger">${r.erro}</div>`;
-    } else {
-        msg.innerHTML = `<div class="alert alert-success">${r.ok ? "Sucesso" : "OK"}</div>`;
-    }
-
-    setTimeout(() => msg.innerHTML = "", 2500);
+    document.getElementById("lotacao_busca").value = "";
 }
 
 // =====================
 // INIT
 // =====================
 carregarFormacoes();
-carregarLotacoes();
 carregarServidores();
 
 </script>

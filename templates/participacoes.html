@@ -81,6 +81,41 @@ let formacaoAtual = null;
 
 
 // =====================
+// AUTOCOMPLETE MATRÍCULA
+// =====================
+let timeoutMatricula;
+
+document.getElementById("matricula").addEventListener("input", async function () {
+
+    clearTimeout(timeoutMatricula);
+
+    timeoutMatricula = setTimeout(async () => {
+
+        let matricula = this.value.trim();
+        if (!matricula) return;
+
+        try {
+
+            let res = await fetch(`/api/servidor/matricula/${matricula}`);
+            let data = await res.json();
+
+            if (data.encontrado) {
+
+                // seleciona servidor pelo ID (CORRETO)
+                document.getElementById("servidor").value = data.id;
+
+            }
+
+        } catch (err) {
+            console.error("Erro matrícula:", err);
+        }
+
+    }, 300);
+
+});
+
+    
+// =====================
 // FORMAÇÕES
 // =====================
 async function carregarFormacoes() {
@@ -372,6 +407,7 @@ async function deletar(id) {
         console.error(err);
     }
 }
+
 
 // =====================
 // UI

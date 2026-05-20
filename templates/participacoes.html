@@ -30,7 +30,7 @@
                    id="matricula"
                    class="form-control mb-2"
                    placeholder="Digite a matrícula">
-
+            <div id="nome_servidor" class="text-primary small mb-2"></div>
             <select id="servidor" class="form-select" required>
                 <option value="">Selecione o servidor</option>
             </select>
@@ -92,7 +92,11 @@ document.getElementById("matricula").addEventListener("input", async function ()
     timeoutMatricula = setTimeout(async () => {
 
         let matricula = this.value.trim();
-        if (!matricula) return;
+
+        if (!matricula) {
+            document.getElementById("nome_servidor").innerHTML = "";
+            return;
+        }
 
         try {
 
@@ -101,13 +105,25 @@ document.getElementById("matricula").addEventListener("input", async function ()
 
             if (data.encontrado) {
 
-                // seleciona servidor pelo ID (CORRETO)
+                // seleciona no dropdown
                 document.getElementById("servidor").value = data.id;
 
+                // MOSTRA O NOME NA TELA 👇
+                document.getElementById("nome_servidor").innerHTML =
+                    `👤 ${data.nome}`;
+
+            } else {
+
+                document.getElementById("nome_servidor").innerHTML =
+                    `<span class="text-danger">Servidor não encontrado</span>`;
+
+                document.getElementById("servidor").value = "";
             }
 
         } catch (err) {
-            console.error("Erro matrícula:", err);
+
+            console.error(err);
+
         }
 
     }, 300);

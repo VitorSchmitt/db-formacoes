@@ -228,3 +228,12 @@ def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
         "nome": servidor.nome       
        
     }
+
+@router.get("/lotacoes")
+def buscar_lotacoes(termo: str):
+
+    return (
+        db.query(Lotacao)
+        .filter(Lotacao.nome.ilike(f"%{termo}%"))
+        .all()
+    )

@@ -224,8 +224,7 @@ def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
 
     return {
         "encontrado": True,
-        "id": servidor.id,
-        "nome": servidor.nome,
         "matricula": servidor.matricula,
+        "nome": servidor.nome,        
         "lotacao": servidor.lotacao
     }

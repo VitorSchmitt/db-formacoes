@@ -149,7 +149,7 @@ async function carregarTabela() {
                 ? `
                     <button
                         class="btn btn-danger btn-sm"
-                        onclick="alterarStatus(${u.id}, false)"
+                        onclick="alterarStatus(${u.id})"
                         title="Desativar"
                     >
                         ⛔
@@ -158,7 +158,7 @@ async function carregarTabela() {
                 : `
                     <button
                         class="btn btn-success btn-sm"
-                        onclick="alterarStatus(${u.id}, true)"
+                        onclick="alterarStatus(${u.id})"
                         title="Ativar"
                     >
                         ✅
@@ -301,19 +301,17 @@ function editar(u) {
 // ==========================
 // ALTERAR STATUS
 // ==========================
-async function alterarStatus(id, ativo) {
+
+async function alterarStatus(id) {
 
     try {
 
-        let res = await api(`/api/usuario/${id}/status`, {
-
-            method: "PUT",
-
-            body: JSON.stringify({
-                ativo: ativo
-            })
-
-        });
+        let res = await api(
+            `/api/usuario/status/${id}`,
+            {
+                method: "PUT"
+            }
+        );
 
         let r = await res.json();
 

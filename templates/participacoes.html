@@ -30,10 +30,7 @@
             <input type="text"
                    id="matricula"
                    class="form-control mb-2"
-                   placeholder="Digite a matrícula">
-
-            <div id="nome_servidor" class="text-primary small mb-2"></div>
-
+                   placeholder="Digite a matrícula"
             <input type="hidden" id="servidor">
             <div id="nome_servidor"
                  class="text-primary small mb-2">
@@ -124,7 +121,7 @@ if (inputMatricula) {
                 if (data?.encontrado) {
 
                     document.getElementById("servidor").value = data.matricula;
-                    nomeEl.innerHTML = 👤 ${data.nome}<br> Matrícula: ${data.matricula};
+                    nomeEl.innerHTML = `👤 ${data.nome}<br> Matrícula: ${data.matricula}`;
 
                 } else {
                     document.getElementById("servidor").value = "";
@@ -137,7 +134,7 @@ if (inputMatricula) {
             } catch (err) {
                 console.error(err);
             }
-        }, 300);
+        }, 400);
     });
 }
 
@@ -417,11 +414,13 @@ function mostrarMsg(r) {
 }
 
 // =====================
-// UI
+// LIMPAR
 // =====================
 function limpar() {
 
+    document.getElementById("matricula").value = "";
     document.getElementById("servidor").value = "";
+    document.getElementById("nome_servidor").innerHTML = "";
     document.getElementById("aproveitamento").value = "";
     document.getElementById("lotacao").value = "";
     document.getElementById("lotacao_busca").value = "";

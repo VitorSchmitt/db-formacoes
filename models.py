@@ -40,8 +40,7 @@ tipo_eixo = ENUM(
 )
 
 tipo_status_formacao = ENUM(
-    "Planejada",
-    "Em andamento",
+    "Planejada",    
     "Finalizada",
     "Cancelada",
     "Em construção",

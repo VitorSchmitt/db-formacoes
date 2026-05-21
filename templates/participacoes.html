@@ -34,9 +34,10 @@
 
             <div id="nome_servidor" class="text-primary small mb-2"></div>
 
-            <select id="servidor" class="form-select" required>
-                <option value="">Selecione o servidor</option>
-            </select>
+            <input type="hidden" id="servidor">
+            <div id="nome_servidor"
+                 class="text-primary small mb-2">
+            </div>
 
         </div>
 
@@ -123,11 +124,14 @@ if (inputMatricula) {
                 if (data?.encontrado) {
 
                     document.getElementById("servidor").value = data.matricula;
-                    nomeEl.innerHTML = `👤 ${data.nome}`;
+                    nomeEl.innerHTML = 👤 ${data.nome}<br> Matrícula: ${data.matricula};
 
                 } else {
+                    document.getElementById("servidor").value = "";
                     nomeEl.innerHTML =
-                        `<span class="text-danger">Servidor não encontrado</span>`;
+                    `<span class="text-danger">
+                    Servidor não encontrado
+                    </span>`;
                 }
 
             } catch (err) {
@@ -174,34 +178,6 @@ async function carregarFormacoes() {
     }
 }
 
-// =====================
-// SERVIDORES
-// =====================
-async function carregarServidores() {
-
-    try {
-
-        let res = await api("/api/servidores/ativos");
-        let data = await res.json();
-
-        let select = document.getElementById("servidor");
-        if (!select) return;
-
-        select.innerHTML = `<option value="">Selecione o servidor</option>`;
-
-        (data || []).forEach(s => {
-            select.innerHTML += `
-                <option value="${s.matricula}">
-                    ${s.nome} (${s.matricula})
-                </option>
-            `;
-        });
-
-    } catch (err) {
-        console.error(err);
-        mostrarMsg({ erro: "Erro ao carregar servidores" });
-    }
-}
 
 // =====================
 // LOTAÇÃO (AUTOCOMPLETE DINÂMICO)
@@ -455,7 +431,7 @@ function limpar() {
 // INIT
 // =====================
 carregarFormacoes();
-carregarServidores();
+
 
 </script>
 

@@ -30,7 +30,7 @@
             <input type="text"
                    id="matricula"
                    class="form-control mb-2"
-                   placeholder="Digite a matrícula"
+                   placeholder="Digite a matrícula">
             <input type="hidden" id="servidor">
             <div id="nome_servidor"
                  class="text-primary small mb-2">
@@ -111,7 +111,7 @@ if (inputMatricula) {
         timeoutMatricula = setTimeout(async () => {
             try {
 
-                let res = await api("/api/servidor/matricula/${matricula}");
+                let res = await api(`/api/servidor/matricula/${matricula}`);
                 let data = await res.json();
 
                 const nomeEl = document.getElementById("nome_servidor");
@@ -120,16 +120,16 @@ if (inputMatricula) {
 
                 if (data && data.matricula) {
                     document.getElementById("servidor").value = data.matricula;
-                    nomeEl.innerHTML = "
+                    nomeEl.innerHTML =`
                     👤 ${data.nome}<br>
-                    Matrícula: ${data.matricula}";
+                    Matrícula: ${data.matricula}`;
 
                     } else {                    
                         document.getElementById("servidor").value = "";                    
-                        nomeEl.innerHTML ="
+                        nomeEl.innerHTML =`
                             <span class="text-danger">
                                 Servidor não encontrado
-                            </span>";
+                            </span>`;
                     }
 
             } catch (err) {

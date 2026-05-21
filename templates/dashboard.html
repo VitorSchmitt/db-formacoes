@@ -123,16 +123,32 @@ function montarURL() {
 }
 
 async function carregar() {
+
+    filtros.mes_inicio =document.getElementById("mes_inicio").value;
+    filtros.mes_fim =document.getElementById("mes_fim").value;
+    filtros.lotacao =document.getElementById("filtroLotacao").value;
+    filtros.curso =document.getElementById("filtroCurso").value;
+    filtros.eixo =document.getElementById("filtroEixo").value;
+
     try {
+
+        document.getElementById("loading").style.display="block";
+
         let res = await fetch(montarURL());
+
         let data = await res.json();
 
         atualizarCards(data);
         preencherFiltros(data);
         montarGraficos(data);
 
-    } catch (err) {
+    } catch(err){
+
         console.error(err);
+
+    } finally {
+
+        document.getElementById("loading").style.display="none";
     }
 }
 
@@ -146,27 +162,57 @@ function atualizarCards(data) {
     document.getElementById("mediaServidor").innerText = data.cards?.media_por_servidor || 0;
 }
 
-function preencherFiltros(data) {
+function preencherFiltros(data){
 
-    let lotacao = document.getElementById("filtroLotacao");
-    let curso = document.getElementById("filtroCurso");
-    let eixo = document.getElementById("filtroEixo");
+    let lotacao=document.getElementById("filtroLotacao");
+    let curso=document.getElementById("filtroCurso");
+    let eixo=document.getElementById("filtroEixo");
 
-    lotacao.innerHTML = `<option value="">Todas</option>`;
-    curso.innerHTML = `<option value="">Todos</option>`;
-    eixo.innerHTML = `<option value="">Todos</option>`;
+    if(lotacao.options.length<=1){
 
-    (data.lotacao || []).forEach(x => {
-        lotacao.add(new Option(x.lotacao, x.lotacao));
-    });
+        (data.lotacao || []).forEach(x=>{
+            lotacao.add(
+                new Option(x.lotacao,x.lotacao)
+            );
+        });
+    }
 
-    (data.curso || []).forEach(x => {
-        curso.add(new Option(x.formacao, x.formacao));
-    });
+    if(curso.options.length<=1){
 
-    (data.eixo || []).forEach(x => {
-        eixo.add(new Option(x.eixo, x.eixo));
-    });
+        (data.curso || []).forEach(x=>{
+            curso.add(
+                new Option(x.formacao,x.formacao)
+            );
+        });
+    }
+
+    if(eixo.options.length<=1){
+
+        (data.eixo || []).forEach(x=>{
+            eixo.add(
+                new Option(x.eixo,x.eixo)
+            );
+        });
+    }
+}
+
+function limparFiltros(){
+
+    document.getElementById("mes_inicio").value="";
+    document.getElementById("mes_fim").value="";
+    document.getElementById("filtroLotacao").value="";
+    document.getElementById("filtroCurso").value="";
+    document.getElementById("filtroEixo").value="";
+
+    filtros = {
+        mes_inicio:"",
+        mes_fim:"",
+        lotacao:"",
+        curso:"",
+        eixo:""
+    };
+
+    carregar();
 }
 
 function montarGraficos(data) {

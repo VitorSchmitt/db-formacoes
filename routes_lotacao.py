@@ -18,7 +18,7 @@ def listar_lotacoes(db: Session = Depends(get_db)):
     Lotacao.descricao,
     Lotacao.tipo,
     Lotacao.ativo
-    ).order_by(Lotacao.tipo, Lotacao.descricao)
+    ).order_by(Lotacao.ativo,Lotacao.tipo, Lotacao.descricao)
 
     result = db.execute(stmt).all()
 

@@ -111,25 +111,26 @@ if (inputMatricula) {
         timeoutMatricula = setTimeout(async () => {
             try {
 
-                let res = await fetch(`/api/servidor/matricula/${matricula}`);
+                let res = await api("/api/servidor/matricula/${matricula}");
                 let data = await res.json();
 
                 const nomeEl = document.getElementById("nome_servidor");
 
                 if (!nomeEl) return;
 
-                if (data?.encontrado) {
-
+                if (data && data.matricula) {
                     document.getElementById("servidor").value = data.matricula;
-                    nomeEl.innerHTML = `👤 ${data.nome}<br> Matrícula: ${data.matricula}`;
+                    nomeEl.innerHTML = "
+                    👤 ${data.nome}<br>
+                    Matrícula: ${data.matricula}";
 
-                } else {
-                    document.getElementById("servidor").value = "";
-                    nomeEl.innerHTML =
-                    `<span class="text-danger">
-                    Servidor não encontrado
-                    </span>`;
-                }
+                    } else {                    
+                        document.getElementById("servidor").value = "";                    
+                        nomeEl.innerHTML ="
+                            <span class="text-danger">
+                                Servidor não encontrado
+                            </span>";
+                    }
 
             } catch (err) {
                 console.error(err);

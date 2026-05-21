@@ -401,8 +401,7 @@ def enums():
 
         "status":[
 
-            "Planejada",
-            "Em andamento",
+            "Planejada",            
             "Finalizada",
             "Cancelada",
             "Em construção"

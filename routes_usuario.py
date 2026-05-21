@@ -42,7 +42,10 @@ def listar_usuarios(db: Session = Depends(get_db)):
             "id": u.id,
             "username": u.username,
             "perfil": u.perfil,
-            "ativo": u.ativo
+            "ativo": u.ativo,
+            "email": u.email,
+            "criado_em": u.criado_em,
+            "ultimo_login": u.ultimo_login
         }
         for u in dados
     ]

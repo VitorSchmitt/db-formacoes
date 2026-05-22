@@ -177,14 +177,26 @@ function preencherFiltros(data){
         });
     }
 
-    if(curso.options.length<=1){
+    if(curso.options.length <= 1){
 
-        (data.curso || []).forEach(x=>{
-            curso.add(
-                new Option(x.formacao,x.formacao)
-            );
-        });
-    }
+    (data.curso || [])
+    .sort((a,b)=>
+        a.formacao.localeCompare(
+            b.formacao,
+            'pt-BR'
+        )
+    )
+    .forEach(x=>{
+
+        curso.add(
+            new Option(
+                x.formacao,
+                x.formacao
+            )
+        );
+
+    });
+}
 
     if(eixo.options.length<=1){
 

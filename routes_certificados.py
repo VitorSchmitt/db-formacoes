@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
-from models import Participacao, Formacao
+from models import Participacao, Formacao, Servidor
 
 from tempfile import NamedTemporaryFile
 from datetime import datetime

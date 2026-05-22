@@ -67,6 +67,8 @@
 
     <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Certificados</h6><h2 id="certificados">0</h2></div></div></div>
 
+    <div class="col-md-2"><div class="card text-white bg-info text-center"><div class="card-body"><h6>Matrículas</h6><h2 id="servidoresUnicos"></h2></div></div></div>
+
     <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Evasão</h6><h2 id="evasao">0</h2></div></div></div>
 
     <div class="col-md-2"><div class="card shadow-sm text-center"><div class="card-body"><h6>Taxa Evasão</h6><h2 id="taxaEvasao">0%</h2></div></div></div>
@@ -156,6 +158,7 @@ function atualizarCards(data) {
 
     document.getElementById("total").innerText = data.cards?.participacoes || 0;
     document.getElementById("certificados").innerText = data.cards?.certificados || 0;
+    document.getElementById("servidoresUnicos").innerText=data.servidores_unicos || 0;
     document.getElementById("evasao").innerText = data.cards?.evasao || 0;
     document.getElementById("taxaEvasao").innerText = (data.cards?.taxa_evasao || 0) + "%";
     document.getElementById("cargaRealizada").innerText = (data.cards?.carga_realizada || 0) + "h";

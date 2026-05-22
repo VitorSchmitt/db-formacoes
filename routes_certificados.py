@@ -424,13 +424,18 @@ def listar_aptos(
     participacoes = (
 
         db.query(Participacao)
-
+    
         .join(Formacao)
-
+        .join(Servidor)
+    
         .filter(
             Participacao.formacao_id == formacao_id
         )
-
+    
+        .order_by(
+            Servidor.nome
+        )
+    
         .all()
     )
 

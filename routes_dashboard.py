@@ -408,6 +408,8 @@ def dashboard(
 
                 "certificados": certificados,
 
+                "servidores_unicos": servidores_unicos,
+
                 "evasao": evasao,
 
                 "taxa_evasao": taxa_evasao,

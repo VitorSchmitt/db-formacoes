@@ -7,7 +7,7 @@
 
 <div id="dashboard">
 <h2 class="mb-4">📊 Dashboard de Formações</h2>
-<button onclick="exportarPDF()">PDF</button>
+
 <div id="erro" class="alert alert-danger" style="display:none"></div>
 
 <div id="loading" style="display:none;font-weight:bold;">
@@ -57,6 +57,10 @@
 
     <div class="col-md-1 d-flex align-items-end">
         <button onclick="limparFiltros()" class="btn btn-secondary w-100">⟲</button>
+    </div>
+
+    <div class="col-md-1 d-flex align-items-end">
+        <button onclick="exportarPDF()" class="btn btn-secondary w-100" >PDF</button>        
     </div>
 
 </div>

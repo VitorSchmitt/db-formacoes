@@ -171,15 +171,27 @@ function preencherFiltros(data){
     let curso=document.getElementById("filtroCurso");
     let eixo=document.getElementById("filtroEixo");
 
-    if(lotacao.options.length<=1){
+    if (lotacao.options.length <= 1) {
 
-        (data.lotacao || []).forEach(x=>{
+    (data.lotacao || [])
+        .sort((a, b) =>
+            a.lotacao.localeCompare(
+                b.lotacao,
+                'pt-BR',
+                { sensitivity: 'base' }
+            )
+        )
+        .forEach(x => {
+
             lotacao.add(
-                new Option(x.lotacao,x.lotacao)
+                new Option(
+                    x.lotacao,
+                    x.lotacao
+                )
             );
-        });
-    }
 
+        });
+}
     if(curso.options.length <= 1){
 
     (data.curso || [])

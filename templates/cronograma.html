@@ -148,8 +148,14 @@ async function carregarCronograma() {
                 </td>
 
                 <td>
-                    ${item.status}
-                </td>
+                   <span class="badge
+                       ${item.status === 'Planejada' ? 'bg-warning' :
+                         item.status === 'Realizada' ? 'bg-success' :
+                         'bg-secondary'}">               
+                       ${item.status}
+               
+                   </span>
+               </td>
 
             </tr>
 

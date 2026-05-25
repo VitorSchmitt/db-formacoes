@@ -18,7 +18,9 @@ PUBLIC_PATHS = [
     "/web/usuarios",
     "/web/lotacoes",
     "/web/certificados",
-    "/web/plano_anual"
+    "/web/plano_anual",
+    "/web/cronograma"
+    
     
 ]
 
@@ -43,8 +45,12 @@ PERMISSOES = {
         "/api/certificados"
     ],
     "custom": [ 
-        "/web/dashboard",        
-        "/api/dashboard"
+        "/web/dashboard",
+        "/web/plano_anual",
+        "/web/cronograma",        
+        "/api/dashboard",
+        "/api/dashboard",
+        "/api/plano_anual"
     ]
     
 }

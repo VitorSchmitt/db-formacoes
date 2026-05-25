@@ -7,7 +7,7 @@
 
 <div id="dashboard">
 <h2 class="mb-4">📊 Dashboard de Formações</h2>
-
+<button onclick="exportarPDF()">PDF</button>
 <div id="erro" class="alert alert-danger" style="display:none"></div>
 
 <div id="loading" style="display:none;font-weight:bold;">
@@ -275,7 +275,8 @@ function preencherFiltros(data){
     .sort((a,b)=>
         a.formacao.localeCompare(
             b.formacao,
-            'pt-BR'
+            'pt-BR',
+            { sensitivity: 'base' }
         )
     )
     .forEach(x=>{
@@ -422,6 +423,8 @@ function montarGraficos(data) {
     
 
 window.carregar = carregar;
+window.exportarPDF = exportarPDF;
+window.limparFiltros = limparFiltros;
 
 document.addEventListener("DOMContentLoaded", carregar);
 

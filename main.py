@@ -16,7 +16,7 @@ from routes_dashboard import router as dashboard_router
 from routes_lotacao import router as lotacao_router
 from routes_certificados import router as certificado_router
 from routes_plano_anual import router as plano_anual_router
-
+from routes_cronograma import router as cronograma_router
 
 from middleware import AuthMiddleware
 
@@ -48,7 +48,7 @@ app.include_router(dashboard_router)
 app.include_router(lotacao_router)
 app.include_router(certificado_router)
 app.include_router(plano_anual_router)
-
+app.include_router(cronograma_router)
 # ===============================
 # WEB
 # ===============================
@@ -138,4 +138,12 @@ def tela_plano(
         {
             "request":request
         }
+    )
+
+@app.get("/web/cronograma")
+def tela_cronograma(request: Request):
+
+    return templates.TemplateResponse(
+        "cronograma.html",
+        {"request": request}
     )

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">📅 Cronograma Anual</h2>
+
+<div id="erro"
+     class="alert alert-danger"
+     style="display:none">
+</div>
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+
+        <label class="form-label">
+            Ano
+        </label>
+
+        <input
+            type="number"
+            id="ano"
+            class="form-control"
+            value="{{now().year if now else 2026}}"
+        >
+
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+
+        <button
+            onclick="carregarCronograma()"
+            class="btn btn-dark w-100">
+
+            Buscar
+
+        </button>
+
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+
+        <button
+            onclick="exportarPDF()"
+            class="btn btn-danger w-100">
+
+            📄 PDF
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>Período</th>
+                        <th>Formação</th>
+                        <th>Eixo</th>
+                        <th>CH</th>
+                        <th>Público</th>
+                        <th>Investimento</th>
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tabelaCronograma">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function carregarCronograma() {
+
+    let ano =
+        document.getElementById(
+            "ano"
+        ).value;
+
+    try{
+
+        let resposta =
+            await fetch(
+                `/api/cronograma/${ano}`
+            );
+
+        let dados =
+            await resposta.json();
+
+        let tabela =
+            document.getElementById(
+                "tabelaCronograma"
+            );
+
+        tabela.innerHTML="";
+
+        dados.forEach(item=>{
+
+            tabela.innerHTML += `
+
+            <tr>
+
+                <td>${item.periodo}</td>
+
+                <td>
+                    ${item.descricao}
+                </td>
+
+                <td>
+                    ${item.eixo}
+                </td>
+
+                <td>
+                    ${item.carga_horaria}h
+                </td>
+
+                <td>
+                    ${item.publico}
+                </td>
+
+                <td>
+
+                    R$
+                    ${item.investimento}
+
+                </td>
+
+                <td>
+                    ${item.status}
+                </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+function exportarPDF(){
+
+    let ano =
+        document.getElementById(
+            "ano"
+        ).value;
+
+    window.open(
+        `/cronograma/pdf/${ano}`
+    );
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    carregarCronograma
+);
+
+</script>
+
+{% endblock %}

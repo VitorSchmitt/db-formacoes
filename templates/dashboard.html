@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<div id="dashboard">
 <h2 class="mb-4">📊 Dashboard de Formações</h2>
 
 <div id="erro" class="alert alert-danger" style="display:none"></div>
@@ -104,6 +104,7 @@
 <div class="row">
     <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g7"></div></div></div></div>
 </div>
+</div>
 
 <script>
 (() => {
@@ -115,6 +116,78 @@ let filtros = {
     curso: "",
     eixo: ""
 };
+
+async function exportarPDF() {
+
+    const { jsPDF } = window.jspdf;
+
+    let dashboard =
+        document.getElementById("dashboard");
+
+    let canvas = await html2canvas(
+        dashboard,
+        {
+            scale: 2,
+            useCORS: true
+        }
+    );
+
+    let imgData =
+        canvas.toDataURL("image/png");
+
+    let pdf = new jsPDF(
+        "p",
+        "mm",
+        "a4"
+    );
+
+    let larguraPDF =
+        pdf.internal.pageSize.getWidth();
+
+    let alturaPDF =
+        (canvas.height * larguraPDF)
+        / canvas.width;
+
+    let alturaPagina =
+        pdf.internal.pageSize.getHeight();
+
+    let alturaRestante =
+        alturaPDF;
+
+    let posicao = 0;
+
+    pdf.addImage(
+        imgData,
+        "PNG",
+        0,
+        posicao,
+        larguraPDF,
+        alturaPDF
+    );
+
+    alturaRestante -= alturaPagina;
+
+    while (alturaRestante > 0) {
+
+        posicao =
+            alturaRestante - alturaPDF;
+
+        pdf.addPage();
+
+        pdf.addImage(
+            imgData,
+            "PNG",
+            0,
+            posicao,
+            larguraPDF,
+            alturaPDF
+        );
+
+        alturaRestante -= alturaPagina;
+    }
+
+    pdf.save("dashboard.pdf");
+}
 
 function montarURL() {
     return `/api/dashboard?mes_inicio=${encodeURIComponent(filtros.mes_inicio)}`
@@ -341,6 +414,8 @@ function montarGraficos(data) {
     
     }
     }
+
+    
 
 window.carregar = carregar;
 

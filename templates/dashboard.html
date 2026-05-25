@@ -244,17 +244,39 @@ function limparFiltros(){
 
 function montarGraficos(data) {
 
-    Plotly.react("g1", [{
-        x: (data.lotacao || []).map(x => x.lotacao),
-        y: (data.lotacao || []).map(x => x.qtd),
-        type: "bar"
-    }], { title: "Top Lotações" });
+    // Top Lotações
+    if ((data.lotacao || []).length > 1) {
 
-    Plotly.react("g2", [{
-        x: (data.curso || []).map(x => x.formacao),
-        y: (data.curso || []).map(x => x.qtd),
-        type: "bar"
-    }], { title: "Top Cursos" });
+        document.getElementById("g1").style.display = "block";
+
+        Plotly.react("g1", [{
+            x: (data.lotacao || []).map(x => x.lotacao),
+            y: (data.lotacao || []).map(x => x.qtd),
+            type: "bar"
+        }], { title: "Top Lotações" });
+
+    } else {
+
+        document.getElementById("g1").style.display = "none";
+
+    }
+
+     // Top Cursos
+    if ((data.curso || []).length > 1) {
+
+        document.getElementById("g2").style.display = "block";
+
+        Plotly.react("g2", [{
+            x: (data.curso || []).map(x => x.formacao),
+            y: (data.curso || []).map(x => x.qtd),
+            type: "bar"
+        }], { title: "Top Cursos" });
+
+    } else {
+
+        document.getElementById("g2").style.display = "none";
+
+    }
 
     Plotly.react("g3", [{
         x: (data.periodo || []).map(x => x.mes),

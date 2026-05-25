@@ -320,13 +320,27 @@ function montarGraficos(data) {
         title: "Participações por Mês e Eixo"
     });
 
-    Plotly.react("g7", [{
-        x: (data.anual || []).map(x => x.ano),
-        y: (data.anual || []).map(x => x.qtd),
-        type: "scatter",
-        mode: "lines+markers"
-    }], { title: "Comparativo Anual" });
-}
+    let anos = [...new Set((data.anual || []).map(x => x.ano))];
+
+    if (anos.length > 1) {
+    
+        document.getElementById("g7").style.display = "block";
+    
+        Plotly.react("g7", [{
+            x: (data.anual || []).map(x => x.ano),
+            y: (data.anual || []).map(x => x.qtd),
+            type: "scatter",
+            mode: "lines+markers"
+        }], {
+            title: "Comparativo Anual"
+        });
+    
+    } else {
+    
+        document.getElementById("g7").style.display = "none";
+    
+    }
+    }
 
 window.carregar = carregar;
 

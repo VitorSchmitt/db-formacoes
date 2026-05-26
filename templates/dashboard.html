@@ -177,8 +177,7 @@ async function exportarPDF() {
 
     while (alturaRestante > 0) {
 
-        posicao =
-            alturaRestante - alturaPDF;
+        posicao = -(alturaPDF - alturaRestante);
 
         pdf.addPage();
 

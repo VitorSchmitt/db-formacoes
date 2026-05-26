@@ -8,18 +8,24 @@ from reportlab.platypus import (
     Paragraph,
     Spacer,
     Table,
-    TableStyle
+    TableStyle,
+    Image
 )
 
 from reportlab.lib import colors
 from reportlab.lib import styles
 from reportlab.lib.units import cm
 
+import os
+
 from database import SessionLocal
 from models import (
     Servidor,
     Participacao
 )
+
+LOGO = "static/img/logo.png"
+FASE = "static/img/fase.png"
 
 router = APIRouter()
 
@@ -34,6 +40,7 @@ def get_db():
 
     try:
         yield db
+
     finally:
         db.close()
 
@@ -49,7 +56,9 @@ def tela_relatorio(
 
     return templates.TemplateResponse(
         "relatorio_servidor.html",
-        {"request": request}
+        {
+            "request": request
+        }
     )
 
 
@@ -70,8 +79,7 @@ def relatorio_servidor(
         )
 
         .filter(
-            Servidor.matricula ==
-            matricula
+            Servidor.matricula == matricula
         )
 
         .first()
@@ -81,10 +89,12 @@ def relatorio_servidor(
     if not servidor:
 
         return {
-            "servidor":"",
-            "matricula":"",
-            "total_horas":0,
-            "formacoes":[]
+
+            "servidor": "",
+            "matricula": "",
+            "total_horas": 0,
+            "formacoes": []
+
         }
 
     participacoes = (
@@ -102,9 +112,9 @@ def relatorio_servidor(
 
     )
 
-    resultado=[]
+    resultado = []
 
-    total_horas=0
+    total_horas = 0
 
     for p in participacoes:
 
@@ -125,10 +135,14 @@ def relatorio_servidor(
                 carga,
 
             "data_fim":
-                str(f.data_termino),
+                str(
+                    f.data_termino
+                ),
 
             "modalidade":
-                str(f.modalidade)
+                str(
+                    f.modalidade
+                )
 
         })
 
@@ -157,7 +171,7 @@ def relatorio_servidor(
     "/api/relatorio-servidor/pdf"
 )
 def gerar_pdf(
-    matricula:str,
+    matricula: str,
     db: Session = Depends(get_db)
 ):
 
@@ -173,6 +187,7 @@ def gerar_pdf(
         )
 
         .first()
+
     )
 
     if not servidor:
@@ -197,21 +212,111 @@ def gerar_pdf(
 
     )
 
-    arquivo="relatorio.pdf"
+    arquivo = "relatorio.pdf"
 
     doc = SimpleDocTemplate(
+
         arquivo,
+
         rightMargin=1*cm,
         leftMargin=1*cm,
         topMargin=1*cm,
         bottomMargin=1*cm
+
     )
 
     estilos = (
         styles.getSampleStyleSheet()
     )
 
-    elementos=[]
+    elementos = []
+
+
+    # ==========================
+    # LOGOS
+    # ==========================
+
+    logo_esquerda = ""
+    logo_direita = ""
+
+    if os.path.exists(LOGO):
+
+        logo_esquerda = Image(
+            LOGO,
+            width=5*cm,
+            height=2.5*cm
+        )
+
+    if os.path.exists(FASE):
+
+        logo_direita = Image(
+            FASE,
+            width=2.5*cm,
+            height=2.5*cm
+        )
+
+    tabela_logos = Table(
+
+        [[
+            logo_esquerda,
+            logo_direita
+        ]],
+
+        colWidths=[
+            9*cm,
+            9*cm
+        ]
+
+    )
+
+    tabela_logos.setStyle(
+
+        TableStyle([
+
+            (
+                "ALIGN",
+                (0,0),
+                (0,0),
+                "LEFT"
+            ),
+
+            (
+                "ALIGN",
+                (1,0),
+                (1,0),
+                "RIGHT"
+            ),
+
+            (
+                "VALIGN",
+                (0,0),
+                (-1,-1),
+                "MIDDLE"
+            ),
+
+            (
+                "BOTTOMPADDING",
+                (0,0),
+                (-1,-1),
+                10
+            )
+
+        ])
+
+    )
+
+    elementos.append(
+        tabela_logos
+    )
+
+    elementos.append(
+        Spacer(1,12)
+    )
+
+
+    # ==========================
+    # TÍTULO
+    # ==========================
 
     elementos.append(
 
@@ -248,12 +353,20 @@ def gerar_pdf(
         Spacer(1,15)
     )
 
-    tabela=[[
-        "Formação",
-        "CH",        
-        "Término"]]
 
-    total=0
+    # ==========================
+    # TABELA
+    # ==========================
+
+    tabela = [[
+
+        "Formação",
+        "CH",
+        "Término"
+
+    ]]
+
+    total = 0
 
     for p in participacoes:
 
@@ -278,87 +391,89 @@ def gerar_pdf(
         ])
 
     tabela.append([
-        "Total",        
-        str(total)
+
+        "Total",
+        str(total),
+        ""
+
     ])
 
-    tabela_pdf=Table(
+    tabela_pdf = Table(
+
         tabela,
+
         colWidths=[
             12*cm,
-            1*cm,            
+            1*cm,
             3*cm
         ]
+
     )
 
     tabela_pdf.setStyle(
 
-    TableStyle([
+        TableStyle([
 
-        # cabeçalho
-        (
-            'BACKGROUND',
-            (0,0),
-            (-1,0),
-            colors.lightgrey
-        ),
+            (
+                'BACKGROUND',
+                (0,0),
+                (-1,0),
+                colors.lightgrey
+            ),
 
-        (
-            'FONTNAME',
-            (0,0),
-            (-1,0),
-            'Helvetica-Bold'
-        ),
+            (
+                'FONTNAME',
+                (0,0),
+                (-1,0),
+                'Helvetica-Bold'
+            ),
 
-        (
-            'GRID',
-            (0,0),
-            (-1,-1),
-            1,
-            colors.black
-        ),
+            (
+                'GRID',
+                (0,0),
+                (-1,-1),
+                1,
+                colors.black
+            ),
 
-        (
-            'VALIGN',
-            (0,0),
-            (-1,-1),
-            'MIDDLE'
-        ),
+            (
+                'VALIGN',
+                (0,0),
+                (-1,-1),
+                'MIDDLE'
+            ),
 
-        # alinhamento geral
-        (
-            'ALIGN',
-            (0,0),
-            (0,-1),
-            'LEFT'
-        ),
+            (
+                'ALIGN',
+                (0,0),
+                (0,-1),
+                'LEFT'
+            ),
 
-        (
-            'ALIGN',
-            (2,0),
-            (2,-1),
-            'CENTER'
-        ),
+            (
+                'ALIGN',
+                (2,0),
+                (2,-1),
+                'CENTER'
+            ),
 
-        # CH alinhada à direita
-        (
-            'ALIGN',
-            (1,1),
-            (1,-1),
-            'RIGHT'
-        ),
+            (
+                'ALIGN',
+                (1,1),
+                (1,-1),
+                'RIGHT'
+            ),
 
-        # linha total
-        (
-            'BACKGROUND',
-            (-2,-1),
-            (-1,-1),
-            colors.lightgrey
-        )
+            (
+                'BACKGROUND',
+                (-2,-1),
+                (-1,-1),
+                colors.lightgrey
+            )
 
-    ])
+        ])
 
-)
+    )
 
     elementos.append(
         tabela_pdf

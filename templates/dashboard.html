@@ -132,16 +132,16 @@ async function exportarPDF() {
     let dashboard =
         document.getElementById("dashboard");
 
+    // captura do dashboard
     let canvas = await html2canvas(
         dashboard,
         {
             scale: 2,
-            useCORS: true
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            scrollY: -window.scrollY
         }
     );
-
-    let imgData =
-        canvas.toDataURL("image/png");
 
     let pdf = new jsPDF(
         "p",
@@ -152,45 +152,81 @@ async function exportarPDF() {
     let larguraPDF =
         pdf.internal.pageSize.getWidth();
 
-    let alturaPDF =
-        (canvas.height * larguraPDF)
-        / canvas.width;
-
-    let alturaPagina =
+    let alturaPDFPagina =
         pdf.internal.pageSize.getHeight();
 
+    // conversão mm -> pixels
+    let imgWidth = larguraPDF;
+
+    let imgHeight =
+        (canvas.height * imgWidth) /
+        canvas.width;
+
+    let pageHeightPx =
+        (canvas.width * alturaPDFPagina) /
+        larguraPDF;
+
     let alturaRestante =
-        alturaPDF;
+        canvas.height;
 
-    let posicao = 0;
-
-    pdf.addImage(
-        imgData,
-        "PNG",
-        0,
-        posicao,
-        larguraPDF,
-        alturaPDF
-    );
-
-    alturaRestante -= alturaPagina;
+    let y = 0;
 
     while (alturaRestante > 0) {
 
-        posicao = -(alturaPDF - alturaRestante);
+        // cria um canvas temporário para a página
+        let pageCanvas =
+            document.createElement("canvas");
 
-        pdf.addPage();
+        pageCanvas.width =
+            canvas.width;
 
-        pdf.addImage(
-            imgData,
-            "PNG",
+        pageCanvas.height =
+            Math.min(
+                pageHeightPx,
+                alturaRestante
+            );
+
+        let ctx =
+            pageCanvas.getContext("2d");
+
+        ctx.drawImage(
+            canvas,
             0,
-            posicao,
-            larguraPDF,
-            alturaPDF
+            y,
+            canvas.width,
+            pageCanvas.height,
+            0,
+            0,
+            canvas.width,
+            pageCanvas.height
         );
 
-        alturaRestante -= alturaPagina;
+        let pageImg =
+            pageCanvas.toDataURL(
+                "image/png"
+            );
+
+        let alturaPaginaAtual =
+            (pageCanvas.height *
+            imgWidth) /
+            pageCanvas.width;
+
+        if (y > 0)
+            pdf.addPage();
+
+        pdf.addImage(
+            pageImg,
+            "PNG",
+            0,
+            0,
+            imgWidth,
+            alturaPaginaAtual
+        );
+
+        alturaRestante -=
+            pageCanvas.height;
+
+        y += pageCanvas.height;
     }
 
     pdf.save("dashboard.pdf");

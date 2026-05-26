@@ -98,8 +98,8 @@ def relatorio_servidor(
         )
 
         .filter(
-            Participacao.servidor ==
-            servidor.id
+            Participacao.servidor == matricula
+            
         )
 
         .all()
@@ -198,8 +198,8 @@ def relatorio_servidor_pdf(
         )
 
         .filter(
-            Participacao.servidor ==
-            servidor.id
+            Participacao.servidor == matricula
+            
         )
 
         .all()

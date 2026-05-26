@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+    📋 Relatório por Servidor
+</h2>
+
+<div class="row mb-3">
+
+    <div class="col-md-6">
+
+        <input
+            id="servidor"
+            type="number"
+            class="form-control"
+            placeholder="ID do servidor"
+        >
+
+    </div>
+
+    <div class="col-md-2">
+
+        <button
+            class="btn btn-primary w-100"
+            onclick="buscar()">
+
+            Pesquisar
+
+        </button>
+
+    </div>
+
+</div>
+
+<div class="card">
+
+    <div class="card-body">
+
+        <h4 id="nomeServidor">
+
+        </h4>
+
+        <table
+            class="table table-striped">
+
+            <thead>
+
+                <tr>
+
+                    <th>Formação</th>
+                    <th>Eixo</th>
+                    <th>Carga Horária</th>
+                    <th>Início</th>
+                    <th>Fim</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="resultado">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+async function buscar(){
+
+    let servidor_id =
+        document.getElementById(
+            "servidor"
+        ).value;
+
+    let resposta =
+        await fetch(
+            `/api/relatorio-servidor?servidor_id=${servidor_id}`
+        );
+
+    let dados =
+        await resposta.json();
+
+    document.getElementById(
+        "nomeServidor"
+    ).innerText =
+        dados.servidor;
+
+    let html="";
+
+    dados.formacoes.forEach(
+        x=>{
+
+            html += `
+            <tr>
+
+                <td>${x.formacao}</td>
+                <td>${x.eixo}</td>
+                <td>${x.carga_horaria}</td>
+                <td>${x.data_inicio}</td>
+                <td>${x.data_fim}</td>
+
+            </tr>
+            `;
+
+        }
+    );
+
+    document.getElementById(
+        "resultado"
+    ).innerHTML =
+        html;
+
+}
+
+</script>
+
+{% endblock %}

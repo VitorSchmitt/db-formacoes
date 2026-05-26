@@ -20,15 +20,12 @@
     </div>
 
     <div class="col-md-2">
-
         <button
             class="btn btn-primary w-100"
-            onclick="buscar()">
-
-            Pesquisar
-
-        </button>
-
+            onclick="buscar()">Pesquisar</button>
+        <button
+            class="btn btn-danger"
+            onclick="gerarPDF()">📄 PDF</button>
     </div>
 
 </div>
@@ -114,6 +111,18 @@ async function buscar(){
         "resultado"
     ).innerHTML =
         html;
+
+}
+function gerarPDF(){
+
+    let servidor_id =
+        document.getElementById(
+            "servidor"
+        ).value;
+
+    window.open(
+        `/api/relatorio-servidor/pdf?servidor_id=${servidor_id}`
+    );
 
 }
 

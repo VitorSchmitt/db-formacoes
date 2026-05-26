@@ -293,33 +293,72 @@ def gerar_pdf(
 
     tabela_pdf.setStyle(
 
-        TableStyle([
+    TableStyle([
 
-            (
-                'BACKGROUND',
-                (0,0),
-                (-1,0),
-                colors.lightgrey
-            ),
+        # cabeçalho
+        (
+            'BACKGROUND',
+            (0,0),
+            (-1,0),
+            colors.lightgrey
+        ),
 
-            (
-                'GRID',
-                (0,0),
-                (-1,-1),
-                1,
-                colors.black
-            ),
+        (
+            'FONTNAME',
+            (0,0),
+            (-1,0),
+            'Helvetica-Bold'
+        ),
 
-            (
-                'FONTNAME',
-                (0,0),
-                (-1,0),
-                'Helvetica-Bold'
-            )
+        (
+            'GRID',
+            (0,0),
+            (-1,-1),
+            1,
+            colors.black
+        ),
 
-        ])
+        (
+            'VALIGN',
+            (0,0),
+            (-1,-1),
+            'MIDDLE'
+        ),
 
-    )
+        # alinhamento geral
+        (
+            'ALIGN',
+            (0,0),
+            (0,-1),
+            'LEFT'
+        ),
+
+        (
+            'ALIGN',
+            (2,0),
+            (2,-1),
+            'CENTER'
+        ),
+
+        # CH alinhada à direita
+        (
+            'ALIGN',
+            (1,1),
+            (1,-1),
+            'RIGHT'
+        ),
+
+        # linha total
+        (
+            'BACKGROUND',
+            (-2,-1),
+            (-1,-1),
+            colors.lightgrey
+        )
+
+    ])
+
+)
 
     elementos.append(
         tabela_pdf

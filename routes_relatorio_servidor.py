@@ -251,8 +251,7 @@ def gerar_pdf(
     tabela=[[
         "Formação",
         "CH",        
-        "Término"
-    ]]
+        "Término"]]
 
     total=0
 
@@ -279,19 +278,15 @@ def gerar_pdf(
         ])
 
     tabela.append([
-
-        "",
-        "Total",
-        "",
+        "Total",        
         str(total)
-
     ])
 
     tabela_pdf=Table(
         tabela,
         colWidths=[
-            8*cm,
-            2*cm,            
+            12*cm,
+            1*cm,            
             3*cm
         ]
     )

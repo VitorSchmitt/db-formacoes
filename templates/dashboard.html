@@ -147,7 +147,16 @@ async function exportarPDF() {
     let dashboard =
         document.getElementById("dashboard");
 
-    // captura do dashboard
+    // Aguarda gráficos terminarem de renderizar
+    window.dispatchEvent(
+        new Event("resize")
+    );
+
+    await new Promise(
+        resolve => setTimeout(resolve, 500)
+    );
+
+    // captura dashboard
     let canvas = await html2canvas(
         dashboard,
         {
@@ -170,16 +179,26 @@ async function exportarPDF() {
     let alturaPDFPagina =
         pdf.internal.pageSize.getHeight();
 
-    // conversão mm -> pixels
-    let imgWidth = larguraPDF;
+    // margens
+    let margemTopo = 20;
+    let margemInferior = 10;
+    let margemLateral = 5;
 
-    let imgHeight =
-        (canvas.height * imgWidth) /
-        canvas.width;
+    // área útil da página
+    let areaUtilPagina =
+        alturaPDFPagina -
+        margemTopo -
+        margemInferior;
 
+    let imgWidth =
+        larguraPDF -
+        (margemLateral * 2);
+
+    // converte altura útil em pixels
     let pageHeightPx =
-        (canvas.width * alturaPDFPagina) /
-        larguraPDF;
+        (canvas.width *
+        areaUtilPagina) /
+        imgWidth;
 
     let alturaRestante =
         canvas.height;
@@ -188,9 +207,10 @@ async function exportarPDF() {
 
     while (alturaRestante > 0) {
 
-        // cria um canvas temporário para a página
         let pageCanvas =
-            document.createElement("canvas");
+            document.createElement(
+                "canvas"
+            );
 
         pageCanvas.width =
             canvas.width;
@@ -202,7 +222,9 @@ async function exportarPDF() {
             );
 
         let ctx =
-            pageCanvas.getContext("2d");
+            pageCanvas.getContext(
+                "2d"
+            );
 
         ctx.drawImage(
             canvas,
@@ -226,14 +248,24 @@ async function exportarPDF() {
             imgWidth) /
             pageCanvas.width;
 
-        if (y > 0)
+        if (y > 0) {
             pdf.addPage();
+        }
+
+        // cabeçalho opcional
+        pdf.setFontSize(14);
+
+        pdf.text(
+            "Relatório Dashboard",
+            margemLateral,
+            10
+        );
 
         pdf.addImage(
             pageImg,
             "PNG",
-            0,
-            0,
+            margemLateral,
+            margemTopo,
             imgWidth,
             alturaPaginaAtual
         );
@@ -241,10 +273,13 @@ async function exportarPDF() {
         alturaRestante -=
             pageCanvas.height;
 
-        y += pageCanvas.height;
+        y +=
+            pageCanvas.height;
     }
 
-    pdf.save("dashboard.pdf");
+    pdf.save(
+        "dashboard.pdf"
+    );
 }
 
 function montarURL() {

@@ -124,9 +124,6 @@ def relatorio_servidor(
             "carga_horaria":
                 carga,
 
-            "data_inicio":
-                str(f.data_inicio),
-
             "data_fim":
                 str(f.data_termino),
 
@@ -253,8 +250,7 @@ def gerar_pdf(
 
     tabela=[[
         "Formação",
-        "CH",
-        "Início",
+        "CH",        
         "Término"
     ]]
 
@@ -277,10 +273,6 @@ def gerar_pdf(
             str(carga),
 
             str(
-                f.data_inicio
-            ),
-
-            str(
                 f.data_termino
             )
 
@@ -299,8 +291,7 @@ def gerar_pdf(
         tabela,
         colWidths=[
             8*cm,
-            2*cm,
-            3*cm,
+            2*cm,            
             3*cm
         ]
     )

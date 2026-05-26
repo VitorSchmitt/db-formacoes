@@ -98,7 +98,7 @@ def relatorio_servidor(
         )
 
         .filter(
-            Participacao.servidor_id ==
+            Participacao.servidor ==
             servidor.id
         )
 
@@ -198,7 +198,7 @@ def relatorio_servidor_pdf(
         )
 
         .filter(
-            Participacao.servidor_id ==
+            Participacao.servidor ==
             servidor.id
         )
 

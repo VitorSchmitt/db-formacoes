@@ -19,8 +19,8 @@ PUBLIC_PATHS = [
     "/web/lotacoes",
     "/web/certificados",
     "/web/plano_anual",
-    "/web/cronograma"
-    
+    "/web/cronograma",
+    "/web/relatorio_servidor",
     
 ]
 

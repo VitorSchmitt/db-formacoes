@@ -18,8 +18,7 @@ from reportlab.lib.units import cm
 from database import SessionLocal
 from models import (
     Servidor,
-    Participacao,
-    Formacao
+    Participacao
 )
 
 router = APIRouter()
@@ -35,7 +34,6 @@ def get_db():
 
     try:
         yield db
-
     finally:
         db.close()
 
@@ -51,14 +49,12 @@ def tela_relatorio(
 
     return templates.TemplateResponse(
         "relatorio_servidor.html",
-        {
-            "request": request
-        }
+        {"request": request}
     )
 
 
 # ==========================
-# API CONSULTA
+# CONSULTA
 # ==========================
 
 @router.get("/api/relatorio-servidor")
@@ -68,60 +64,62 @@ def relatorio_servidor(
 ):
 
     servidor = (
+
         db.query(
             Servidor
         )
+
         .filter(
-            Servidor.matricula == matricula
+            Servidor.matricula ==
+            matricula
         )
+
         .first()
+
     )
 
     if not servidor:
 
         return {
-            "servidor": "",
-            "formacoes": []
+            "servidor":"",
+            "matricula":"",
+            "total_horas":0,
+            "formacoes":[]
         }
 
     participacoes = (
 
         db.query(
-            Participacao,
-            Formacao
-        )
-
-        .join(
-            Formacao,
-            Participacao.formacao_id ==
-            Formacao.id
+            Participacao
         )
 
         .filter(
-            Participacao.servidor == matricula
-            
+            Participacao.matricula ==
+            servidor.matricula
         )
 
         .all()
+
     )
 
-    resultado = []
+    resultado=[]
 
-    total_horas = 0
+    total_horas=0
 
-    for p, f in participacoes:
+    for p in participacoes:
 
-        carga = f.carga_horaria or 0
+        f = p.formacao
+
+        carga = (
+            f.carga_horaria or 0
+        )
 
         total_horas += carga
 
         resultado.append({
 
             "formacao":
-                f.formacao,
-
-            "eixo":
-                f.eixo,
+                f.descricao,
 
             "carga_horaria":
                 carga,
@@ -130,7 +128,10 @@ def relatorio_servidor(
                 str(f.data_inicio),
 
             "data_fim":
-                str(f.data_fim)
+                str(f.data_termino),
+
+            "modalidade":
+                str(f.modalidade)
 
         })
 
@@ -158,8 +159,8 @@ def relatorio_servidor(
 @router.get(
     "/api/relatorio-servidor/pdf"
 )
-def relatorio_servidor_pdf(
-    matricula: str,
+def gerar_pdf(
+    matricula:str,
     db: Session = Depends(get_db)
 ):
 
@@ -187,49 +188,38 @@ def relatorio_servidor_pdf(
     participacoes = (
 
         db.query(
-            Participacao,
-            Formacao
-        )
-
-        .join(
-            Formacao,
-            Participacao.formacao_id ==
-            Formacao.id
+            Participacao
         )
 
         .filter(
-            Participacao.servidor == matricula
-            
+            Participacao.matricula ==
+            servidor.matricula
         )
 
         .all()
+
     )
 
-    nome_arquivo = (
-        "relatorio_servidor.pdf"
-    )
+    arquivo="relatorio.pdf"
 
     doc = SimpleDocTemplate(
-
-        nome_arquivo,
-
+        arquivo,
         rightMargin=1*cm,
         leftMargin=1*cm,
         topMargin=1*cm,
         bottomMargin=1*cm
-
     )
 
     estilos = (
         styles.getSampleStyleSheet()
     )
 
-    elementos = []
+    elementos=[]
 
     elementos.append(
 
         Paragraph(
-            "Relatório de Formações do Servidor",
+            "Relatório de Formações",
             estilos["Title"]
         )
 
@@ -261,61 +251,58 @@ def relatorio_servidor_pdf(
         Spacer(1,15)
     )
 
-    tabela = [[
-
+    tabela=[[
         "Formação",
-        "Eixo",
         "CH",
-        "Período"
-
+        "Início",
+        "Término"
     ]]
 
-    total_horas = 0
+    total=0
 
-    for p, f in participacoes:
+    for p in participacoes:
+
+        f = p.formacao
 
         carga = (
             f.carga_horaria or 0
         )
 
-        total_horas += carga
-
-        periodo = (
-            f"{f.data_inicio}"
-            " até "
-            f"{f.data_fim}"
-        )
+        total += carga
 
         tabela.append([
 
-            f.formacao,
-            f.eixo,
+            f.descricao,
+
             str(carga),
-            periodo
+
+            str(
+                f.data_inicio
+            ),
+
+            str(
+                f.data_termino
+            )
 
         ])
 
     tabela.append([
 
         "",
-        "",
         "Total",
-
-        str(total_horas)
+        "",
+        str(total)
 
     ])
 
-    tabela_pdf = Table(
-
+    tabela_pdf=Table(
         tabela,
-
         colWidths=[
             8*cm,
-            4*cm,
             2*cm,
-            5*cm
+            3*cm,
+            3*cm
         ]
-
     )
 
     tabela_pdf.setStyle(
@@ -342,20 +329,6 @@ def relatorio_servidor_pdf(
                 (0,0),
                 (-1,0),
                 'Helvetica-Bold'
-            ),
-
-            (
-                'VALIGN',
-                (0,0),
-                (-1,-1),
-                'MIDDLE'
-            ),
-
-            (
-                'BACKGROUND',
-                (-2,-1),
-                (-1,-1),
-                colors.lightgrey
             )
 
         ])
@@ -371,10 +344,6 @@ def relatorio_servidor_pdf(
     )
 
     return FileResponse(
-
-        nome_arquivo,
-
-        filename=
-        f"{servidor.nome}.pdf"
-
+        arquivo,
+        filename=f"{servidor.nome}.pdf"
     )

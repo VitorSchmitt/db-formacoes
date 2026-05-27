@@ -542,30 +542,246 @@ function limparFiltros(){
 
 function montarGraficos(data){
 
-    Plotly.react("g1",[{
+    // ==========================
+    // Top Lotações
+    // ==========================
 
-        x:data.lotacao.map(x=>x.lotacao),
-        y:data.lotacao.map(x=>x.qtd),
-        type:"bar"
+    if((data.lotacao || []).length > 0){
+
+        document.getElementById("g1").style.display="block";
+
+        Plotly.react("g1",[{
+
+            x:data.lotacao.map(
+                x=>x.lotacao
+            ),
+
+            y:data.lotacao.map(
+                x=>x.qtd
+            ),
+
+            type:"bar"
+
+        }],{
+
+            title:"Top Lotações"
+
+        });
+
+    }else{
+
+        document.getElementById("g1").style.display="none";
+        document.getElementById("g1").innerHTML="";
+    }
+
+
+    // ==========================
+    // Top Cursos
+    // ==========================
+
+    if((data.curso || []).length > 0){
+
+        document.getElementById("g2").style.display="block";
+
+        Plotly.react("g2",[{
+
+            x:data.curso.map(
+                x=>x.formacao
+            ),
+
+            y:data.curso.map(
+                x=>x.qtd
+            ),
+
+            type:"bar"
+
+        }],{
+
+            title:"Top Cursos"
+
+        });
+
+    }else{
+
+        document.getElementById("g2").style.display="none";
+        document.getElementById("g2").innerHTML="";
+    }
+
+
+    // ==========================
+    // Participações por mês
+    // ==========================
+
+    Plotly.react("g3",[{
+
+        x:(data.periodo || []).map(
+            x=>x.mes
+        ),
+
+        y:(data.periodo || []).map(
+            x=>x.qtd
+        ),
+
+        type:"scatter",
+        mode:"lines+markers"
 
     }],{
 
-        title:"Top Lotações"
+        title:"Participações por Mês"
 
     });
 
 
-    Plotly.react("g2",[{
+    // ==========================
+    // Certificados x evasão
+    // ==========================
 
-        x:data.curso.map(x=>x.formacao),
-        y:data.curso.map(x=>x.qtd),
-        type:"bar"
+    Plotly.react("g4",[{
+
+        labels:[
+            "Certificados",
+            "Evasão"
+        ],
+
+        values:[
+
+            data.cards?.certificados || 0,
+
+            data.cards?.evasao || 0
+
+        ],
+
+        type:"pie"
 
     }],{
 
-        title:"Top Cursos"
+        title:"Conclusão x Evasão"
 
     });
+
+
+    // ==========================
+    // Eixos
+    // ==========================
+
+    if(data.eixo){
+
+        Plotly.react("g5",[{
+
+            x:data.eixo.map(
+                x=>x.eixo
+            ),
+
+            y:data.eixo.map(
+                x=>x.qtd
+            ),
+
+            type:"bar"
+
+        }],{
+
+            title:"Participações por Eixo"
+
+        });
+
+    }
+
+
+    // ==========================
+    // Mês x Eixo
+    // ==========================
+
+    if(data.periodo_eixo){
+
+        let eixos=[
+
+            ...new Set(
+
+                data.periodo_eixo.map(
+                    x=>x.eixo
+                )
+
+            )
+
+        ];
+
+        let traces=eixos.map(eixo=>{
+
+            let dados=
+
+                data.periodo_eixo.filter(
+                    x=>x.eixo===eixo
+                );
+
+            return{
+
+                x:dados.map(
+                    x=>x.mes
+                ),
+
+                y:dados.map(
+                    x=>x.qtd
+                ),
+
+                name:eixo,
+
+                type:"bar"
+
+            };
+
+        });
+
+        Plotly.react(
+            "g6",
+            traces,
+            {
+                barmode:"stack",
+                title:"Participações por Mês e Eixo"
+            }
+        );
+    }
+
+
+    // ==========================
+    // Comparativo anual
+    // ==========================
+
+    if((data.anual || []).length>0){
+
+        document.getElementById(
+            "g7"
+        ).style.display="block";
+
+        Plotly.react("g7",[{
+
+            x:data.anual.map(
+                x=>x.ano
+            ),
+
+            y:data.anual.map(
+                x=>x.qtd
+            ),
+
+            type:"scatter",
+
+            mode:"lines+markers"
+
+        }],{
+
+            title:"Comparativo Anual"
+
+        });
+
+    }else{
+
+        document.getElementById(
+            "g7"
+        ).style.display="none";
+
+        document.getElementById(
+            "g7"
+        ).innerHTML="";
+    }
 
 }
 

@@ -5,36 +5,54 @@
 <h2>👥 Cadastro de Servidores</h2>
 
 <form onsubmit="salvar(event)">
-    
+
     <div class="row mb-3">
 
         <div class="col-md-2">
-            <input type="text"
-                   id="matricula"
-                   class="form-control"
-                   placeholder="Matrícula"
-                   required>
+
+            <input
+                type="text"
+                id="matricula"
+                class="form-control"
+                placeholder="Matrícula"
+                maxlength="20"
+                required
+            >
+
         </div>
 
         <div class="col-md-5">
-            <input type="text"
-                   id="nome"
-                   class="form-control"
-                   placeholder="Nome"
-                   required>
+
+            <input
+                type="text"
+                id="nome"
+                class="form-control"
+                placeholder="Nome"
+                required
+            >
+
         </div>
 
         <div class="col-md-3">
-            <select id="cargo"
-                    class="form-select"
-                    required>
+
+            <select
+                id="cargo"
+                class="form-select"
+                required
+            >
             </select>
+
         </div>
 
         <div class="col-md-2 d-grid">
-            <button class="btn btn-primary">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
                 Salvar
             </button>
+
         </div>
 
     </div>
@@ -45,18 +63,31 @@
 
 <hr>
 
-<input type="text"
-       id="busca"
-       class="form-control mb-3"
-       placeholder="Buscar servidor..."
-       onkeyup="carregarTabela()">
+<input
+    type="text"
+    id="busca"
+    class="form-control mb-3"
+    placeholder="Buscar servidor..."
+    onkeyup="carregarTabela()"
+>
 
 <div id="tabela"></div>
+
 <style>
+
 .table{
-    font-size: 0.82rem;
+    font-size:0.82rem;
 }
+
+#matricula:disabled{
+
+    background-color:#f8f9fa;
+    cursor:not-allowed;
+
+}
+
 </style>
+
 <script>
 
 let editando = null;
@@ -66,346 +97,585 @@ let listaServidores = [];
 // =====================================================
 // API
 // =====================================================
-async function api(url, options = {}) {
+
+async function api(
+    url,
+    options={}
+){
 
     options.headers = {
-        "Content-Type": "application/json"
+        "Content-Type":"application/json"
     };
 
-    return fetch(url, options);
+    return fetch(
+        url,
+        options
+    );
+
 }
 
 
 // =====================================================
 // CARGOS
 // =====================================================
-async function carregarCargos() {
 
-    try {
+async function carregarCargos(){
 
-        let res = await api("/api/servidores/cargos");
-        let data = await res.json();
+    try{
 
-        let select = document.getElementById("cargo");
+        let res =
+            await api(
+                "/api/servidores/cargos"
+            );
 
-        select.innerHTML = `
+        let data =
+            await res.json();
+
+        let select =
+            document.getElementById(
+                "cargo"
+            );
+
+        select.innerHTML=`
+
             <option value="">
                 Selecione o cargo
             </option>
+
         `;
 
-        data.forEach(c => {
+        data.forEach(c=>{
 
             select.innerHTML += `
+
                 <option value="${c.id}">
                     ${c.descricao}
                 </option>
+
             `;
+
         });
 
-    } catch (err) {
+    }
+
+    catch(err){
 
         mostrarMsg({
-            erro: "Erro ao carregar cargos"
+            erro:
+            "Erro ao carregar cargos"
         });
 
         console.error(err);
+
     }
+
 }
 
 
 // =====================================================
 // LISTAR
 // =====================================================
-async function carregarTabela() {
 
-    try {
+async function carregarTabela(){
 
-        let res = await api("/api/servidores");
-        let data = await res.json();
+    try{
 
-        listaServidores = data;
+        let res =
+            await api(
+                "/api/servidores"
+            );
 
-        let busca = document
-            .getElementById("busca")
+        let data =
+            await res.json();
+
+        let busca =
+            document
+            .getElementById(
+                "busca"
+            )
             .value
             .toLowerCase();
 
-        let html = `
+        let filtrados =
+            data.filter(s=>
+
+                s.nome
+                .toLowerCase()
+                .includes(busca)
+
+                ||
+
+                String(
+                    s.matricula
+                )
+                .toLowerCase()
+                .includes(busca)
+
+            );
+
+        listaServidores =
+            filtrados;
+
+        let html=`
+
         <table class="table table-striped table-hover align-middle">
 
             <thead class="table-dark">
+
                 <tr>
+
                     <th>Matrícula</th>
                     <th>Nome</th>
                     <th>Cargo</th>
                     <th>Status</th>
-                    <th width="180">Ações</th>
+                    <th width="180">
+                        Ações
+                    </th>
+
                 </tr>
+
             </thead>
 
             <tbody>
+
         `;
 
-                let filtrados = data.filter(s =>
-                s.nome.toLowerCase().includes(busca) ||
-                s.matricula.toLowerCase().includes(busca)
-            );
-            
-            listaServidores = filtrados;
-            
-            filtrados.forEach((s, i) => {
+        filtrados.forEach(s=>{
 
-            let status = s.ativo
+            let status =
+                s.ativo
                 ? "🟢 Ativo"
                 : "🔴 Inativo";
 
-            let btnTexto = s.ativo
+            let btnTexto =
+                s.ativo
                 ? "Desativar"
                 : "Ativar";
 
-            let btnClasse = s.ativo
+            let btnClasse =
+                s.ativo
                 ? "btn-danger"
                 : "btn-success";
 
             html += `
+
             <tr>
 
-                <td>${s.matricula}</td>
+                <td>
+                    ${s.matricula}
+                </td>
 
-                <td>${s.nome}</td>
+                <td>
+                    ${s.nome}
+                </td>
 
-                <td>${s.cargo || ""}</td>
+                <td>
+                    ${s.cargo || ""}
+                </td>
 
-                <td>${status}</td>
+                <td>
+                    ${status}
+                </td>
 
                 <td>
 
-                    <button class="btn btn-warning btn-sm"
-                        onclick="editar('${s.matricula}')">
+                    <button
+                        class="btn btn-warning btn-sm"
+                        onclick="editar('${s.matricula}')"
+                    >
 
                     ✏️
+
                     </button>
 
-                    <button class="btn ${btnClasse} btn-sm"
-                            onclick="toggleServidor('${s.matricula}')">
+                    <button
+                        class="btn ${btnClasse} btn-sm"
+                        onclick="toggleServidor('${s.matricula}')"
+                    >
 
                         ${btnTexto}
+
                     </button>
 
                 </td>
 
             </tr>
+
             `;
+
         });
 
-        html += `
+        html +=`
+
             </tbody>
+
         </table>
+
         `;
 
-        document.getElementById("tabela").innerHTML = html;
+        document
+        .getElementById(
+            "tabela"
+        )
+        .innerHTML=html;
 
-    } catch (err) {
+    }
+
+    catch(err){
 
         mostrarMsg({
-            erro: "Erro ao carregar servidores"
+            erro:
+            "Erro ao carregar servidores"
         });
 
-        console.error(err);
+        console.error(
+            err
+        );
+
     }
+
 }
 
 
 // =====================================================
 // SALVAR
 // =====================================================
-async function salvar(e) {
+
+async function salvar(e){
 
     e.preventDefault();
 
-    let cargo = document.getElementById("cargo").value;
+    let cargo=
+        document.getElementById(
+            "cargo"
+        ).value;
 
-    if (!cargo) {
+    if(!cargo){
 
         mostrarMsg({
-            erro: "Selecione um cargo"
+            erro:
+            "Selecione um cargo"
         });
 
         return;
+
     }
 
-    let dados = {
+    let dados={
 
-        matricula: document.getElementById("matricula").value,
+        matricula:
+            document
+            .getElementById(
+                "matricula"
+            )
+            .value,
 
-        nome: document.getElementById("nome").value,
+        nome:
+            document
+            .getElementById(
+                "nome"
+            )
+            .value,
 
-        cargo_id: parseInt(cargo)
+        cargo_id:
+            parseInt(
+                cargo
+            )
+
     };
 
-    let url = "/api/servidores";
-    let method = "POST";
+    let url=
+        "/api/servidores";
 
-    if (editando) {
+    let method=
+        "POST";
 
-        url = `/api/servidores/${editando}`;
-        method = "PUT";
+    if(editando){
+
+        url=
+        `/api/servidores/${editando}`;
+
+        method=
+        "PUT";
+
     }
 
-    try {
+    try{
 
-        let res = await api(url, {
-            method: method,
-            body: JSON.stringify(dados)
-        });
+        let res =
+            await api(
+                url,
+                {
+                    method:
+                        method,
 
-        let r = await res.json();
+                    body:
+                        JSON.stringify(
+                            dados
+                        )
+                }
+            );
 
-        mostrarMsg(r);
+        let r=
+            await res.json();
 
-        if (r.ok) {
+        mostrarMsg(
+            r
+        );
+
+        if(r.ok){
 
             limpar();
 
             carregarTabela();
+
         }
 
-    } catch (err) {
+    }
+
+    catch(err){
 
         mostrarMsg({
-            erro: "Erro ao salvar servidor"
+            erro:
+            "Erro ao salvar servidor"
         });
 
-        console.error(err);
+        console.error(
+            err
+        );
+
     }
+
 }
 
 
 // =====================================================
 // EDITAR
 // =====================================================
-function editar(matricula) {
+
+function editar(
+    matricula
+){
 
     limpar();
 
-    let s = listaServidores.find(
-        x => x.matricula == matricula
-    );
+    let s =
+        listaServidores.find(
 
-    if(!s) return;
+            x =>
+            x.matricula ==
+            matricula
 
-    editando = s.matricula;
+        );
 
-    document.getElementById("matricula").value = s.matricula;
-    document.getElementById("nome").value = s.nome;
-    document.getElementById("cargo").value = s.cargo_id;
+    if(!s)
+        return;
 
-    document.getElementById("matricula").disabled = true;
+    editando =
+        s.matricula;
 
-    document.querySelector(".btn-primary").innerText =
+    document.getElementById(
+        "matricula"
+    ).value =
+        s.matricula;
+
+    document.getElementById(
+        "nome"
+    ).value =
+        s.nome;
+
+    document.getElementById(
+        "cargo"
+    ).value =
+        s.cargo_id;
+
+    document.getElementById(
+        "matricula"
+    ).disabled =
+        true;
+
+    document.querySelector(
+        ".btn-primary"
+    ).innerText=
         "Atualizar";
 
-    document.querySelector("h2").innerHTML =
-        `✏️ Editando Servidor: ${s.nome}`;
+    document.querySelector(
+        "h2"
+    ).innerHTML=
+    `✏️ Editando Servidor: ${s.nome}`;
 
     window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+
+        top:0,
+        behavior:"smooth"
+
     });
 
-    setTimeout(() => {
-        document.getElementById("nome").focus();
-    }, 300);
+    setTimeout(()=>{
 
-    document.querySelector("form").classList.add(
+        document
+        .getElementById(
+            "nome"
+        )
+        .focus();
+
+    },300);
+
+    document
+    .querySelector(
+        "form"
+    )
+    .classList.add(
+
         "border",
         "border-warning",
         "p-3",
         "rounded"
+
     );
+
 }
-// =====================================================
-// TOGGLE ATIVO / INATIVO
-// =====================================================
-async function toggleServidor(matricula) {
 
-    try {
 
-        let res = await api(
-            `/api/servidores/toggle/${matricula}`,
-            {
-                method: "PATCH"
-            }
+// =====================================================
+// TOGGLE
+// =====================================================
+
+async function toggleServidor(
+    matricula
+){
+
+    try{
+
+        let res =
+            await api(
+
+                `/api/servidores/toggle/${matricula}`,
+
+                {
+                    method:
+                    "PATCH"
+                }
+
+            );
+
+        let r =
+            await res.json();
+
+        mostrarMsg(
+            r
         );
-
-        let r = await res.json();
-
-        mostrarMsg(r);
 
         carregarTabela();
 
-    } catch (err) {
+    }
+
+    catch(err){
 
         mostrarMsg({
-            erro: "Erro ao alterar status"
+
+            erro:
+            "Erro ao alterar status"
+
         });
 
-        console.error(err);
     }
+
 }
 
 
 // =====================================================
 // UI
 // =====================================================
-function mostrarMsg(r) {
 
-    let msg = document.getElementById("msg");
+function mostrarMsg(r){
 
-    if (r.erro) {
+    let msg =
+        document.getElementById(
+            "msg"
+        );
 
-        msg.innerHTML = `
-            <div class="alert alert-danger">
-                ${r.erro}
-            </div>
+    if(r.erro){
+
+        msg.innerHTML=`
+
+        <div class="alert alert-danger">
+
+            ${r.erro}
+
+        </div>
+
         `;
 
-    } else {
-
-        msg.innerHTML = `
-            <div class="alert alert-success">
-                Operação realizada com sucesso
-            </div>
-        `;
     }
+
+    else{
+
+        msg.innerHTML=`
+
+        <div class="alert alert-success">
+
+            Operação realizada com sucesso
+
+        </div>
+
+        `;
+
+    }
+
 }
 
 
-function limpar() {
+function limpar(){
 
-    editando = null;
+    editando=null;
 
-    document.querySelector("form").reset();
+    document
+    .querySelector(
+        "form"
+    )
+    .reset();
 
-    document.getElementById("matricula").disabled = false;
+    document
+    .getElementById(
+        "matricula"
+    )
+    .disabled=false;
 
-    document.querySelector(".btn-primary").innerText = "Salvar";
+    document
+    .querySelector(
+        ".btn-primary"
+    )
+    .innerText=
+        "Salvar";
 
-    document.querySelector("h2").innerHTML =
+    document
+    .querySelector(
+        "h2"
+    )
+    .innerHTML=
         "👥 Cadastro de Servidores";
 
-    // remove destaque
-    document.querySelector("form").classList.remove("border");
-    document.querySelector("form").classList.remove("border-warning");
-    document.querySelector("form").classList.remove("p-3");
-    document.querySelector("form").classList.remove("rounded");
+    document
+    .querySelector(
+        "form"
+    )
+    .classList.remove(
+
+        "border",
+        "border-warning",
+        "p-3",
+        "rounded"
+
+    );
+
 }
 
 
 // =====================================================
 // INIT
 // =====================================================
+
 carregarCargos();
 carregarTabela();
 

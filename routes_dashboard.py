@@ -198,25 +198,28 @@ def dashboard(
         lotacao_data = (
 
             base.with_entities(
-
+        
                 Lotacao.tipo,
-
-                func.count()
-
+        
+                func.count(
+                    Participacao.id
+                )
+        
             )
-
+        
             .group_by(
                 Lotacao.tipo
             )
-
+        
             .order_by(
-                func.count().desc()
+                func.count(
+                    Participacao.id
+                ).desc()
             )
-
+        
             .all()
-
+        
         )
-
 
         # =====================================
         # CURSOS
@@ -225,25 +228,29 @@ def dashboard(
         curso_data = (
 
             base.with_entities(
-
+        
                 Formacao.descricao,
-
-                func.count()
-
+        
+                func.count(
+                    Participacao.id
+                )
+        
             )
-
+        
             .group_by(
+                Formacao.id,
                 Formacao.descricao
             )
-
+        
             .order_by(
-                func.count().desc()
+                func.count(
+                    Participacao.id
+                ).desc()
             )
-
+        
             .all()
-
+        
         )
-
 
         # =====================================
         # PERÍODO
@@ -258,7 +265,9 @@ def dashboard(
                     'YYYY-MM'
                 ),
 
-                func.count()
+                func.count(
+                    Participacao.id
+                )
 
             )
 
@@ -295,7 +304,9 @@ def dashboard(
 
                 PlanoAnual.eixo,
 
-                func.count()
+                func.count(
+                    Participacao.id
+                )
 
             )
 
@@ -369,7 +380,9 @@ def dashboard(
                     Formacao.data_termino
                 ),
 
-                func.count()
+                func.count(
+                    Participacao.id
+                )
 
             )
 

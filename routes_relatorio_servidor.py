@@ -599,9 +599,13 @@ def gerar_pdf(
     )
 
     elementos.append(
-        tabela_data
+    tabela_data
     )
-
+    
+    doc.build(
+        elementos
+    )
+    
     return FileResponse(
         arquivo,
         filename=f"{servidor.nome}.pdf"

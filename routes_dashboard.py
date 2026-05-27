@@ -85,7 +85,7 @@ def dashboard(
         if lotacao:
 
             base = base.filter(
-                Lotacao.tipo == lotacao
+                Lotacao.descricao == lotacao
             )
 
 
@@ -208,7 +208,7 @@ def dashboard(
             )
         
             .group_by(
-                Lotacao.tipo
+                Lotacao.descricao
             )
         
             .order_by(
@@ -229,11 +229,12 @@ def dashboard(
 
             base.with_entities(
         
+                Formacao.id,
                 Formacao.descricao,
         
                 func.count(
                     Participacao.id
-                )
+                ).label("qtd")
         
             )
         
@@ -448,12 +449,12 @@ def dashboard(
             "curso": [
 
                 {
-                    "formacao": c[0],
-                    "qtd": c[1]
+                    "formacao": c[1],
+                    "qtd": c[2]
                 }
-
+            
                 for c in curso_data
-            ],
+            ]
 
 
             "periodo": [

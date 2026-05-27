@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Query
-from sqlalchemy import func
+from fastapi import APIRouter, Query, Depends
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from database import SessionLocal
 
@@ -13,6 +14,136 @@ from models import (
 router = APIRouter()
 
 
+# =====================================
+# DB
+# =====================================
+
+def get_db():
+
+    db = SessionLocal()
+
+    try:
+        yield db
+
+    finally:
+        db.close()
+
+
+# =====================================
+# FILTRO LOTAÇÕES
+# =====================================
+
+@router.get("/api/dashboard/lotacoes")
+def listar_lotacoes(
+    db: Session = Depends(get_db)
+):
+
+    stmt = (
+
+        select(
+            Lotacao.tipo
+        )
+
+        .distinct()
+
+        .order_by(
+            Lotacao.tipo
+        )
+
+    )
+
+    result = db.execute(
+        stmt
+    ).all()
+
+    return [
+
+        l.tipo
+
+        for l in result
+        if l.tipo
+    ]
+
+
+# =====================================
+# FILTRO CURSOS
+# =====================================
+
+@router.get("/api/dashboard/cursos")
+def listar_cursos(
+    db: Session = Depends(get_db)
+):
+
+    stmt = (
+
+        select(
+            Formacao.id,
+            Formacao.descricao
+        )
+
+        .distinct()
+
+        .order_by(
+            Formacao.descricao
+        )
+
+    )
+
+    result = db.execute(
+        stmt
+    ).all()
+
+    return [
+
+        {
+            "id": c.id,
+            "descricao": c.descricao
+        }
+
+        for c in result
+    ]
+
+
+# =====================================
+# FILTRO EIXOS
+# =====================================
+
+@router.get("/api/dashboard/eixos")
+def listar_eixos(
+    db: Session = Depends(get_db)
+):
+
+    stmt = (
+
+        select(
+            PlanoAnual.eixo
+        )
+
+        .distinct()
+
+        .order_by(
+            PlanoAnual.eixo
+        )
+
+    )
+
+    result = db.execute(
+        stmt
+    ).all()
+
+    return [
+
+        e.eixo
+
+        for e in result
+        if e.eixo
+    ]
+
+
+# =====================================
+# DASHBOARD
+# =====================================
+
 @router.get("/api/dashboard")
 def dashboard(
 
@@ -20,40 +151,48 @@ def dashboard(
     mes_fim: str = Query(None),
     lotacao: str = Query(None),
     curso: str = Query(None),
-    eixo: str = Query(None)
+    eixo: str = Query(None),
+
+    db: Session = Depends(get_db)
 
 ):
-
-    db = SessionLocal()
 
     try:
 
         # =====================================
-        # QUERY BASE
+        # BASE
         # =====================================
 
         base = (
 
             db.query(
+
                 Participacao,
                 Formacao,
                 Lotacao,
                 PlanoAnual
+
             )
 
             .join(
+
                 Formacao,
                 Participacao.formacao_id == Formacao.id
+
             )
 
             .join(
+
                 Lotacao,
                 Participacao.lotacao_id == Lotacao.id
+
             )
 
             .outerjoin(
+
                 PlanoAnual,
                 Formacao.plano_id == PlanoAnual.id
+
             )
 
         )
@@ -66,20 +205,24 @@ def dashboard(
         if mes_inicio:
 
             base = base.filter(
+
                 func.to_char(
                     Formacao.data_termino,
                     "YYYY-MM"
                 ) >= mes_inicio
+
             )
 
 
         if mes_fim:
 
             base = base.filter(
+
                 func.to_char(
                     Formacao.data_termino,
                     "YYYY-MM"
                 ) <= mes_fim
+
             )
 
 
@@ -115,37 +258,38 @@ def dashboard(
         )
 
         certificados = 0
-        carga_realizada_total = 0
+        carga_realizada = 0
 
 
-        for p, f, l, pa in participacoes:
+        for p,f,l,pa in participacoes:
+
+            carga = (
+
+                p.aproveitamento
+                or 0
+
+            )
+
+            carga_realizada += carga
 
             carga_total = (
-                f.carga_horaria or 0
-            )
 
-            carga_realizada = (
-                p.aproveitamento or 0
-            )
+                f.carga_horaria
+                or 0
 
-            carga_realizada_total += (
-                carga_realizada
             )
 
             percentual = 0
 
             if carga_total > 0:
 
-                percentual = round(
+                percentual = (
 
-                    (
-                        carga_realizada
-                        /
-                        carga_total
-                    ) * 100,
+                    carga
+                    /
+                    carga_total
 
-                    2
-                )
+                ) * 100
 
 
             if percentual >= 75:
@@ -154,49 +298,33 @@ def dashboard(
 
 
         evasao = (
-            total - certificados
-        )
-
-
-        taxa_evasao = (
-
-            round(
-                (
-                    evasao / total
-                ) * 100,
-                2
-            )
-
-            if total > 0
-            else 0
+            total-certificados
         )
 
 
         servidores_unicos = len(
 
-            set([
+            set(
 
                 p.matricula
 
-                for p, f, l, pa
+                for p,f,l,pa
                 in participacoes
 
-            ])
+            )
 
         )
 
 
-        media_por_servidor = (
+        media = (
 
             round(
-                total /
-                servidores_unicos,
+                total/servidores_unicos,
                 2
             )
 
-            if servidores_unicos > 0
+            if servidores_unicos
             else 0
-
         )
 
 
@@ -207,73 +335,76 @@ def dashboard(
         lotacao_data = (
 
             base.with_entities(
-        
+
                 Lotacao.tipo,
-        
+
                 func.count(
                     Participacao.id
                 )
-        
+
             )
-        
+
             .group_by(
                 Lotacao.tipo
             )
-        
+
             .order_by(
+
                 func.count(
                     Participacao.id
                 ).desc()
+
             )
-        
+
             .all()
-        
+
         )
 
 
-       
         # =====================================
         # CURSOS
         # =====================================
-        
+
         curso_data = (
-        
+
             base.with_entities(
-        
+
                 Lotacao.tipo,
-        
+
                 Formacao.id,
-        
+
                 Formacao.descricao,
-        
+
                 func.count(
                     Participacao.id
-                ).label("qtd")
-        
+                ).label(
+                    "qtd"
+                )
+
             )
-        
+
             .group_by(
-        
+
                 Lotacao.tipo,
-        
+
                 Formacao.id,
-        
+
                 Formacao.descricao
-        
+
             )
-        
+
             .order_by(
-        
+
                 func.count(
                     Participacao.id
                 ).desc()
-        
+
             )
-        
+
             .all()
-        
+
         )
-        
+
 
         # =====================================
         # PERÍODO
@@ -319,261 +450,47 @@ def dashboard(
         )
 
 
-        # =====================================
-        # EIXO
-        # =====================================
-
-        eixo_data = (
-
-            base.with_entities(
-
-                PlanoAnual.eixo,
-
-                func.count(
-                    Participacao.id
-                )
-
-            )
-
-            .group_by(
-                PlanoAnual.eixo
-            )
-
-            .order_by(
-
-                func.count(
-                    Participacao.id
-                ).desc()
-
-            )
-
-            .all()
-
-        )
-
-
-        # =====================================
-        # PERÍODO X EIXO
-        # =====================================
-
-        periodo_eixo_data = (
-
-            base.with_entities(
-
-                func.to_char(
-
-                    Formacao.data_termino,
-                    "YYYY-MM"
-
-                ),
-
-                PlanoAnual.eixo,
-
-                func.count(
-                    Participacao.id
-                )
-
-            )
-
-            .group_by(
-
-                func.to_char(
-
-                    Formacao.data_termino,
-                    "YYYY-MM"
-
-                ),
-
-                PlanoAnual.eixo
-
-            )
-
-            .order_by(
-
-                func.to_char(
-
-                    Formacao.data_termino,
-                    "YYYY-MM"
-
-                )
-
-            )
-
-            .all()
-
-        )
-
-
-        # =====================================
-        # ANUAL
-        # =====================================
-
-        anual_data = (
-
-            base.with_entities(
-
-                func.extract(
-
-                    "year",
-
-                    Formacao.data_termino
-
-                ),
-
-                func.count(
-                    Participacao.id
-                )
-
-            )
-
-            .group_by(
-
-                func.extract(
-
-                    "year",
-
-                    Formacao.data_termino
-
-                )
-
-            )
-
-            .order_by(
-
-                func.extract(
-
-                    "year",
-
-                    Formacao.data_termino
-
-                )
-
-            )
-
-            .all()
-
-        )
-
-
-        # =====================================
-        # RESPONSE
-        # =====================================
-
         return {
 
-            "cards": {
+            "cards":{
 
-                "participacoes":
-                    total,
+                "participacoes":total,
+                "certificados":certificados,
+                "evasao":evasao,
+                "servidores_unicos":servidores_unicos,
+                "carga_realizada":carga_realizada,
+                "media_por_servidor":media
 
-                "certificados":
-                    certificados,
-
-                "servidores_unicos":
-                    servidores_unicos,
-
-                "evasao":
-                    evasao,
-
-                "taxa_evasao":
-                    taxa_evasao,
-
-                "carga_realizada":
-                    carga_realizada_total,
-
-                "media_por_servidor":
-                    media_por_servidor
             },
 
-
-            "lotacao": [
+            "lotacao":[
 
                 {
-                    "lotacao": l[0],
-                    "qtd": l[1]
+                    "lotacao":l[0],
+                    "qtd":l[1]
                 }
 
                 for l in lotacao_data
             ],
 
+            "curso":[
 
-            "curso": [
-            
                 {
-                    "formacao": c[2],
-                    "qtd": c[3]
+                    "formacao":c[2],
+                    "qtd":c[3]
                 }
-            
+
                 for c in curso_data
             ],
 
-
-            "periodo": [
+            "periodo":[
 
                 {
-                    "mes": p[0],
-                    "qtd": p[1]
+                    "mes":p[0],
+                    "qtd":p[1]
                 }
 
                 for p in periodo_data
-            ],
-
-
-            "eixo": [
-
-                {
-
-                    "eixo":
-
-                    str(e[0])
-                    if e[0]
-                    else "Sem plano",
-
-                    "qtd":
-                    e[1]
-
-                }
-
-                for e in eixo_data
-            ],
-
-
-            "periodo_eixo": [
-
-                {
-
-                    "mes": p[0],
-
-                    "eixo":
-
-                    str(p[1])
-                    if p[1]
-                    else "Sem plano",
-
-                    "qtd": p[2]
-
-                }
-
-                for p in periodo_eixo_data
-            ],
-
-
-            "anual": [
-
-                {
-
-                    "ano":
-
-                    int(a[0])
-                    if a[0]
-                    else 0,
-
-                    "qtd":
-                    a[1]
-
-                }
-
-                for a in anual_data
             ]
 
         }
@@ -584,9 +501,5 @@ def dashboard(
         traceback.print_exc()
 
         return {
-            "erro": str(e)
+            "erro":str(e)
         }
-
-    finally:
-
-        db.close()

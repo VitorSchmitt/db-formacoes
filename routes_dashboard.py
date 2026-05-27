@@ -207,29 +207,27 @@ def dashboard(
         lotacao_data = (
 
             base.with_entities(
-
+        
                 Lotacao.tipo,
-
+        
                 func.count(
                     Participacao.id
                 )
-
+        
             )
-
+        
             .group_by(
                 Lotacao.tipo
             )
-
+        
             .order_by(
-
                 func.count(
                     Participacao.id
                 ).desc()
-
             )
-
+        
             .all()
-
+        
         )
 
 

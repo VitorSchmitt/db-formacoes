@@ -58,6 +58,7 @@ def dashboard(
 
         )
 
+
         # =====================================
         # FILTROS
         # =====================================
@@ -67,7 +68,7 @@ def dashboard(
             base = base.filter(
                 func.to_char(
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
                 ) >= mes_inicio
             )
 
@@ -77,7 +78,7 @@ def dashboard(
             base = base.filter(
                 func.to_char(
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
                 ) <= mes_fim
             )
 
@@ -85,7 +86,7 @@ def dashboard(
         if lotacao:
 
             base = base.filter(
-                Lotacao.descricao == lotacao
+                Lotacao.tipo == lotacao
             )
 
 
@@ -99,7 +100,6 @@ def dashboard(
         if eixo:
 
             base = base.filter(
-                PlanoAnual.eixo.isnot(None),
                 PlanoAnual.eixo == eixo
             )
 
@@ -110,7 +110,9 @@ def dashboard(
 
         participacoes = base.all()
 
-        total = len(participacoes)
+        total = len(
+            participacoes
+        )
 
         certificados = 0
         carga_realizada_total = 0
@@ -151,29 +153,35 @@ def dashboard(
                 certificados += 1
 
 
-        evasao = total - certificados
+        evasao = (
+            total - certificados
+        )
+
 
         taxa_evasao = (
 
             round(
-                (evasao / total) * 100,
+                (
+                    evasao / total
+                ) * 100,
                 2
             )
 
             if total > 0
             else 0
-
         )
 
 
         servidores_unicos = len(
 
-            set(
-                [
-                    p.matricula
-                    for p, f, l, pa in participacoes
-                ]
-            )
+            set([
+
+                p.matricula
+
+                for p, f, l, pa
+                in participacoes
+
+            ])
 
         )
 
@@ -181,7 +189,8 @@ def dashboard(
         media_por_servidor = (
 
             round(
-                total / servidores_unicos,
+                total /
+                servidores_unicos,
                 2
             )
 
@@ -198,28 +207,31 @@ def dashboard(
         lotacao_data = (
 
             base.with_entities(
-        
+
                 Lotacao.tipo,
-        
+
                 func.count(
                     Participacao.id
                 )
-        
+
             )
-        
+
             .group_by(
-                Lotacao.descricao
+                Lotacao.tipo
             )
-        
+
             .order_by(
+
                 func.count(
                     Participacao.id
                 ).desc()
+
             )
-        
+
             .all()
-        
+
         )
+
 
         # =====================================
         # CURSOS
@@ -228,30 +240,39 @@ def dashboard(
         curso_data = (
 
             base.with_entities(
-        
+
                 Formacao.id,
+
                 Formacao.descricao,
-        
+
                 func.count(
                     Participacao.id
-                ).label("qtd")
-        
+                ).label(
+                    "qtd"
+                )
+
             )
-        
+
             .group_by(
+
                 Formacao.id,
+
                 Formacao.descricao
+
             )
-        
+
             .order_by(
+
                 func.count(
                     Participacao.id
                 ).desc()
+
             )
-        
+
             .all()
-        
+
         )
+
 
         # =====================================
         # PERÍODO
@@ -262,8 +283,10 @@ def dashboard(
             base.with_entities(
 
                 func.to_char(
+
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
+
                 ),
 
                 func.count(
@@ -276,7 +299,7 @@ def dashboard(
 
                 func.to_char(
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
                 )
 
             )
@@ -285,7 +308,7 @@ def dashboard(
 
                 func.to_char(
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
                 )
 
             )
@@ -316,7 +339,11 @@ def dashboard(
             )
 
             .order_by(
-                func.count().desc()
+
+                func.count(
+                    Participacao.id
+                ).desc()
+
             )
 
             .all()
@@ -333,21 +360,27 @@ def dashboard(
             base.with_entities(
 
                 func.to_char(
+
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
+
                 ),
 
                 PlanoAnual.eixo,
 
-                func.count()
+                func.count(
+                    Participacao.id
+                )
 
             )
 
             .group_by(
 
                 func.to_char(
+
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
+
                 ),
 
                 PlanoAnual.eixo
@@ -357,8 +390,10 @@ def dashboard(
             .order_by(
 
                 func.to_char(
+
                     Formacao.data_termino,
-                    'YYYY-MM'
+                    "YYYY-MM"
+
                 )
 
             )
@@ -377,8 +412,11 @@ def dashboard(
             base.with_entities(
 
                 func.extract(
-                    'year',
+
+                    "year",
+
                     Formacao.data_termino
+
                 ),
 
                 func.count(
@@ -390,8 +428,11 @@ def dashboard(
             .group_by(
 
                 func.extract(
-                    'year',
+
+                    "year",
+
                     Formacao.data_termino
+
                 )
 
             )
@@ -399,8 +440,11 @@ def dashboard(
             .order_by(
 
                 func.extract(
-                    'year',
+
+                    "year",
+
                     Formacao.data_termino
+
                 )
 
             )
@@ -418,20 +462,26 @@ def dashboard(
 
             "cards": {
 
-                "participacoes": total,
+                "participacoes":
+                    total,
 
-                "certificados": certificados,
+                "certificados":
+                    certificados,
 
-                "servidores_unicos": servidores_unicos,
+                "servidores_unicos":
+                    servidores_unicos,
 
-                "evasao": evasao,
+                "evasao":
+                    evasao,
 
-                "taxa_evasao": taxa_evasao,
+                "taxa_evasao":
+                    taxa_evasao,
 
-                "carga_realizada": carga_realizada_total,
+                "carga_realizada":
+                    carga_realizada_total,
 
-                "media_por_servidor": media_por_servidor
-
+                "media_por_servidor":
+                    media_por_servidor
             },
 
 
@@ -452,7 +502,7 @@ def dashboard(
                     "formacao": c[1],
                     "qtd": c[2]
                 }
-            
+
                 for c in curso_data
             ],
 
@@ -471,13 +521,16 @@ def dashboard(
             "eixo": [
 
                 {
+
                     "eixo":
-                        str(e[0])
-                        if e[0]
-                        else "Sem plano",
+
+                    str(e[0])
+                    if e[0]
+                    else "Sem plano",
 
                     "qtd":
-                        e[1]
+                    e[1]
+
                 }
 
                 for e in eixo_data
@@ -487,14 +540,17 @@ def dashboard(
             "periodo_eixo": [
 
                 {
+
                     "mes": p[0],
 
                     "eixo":
-                        str(p[1])
-                        if p[1]
-                        else "Sem plano",
+
+                    str(p[1])
+                    if p[1]
+                    else "Sem plano",
 
                     "qtd": p[2]
+
                 }
 
                 for p in periodo_eixo_data
@@ -504,13 +560,16 @@ def dashboard(
             "anual": [
 
                 {
+
                     "ano":
-                        int(a[0])
-                        if a[0]
-                        else 0,
+
+                    int(a[0])
+                    if a[0]
+                    else 0,
 
                     "qtd":
-                        a[1]
+                    a[1]
+
                 }
 
                 for a in anual_data
@@ -524,9 +583,7 @@ def dashboard(
         traceback.print_exc()
 
         return {
-
             "erro": str(e)
-
         }
 
     finally:

@@ -147,12 +147,14 @@ async function carregarTabela() {
             <tbody>
         `;
 
-        data
-        .filter(s =>
-            s.nome.toLowerCase().includes(busca) ||
-            s.matricula.toLowerCase().includes(busca)
-        )
-        .forEach((s, i) => {
+                let filtrados = data.filter(s =>
+                s.nome.toLowerCase().includes(busca) ||
+                s.matricula.toLowerCase().includes(busca)
+            );
+            
+            listaServidores = filtrados;
+            
+            filtrados.forEach((s, i) => {
 
             let status = s.ativo
                 ? "🟢 Ativo"
@@ -180,9 +182,9 @@ async function carregarTabela() {
                 <td>
 
                     <button class="btn btn-warning btn-sm"
-                            onclick="editar(${i})">
+                        onclick="editar('${s.matricula}')">
 
-                        ✏️
+                    ✏️
                     </button>
 
                     <button class="btn ${btnClasse} btn-sm"
@@ -283,11 +285,15 @@ async function salvar(e) {
 // =====================================================
 // EDITAR
 // =====================================================
-function editar(index) {
+function editar(matricula) {
 
     limpar();
 
-    let s = listaServidores[index];
+    let s = listaServidores.find(
+        x => x.matricula == matricula
+    );
+
+    if(!s) return;
 
     editando = s.matricula;
 
@@ -295,35 +301,30 @@ function editar(index) {
     document.getElementById("nome").value = s.nome;
     document.getElementById("cargo").value = s.cargo_id;
 
-    // matrícula não pode alterar
     document.getElementById("matricula").disabled = true;
 
-    // muda botão
-    document.querySelector(".btn-primary").innerText = "Atualizar";
+    document.querySelector(".btn-primary").innerText =
+        "Atualizar";
 
-    // muda título
     document.querySelector("h2").innerHTML =
         `✏️ Editando Servidor: ${s.nome}`;
 
-    // sobe tela
     window.scrollTo({
         top: 0,
         behavior: "smooth"
     });
 
-    // foco visual
     setTimeout(() => {
         document.getElementById("nome").focus();
     }, 300);
 
-    // destaque visual do formulário
-    document.querySelector("form").classList.add("border");
-    document.querySelector("form").classList.add("border-warning");
-    document.querySelector("form").classList.add("p-3");
-    document.querySelector("form").classList.add("rounded");
+    document.querySelector("form").classList.add(
+        "border",
+        "border-warning",
+        "p-3",
+        "rounded"
+    );
 }
-
-
 // =====================================================
 // TOGGLE ATIVO / INATIVO
 // =====================================================

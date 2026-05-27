@@ -359,175 +359,166 @@ def gerar_pdf(
     elementos.append(
         Spacer(1,15)
     )
-
-
+   
+    # ==========================
+    # ESTILOS
+    # ==========================
+    
+    estilo_esquerda = estilos["Normal"]
+    
+    estilo_direita = styles.ParagraphStyle(
+        "direita",
+        parent=estilos["Normal"],
+        alignment=2   # RIGHT
+    )
+    
+    estilo_centro = styles.ParagraphStyle(
+        "centro",
+        parent=estilos["Normal"],
+        alignment=1   # CENTER
+    )
+    
+    
     # ==========================
     # TABELA
     # ==========================
-
+    
     tabela = [[
-
+    
         Paragraph(
             "<b>Formação</b>",
-            estilos["Normal"]
+            estilo_esquerda
         ),
-
+    
         Paragraph(
             "<b>CH</b>",
-            estilos["Normal"]
+            estilo_direita
         ),
-
+    
         Paragraph(
             "<b>Término</b>",
-            estilos["Normal"]
+            estilo_direita
         )
-
+    
     ]]
-
+    
     total = 0
-
+    
     for p in participacoes:
-
+    
         f = p.formacao
-
-        carga = (
-            f.carga_horaria or 0
-        )
-
+        carga = f.carga_horaria or 0
         total += carga
-
+    
         data_fim = ""
-
+    
         if f.data_termino:
-
-            data_fim = (
-                f.data_termino.strftime(
-                    "%d-%m-%Y"
-                )
+            data_fim = f.data_termino.strftime(
+                "%d-%m-%Y"
             )
-
+    
         tabela.append([
-
+    
             Paragraph(
                 f.descricao,
-                estilos["Normal"]
+                estilo_esquerda
             ),
-
+    
             Paragraph(
                 f"{carga} hs",
-                estilos["Normal"]
+                estilo_direita
             ),
-
+    
             Paragraph(
                 data_fim,
-                estilos["Normal"]
+                estilo_direita
             )
-
+    
         ])
-
-
+    
+    
+    # linha total
     tabela.append([
-
+    
         Paragraph(
             "<b>Total</b>",
-            estilos["Normal"]
+            estilo_esquerda
         ),
-
+    
         Paragraph(
             f"<b>{total} hs</b>",
-            estilos["Normal"]
+            estilo_direita
         ),
-
+    
         Paragraph(
             "",
-            estilos["Normal"]
+            estilo_direita
         )
-
+    
     ])
-
-
+    
+    
     tabela_pdf = Table(
-
+    
         tabela,
-
+    
         colWidths=[
-            12*cm,
-            1.5*cm,
+            11.5*cm,
+            2.5*cm,
             3*cm
         ]
-
+    
     )
-
+    
     tabela_pdf.setStyle(
-
+    
         TableStyle([
-
+    
             (
-                'BACKGROUND',
+                "BACKGROUND",
                 (0,0),
                 (-1,0),
                 colors.lightgrey
             ),
-
+    
             (
-                'GRID',
+                "GRID",
                 (0,0),
                 (-1,-1),
                 1,
                 colors.black
             ),
-
+    
             (
-                'VALIGN',
+                "VALIGN",
                 (0,0),
                 (-1,-1),
-                'MIDDLE'
+                "MIDDLE"
             ),
-
+    
             (
-                'LEADING',
+                "LEADING",
                 (0,0),
                 (-1,-1),
                 14
             ),
-
+    
             (
-                'ALIGN',
-                (0,0),
+                "FONTNAME",
                 (0,-1),
-                'LEFT'
+                (-1,-1),
+                "Helvetica-Bold"
             ),
-
+    
             (
-                'ALIGN',
-                (1,0),
-                (1,-1),
-                'RIGHT'
-            ),
-
-            (
-                'ALIGN',
-                (2,0),
-                (2,-1),
-                'RIGHT'
-            ),
-
-            (
-                'BACKGROUND',
+                "BACKGROUND",
                 (0,-1),
                 (-1,-1),
                 colors.lightgrey
-            ),
-
-            (
-                'FONTNAME',
-                (0,-1),
-                (-1,-1),
-                'Helvetica-Bold'
             )
-
+    
         ])
-
+    
     )
 
     elementos.append(
@@ -583,23 +574,21 @@ def gerar_pdf(
     
     )
     
-    tabela_data.setStyle(
-    
-        TableStyle([
-    
-            (
-                "ALIGN",
-                (0,0),
-                (0,0),
-                "RIGHT"
+    tabela_data = Table(
+
+        [[
+            Paragraph(
+                f"Porto Alegre, {data_emissao}",
+                estilo_direita
             )
+        ]],
     
-        ])
+        colWidths=[17*cm]
     
     )
 
     elementos.append(
-    tabela_data
+        tabela_data
     )
     
     doc.build(

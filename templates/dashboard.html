@@ -131,7 +131,6 @@
 
 <script>
 
-
 (() => {
 
 let filtros = {
@@ -149,23 +148,21 @@ async function exportarPDF() {
     let dashboard =
         document.getElementById("dashboard");
 
-    // Aguarda gráficos terminarem de renderizar
     window.dispatchEvent(
         new Event("resize")
     );
 
     await new Promise(
-        resolve => setTimeout(resolve, 500)
+        resolve => setTimeout(resolve,500)
     );
 
-    // captura dashboard
     let canvas = await html2canvas(
         dashboard,
         {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            scrollY: -window.scrollY
+            scale:2,
+            useCORS:true,
+            backgroundColor:"#ffffff",
+            scrollY:-window.scrollY
         }
     );
 
@@ -178,52 +175,49 @@ async function exportarPDF() {
     let larguraPDF =
         pdf.internal.pageSize.getWidth();
 
-    let alturaPDFPagina =
+    let alturaPagina =
         pdf.internal.pageSize.getHeight();
 
-    // margens
-    let margemTopo = 20;
-    let margemInferior = 10;
-    let margemLateral = 5;
+    let margemTopo=20;
+    let margemInferior=10;
+    let margemLateral=5;
 
-    // área útil da página
-    let areaUtilPagina =
-        alturaPDFPagina -
-        margemTopo -
+    let areaUtil=
+        alturaPagina-
+        margemTopo-
         margemInferior;
 
-    let imgWidth =
-        larguraPDF -
-        (margemLateral * 2);
+    let imgWidth=
+        larguraPDF-
+        (margemLateral*2);
 
-    // converte altura útil em pixels
-    let pageHeightPx =
-        (canvas.width *
-        areaUtilPagina) /
+    let pageHeightPx=
+        (canvas.width*
+        areaUtil)/
         imgWidth;
 
-    let alturaRestante =
+    let restante=
         canvas.height;
 
-    let y = 0;
+    let y=0;
 
-    while (alturaRestante > 0) {
+    while(restante>0){
 
-        let pageCanvas =
+        let pageCanvas=
             document.createElement(
                 "canvas"
             );
 
-        pageCanvas.width =
+        pageCanvas.width=
             canvas.width;
 
-        pageCanvas.height =
+        pageCanvas.height=
             Math.min(
                 pageHeightPx,
-                alturaRestante
+                restante
             );
 
-        let ctx =
+        let ctx=
             pageCanvas.getContext(
                 "2d"
             );
@@ -240,21 +234,20 @@ async function exportarPDF() {
             pageCanvas.height
         );
 
-        let pageImg =
+        let pageImg=
             pageCanvas.toDataURL(
                 "image/png"
             );
 
-        let alturaPaginaAtual =
-            (pageCanvas.height *
-            imgWidth) /
+        let alturaAtual=
+            (pageCanvas.height*
+            imgWidth)/
             pageCanvas.width;
 
-        if (y > 0) {
+        if(y>0){
             pdf.addPage();
         }
 
-        // cabeçalho opcional
         pdf.setFontSize(14);
 
         pdf.text(
@@ -269,14 +262,11 @@ async function exportarPDF() {
             margemLateral,
             margemTopo,
             imgWidth,
-            alturaPaginaAtual
+            alturaAtual
         );
 
-        alturaRestante -=
-            pageCanvas.height;
-
-        y +=
-            pageCanvas.height;
+        restante -= pageCanvas.height;
+        y += pageCanvas.height;
     }
 
     pdf.save(
@@ -284,110 +274,125 @@ async function exportarPDF() {
     );
 }
 
-function montarURL() {
+
+function montarURL(){
+
     return `/api/dashboard?mes_inicio=${encodeURIComponent(filtros.mes_inicio)}`
-        + `&mes_fim=${encodeURIComponent(filtros.mes_fim)}`
-        + `&lotacao=${encodeURIComponent(filtros.lotacao)}`
-        + `&curso=${encodeURIComponent(filtros.curso)}`
-        + `&eixo=${encodeURIComponent(filtros.eixo)}`;
+    +`&mes_fim=${encodeURIComponent(filtros.mes_fim)}`
+    +`&lotacao=${encodeURIComponent(filtros.lotacao)}`
+    +`&curso=${encodeURIComponent(filtros.curso)}`
+    +`&eixo=${encodeURIComponent(filtros.eixo)}`;
+
 }
 
-async function carregar() {
 
-    filtros.mes_inicio =document.getElementById("mes_inicio").value;
-    filtros.mes_fim =document.getElementById("mes_fim").value;
-    filtros.lotacao =document.getElementById("filtroLotacao").value;
-    filtros.curso =document.getElementById("filtroCurso").value;
-    filtros.eixo =document.getElementById("filtroEixo").value;
+async function carregar(){
 
-    try {
+    filtros.mes_inicio=
+        document.getElementById(
+            "mes_inicio"
+        ).value;
 
-        document.getElementById("loading").style.display="block";
+    filtros.mes_fim=
+        document.getElementById(
+            "mes_fim"
+        ).value;
 
-        let res = await fetch(montarURL());
+    filtros.lotacao=
+        document.getElementById(
+            "filtroLotacao"
+        ).value;
 
-        let data = await res.json();
+    filtros.curso=
+        document.getElementById(
+            "filtroCurso"
+        ).value;
+
+    filtros.eixo=
+        document.getElementById(
+            "filtroEixo"
+        ).value;
+
+    try{
+
+        document.getElementById(
+            "loading"
+        ).style.display="block";
+
+        let res=
+            await fetch(
+                montarURL()
+            );
+
+        let data=
+            await res.json();
 
         atualizarCards(data);
-        preencherFiltros(data);
+
         montarGraficos(data);
 
-    } catch(err){
+    }
+
+    catch(err){
 
         console.error(err);
 
-    } finally {
-
-        document.getElementById("loading").style.display="none";
-        
     }
+
+    finally{
+
+        document.getElementById(
+            "loading"
+        ).style.display="none";
+
+    }
+
 }
 
-function atualizarCards(data) {
 
-    document.getElementById("total").innerText = data.cards?.participacoes || 0;
-    document.getElementById("certificados").innerText = data.cards?.certificados || 0;
-    document.getElementById("servidoresUnicos").innerText=data.cards?.servidores_unicos || 0;
-    document.getElementById("evasao").innerText = data.cards?.evasao || 0;
-    document.getElementById("taxaEvasao").innerText = (data.cards?.taxa_evasao || 0) + "%";
-    document.getElementById("cargaRealizada").innerText = (data.cards?.carga_realizada || 0) + "h";
-    document.getElementById("mediaServidor").innerText = data.cards?.media_por_servidor || 0;
+function atualizarCards(data){
+
+    document.getElementById("total").innerText=data.cards?.participacoes||0;
+    document.getElementById("certificados").innerText=data.cards?.certificados||0;
+    document.getElementById("servidoresUnicos").innerText=data.cards?.servidores_unicos||0;
+    document.getElementById("evasao").innerText=data.cards?.evasao||0;
+    document.getElementById("taxaEvasao").innerText=(data.cards?.taxa_evasao||0)+"%";
+    document.getElementById("cargaRealizada").innerText=(data.cards?.carga_realizada||0)+"h";
+    document.getElementById("mediaServidor").innerText=data.cards?.media_por_servidor||0;
+
 }
 
-async function preencherFiltros(data){
 
-    let lotacao =
+async function preencherFiltros(){
+
+    let lotacao=
         document.getElementById(
             "filtroLotacao"
         );
 
-    let curso =
+    let curso=
         document.getElementById(
             "filtroCurso"
         );
 
-    let eixo =
-        document.getElementById(
-            "filtroEixo"
-        );
 
+    if(lotacao.options.length<=1){
 
-    // ==========================
-    // LOTAÇÕES
-    // ==========================
-
-    if(lotacao.options.length <= 1){
-
-        let res =
+        let res=
             await fetch(
                 "/api/dashboard/lotacoes"
             );
 
-        let lista =
+        let lista=
             await res.json();
 
-        lista
-        .sort((a,b)=>
-
-            a.tipo.localeCompare(
-                b.tipo,
-                "pt-BR",
-                {
-                    sensitivity:"base"
-                }
-            )
-
-        )
-
-        .forEach(x=>{
+        lista.forEach(x=>{
 
             lotacao.add(
-
                 new Option(
                     x.tipo,
                     x.tipo
                 )
-
             );
 
         });
@@ -395,66 +400,23 @@ async function preencherFiltros(data){
     }
 
 
-    // ==========================
-    // CURSOS
-    // ==========================
+    if(curso.options.length<=1){
 
-    if(curso.options.length <= 1){
-
-        let res =
+        let res=
             await fetch(
                 "/api/dashboard/cursos"
             );
 
-        let lista =
+        let lista=
             await res.json();
 
-        lista
-        .sort((a,b)=>
-
-            a.descricao.localeCompare(
-                b.descricao,
-                "pt-BR",
-                {
-                    sensitivity:"base"
-                }
-            )
-
-        )
-
-        .forEach(x=>{
+        lista.forEach(x=>{
 
             curso.add(
-
                 new Option(
                     x.descricao,
                     x.descricao
                 )
-
-            );
-
-        });
-
-    }
-
-
-    // ==========================
-    // EIXOS
-    // ==========================
-
-    if(eixo.options.length <=1){
-
-        (data.eixo || [])
-
-        .forEach(x=>{
-
-            eixo.add(
-
-                new Option(
-                    x.eixo,
-                    x.eixo
-                )
-
             );
 
         });
@@ -463,7 +425,6 @@ async function preencherFiltros(data){
 
 }
 
-   
 
 function limparFiltros(){
 
@@ -473,139 +434,61 @@ function limparFiltros(){
     document.getElementById("filtroCurso").value="";
     document.getElementById("filtroEixo").value="";
 
-    filtros = {
+    filtros={
+
         mes_inicio:"",
         mes_fim:"",
         lotacao:"",
         curso:"",
         eixo:""
+
     };
 
     carregar();
+
 }
 
-function montarGraficos(data) {
 
-    // Top Lotações
-    if ((data.lotacao || []).length > 1) {
+function montarGraficos(data){
 
-        document.getElementById("g1").style.display = "block";
+    Plotly.react("g1",[{
 
-        Plotly.react("g1", [{
-            x: (data.lotacao || []).map(x => x.lotacao),
-            y: (data.lotacao || []).map(x => x.qtd),
-            type: "bar"
-        }], { title: "Top Lotações" });
+        x:data.lotacao.map(x=>x.lotacao),
+        y:data.lotacao.map(x=>x.qtd),
+        type:"bar"
 
-    } else {
+    }],{
 
-        document.getElementById("g1").style.display = "none";
-        document.getElementById("g1").innerHTML="";
-    }
+        title:"Top Lotações"
 
-     // Top Cursos
-    if ((data.curso || []).length > 1) {
-
-        document.getElementById("g2").style.display = "block";
-
-        Plotly.react("g2", [{
-            x: (data.curso || []).map(x => x.formacao),
-            y: (data.curso || []).map(x => x.qtd),
-            type: "bar"
-        }], { title: "Top Cursos" });
-
-    } else {
-
-        document.getElementById("g2").style.display = "none";
-        document.getElementById("g2").innerHTML="";
-    }
-
-    Plotly.react("g3", [{
-        x: (data.periodo || []).map(x => x.mes),
-        y: (data.periodo || []).map(x => x.qtd),
-        type: "scatter",
-        mode: "lines+markers"
-    }], { title: "Participações por Mês" });
-
-    Plotly.react("g4", [{
-        labels: ["Certificados", "Evasão"],
-        values: [
-            data.cards?.certificados || 0,
-            data.cards?.evasao || 0
-        ],
-        type: "pie"
-    }], { title: "Conclusão x Evasão" });
-
-    // ✔ FIX PRINCIPAL AQUI (sem plano_eixo)
-    Plotly.react("g5", [{
-        x: (data.eixo || []).map(x => x.eixo),
-        y: (data.eixo || []).map(x => x.qtd),
-        type: "bar"
-    }], { title: "Participações por Eixo" });
-
-    let eixos = [...new Set((data.periodo_eixo || []).map(x => x.eixo))];
-
-    let traces = eixos.map(eixo => {
-
-        let dados = (data.periodo_eixo || []).filter(x => x.eixo === eixo);
-
-        return {
-            x: dados.map(x => x.mes),
-            y: dados.map(x => x.qtd),
-            name: eixo,
-            type: "bar"
-        };
     });
 
-    Plotly.react("g6", traces, {
-        barmode: "stack",
-        title: "Participações por Mês e Eixo"
+
+    Plotly.react("g2",[{
+
+        x:data.curso.map(x=>x.formacao),
+        y:data.curso.map(x=>x.qtd),
+        type:"bar"
+
+    }],{
+
+        title:"Top Cursos"
+
     });
 
-    let anos = [...new Set((data.anual || []).map(x => x.ano))];
+}
 
-    if (anos.length > 1) {
-    
-        document.getElementById("g7").style.display = "block";
-    
-        Plotly.react("g7", [{
-            x: (data.anual || []).map(x => x.ano),
-            y: (data.anual || []).map(x => x.qtd),
-            type: "scatter",
-            mode: "lines+markers"
-        }], {
-            title: "Comparativo Anual"
-        });
-    
-    } else {
-    
-        document.getElementById("g7").style.display = "none";
-        document.getElementById("g7").innerHTML="";
-    
-    }
-    }
 
-    
+window.carregar=carregar;
+window.exportarPDF=exportarPDF;
+window.limparFiltros=limparFiltros;
 
-window.carregar = carregar;
-window.exportarPDF = exportarPDF;
-window.limparFiltros = limparFiltros;
 
 document.addEventListener(
     "DOMContentLoaded",
-    async ()=>{
+    async()=>{
 
-        let res =
-            await fetch(
-                montarURL()
-            );
-
-        let data =
-            await res.json();
-
-        await preencherFiltros(
-            data
-        );
+        await preencherFiltros();
 
         carregar();
 
@@ -613,6 +496,9 @@ document.addEventListener(
 );
 
 })();
+
 </script>
+
+  
 
 {% endblock %}

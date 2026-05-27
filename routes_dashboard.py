@@ -58,8 +58,10 @@ def listar_lotacoes(
 
     return [
 
-        l.tipo
-
+        {
+            "tipo": l.tipo
+        }
+    
         for l in result
         if l.tipo
     ]
@@ -132,9 +134,11 @@ def listar_eixos(
     ).all()
 
     return [
-
-        e.eixo
-
+    
+        {
+            "eixo": e.eixo
+        }
+    
         for e in result
         if e.eixo
     ]
@@ -300,6 +304,17 @@ def dashboard(
         evasao = (
             total-certificados
         )
+        
+        taxa_evasao = (
+
+            round(
+                (evasao / total) * 100,
+                2
+            )
+        
+            if total > 0
+            else 0
+        )
 
 
         servidores_unicos = len(
@@ -454,12 +469,13 @@ def dashboard(
 
             "cards":{
 
-                "participacoes":total,
-                "certificados":certificados,
-                "evasao":evasao,
-                "servidores_unicos":servidores_unicos,
-                "carga_realizada":carga_realizada,
-                "media_por_servidor":media
+                "participacoes": total,
+                "certificados": certificados,
+                "evasao": evasao,
+                "taxa_evasao": taxa_evasao,
+                "servidores_unicos": servidores_unicos,
+                "carga_realizada": carga_realizada,
+                "media_por_servidor": media
 
             },
 

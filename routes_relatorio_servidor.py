@@ -414,7 +414,7 @@ def gerar_pdf(
             ),
 
             Paragraph(
-                str(carga),
+                f"{carga} hs",
                 estilos["Normal"]
             ),
 
@@ -434,9 +434,9 @@ def gerar_pdf(
         ),
 
         Paragraph(
-            f"<b>{total}</b>",
+            f"<b>{total} hs</b>",
             estilos["Normal"]
-        ),
+        )
 
         Paragraph(
             "",
@@ -509,7 +509,7 @@ def gerar_pdf(
                 'ALIGN',
                 (2,0),
                 (2,-1),
-                'CENTER'
+                'RIGHT'
             ),
 
             (

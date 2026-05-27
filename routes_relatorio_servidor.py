@@ -236,7 +236,7 @@ def gerar_pdf(
         styles.getSampleStyleSheet()
     )
 
-    elementos=[]
+    elementos= []
 
 
     # ==========================
@@ -583,18 +583,15 @@ def gerar_pdf(
         
         ])
         
-    )
-        
-    elementos.append(
-        tabela_data
-    )
+    )       
+    
 
     elementos.append(
         tabela_data
     )
     
     doc.build(
-        elementos
+        
     )
     
     return FileResponse(

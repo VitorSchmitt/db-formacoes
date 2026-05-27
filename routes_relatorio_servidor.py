@@ -370,13 +370,8 @@ def gerar_pdf(
         "direita",
         parent=estilos["Normal"],
         alignment=2   # RIGHT
-    )
+    ) 
     
-    estilo_centro = styles.ParagraphStyle(
-        "centro",
-        parent=estilos["Normal"],
-        alignment=1   # CENTER
-    )
     
     
     # ==========================
@@ -561,18 +556,6 @@ def gerar_pdf(
         Spacer(1,30)
     )
     
-    tabela_data = Table(
-    
-        [[
-            Paragraph(
-                f"Porto Alegre, {data_emissao}",
-                estilos["Normal"]
-            )
-        ]],
-    
-        colWidths=[18*cm]
-    
-    )
     
     tabela_data = Table(
 
@@ -585,6 +568,25 @@ def gerar_pdf(
     
         colWidths=[17*cm]
     
+    )
+    
+    tabela_data.setStyle(
+        
+        TableStyle([
+        
+            (
+                "ALIGN",
+                (0,0),
+                (0,0),
+                "RIGHT"
+            )
+        
+        ])
+        
+    )
+        
+    elementos.append(
+        tabela_data
     )
 
     elementos.append(

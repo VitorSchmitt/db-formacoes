@@ -436,7 +436,7 @@ def gerar_pdf(
     tabela.append([
     
         Paragraph(
-            "<b>Total</b>",
+            "<b>Total de horas em formações</b>",
             estilo_esquerda
         ),
     

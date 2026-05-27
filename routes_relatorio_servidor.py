@@ -436,7 +436,7 @@ def gerar_pdf(
         Paragraph(
             f"<b>{total} hs</b>",
             estilos["Normal"]
-        )
+        ),
 
         Paragraph(
             "",
@@ -535,29 +535,71 @@ def gerar_pdf(
     )
 
 
+    
+
     # ==========================
     # DATA DE EMISSÃO
     # ==========================
-
-    data_emissao = datetime.now().strftime(
-        "%d-%m-%Y"
+    
+    meses = {
+    
+        1:"janeiro",
+        2:"fevereiro",
+        3:"março",
+        4:"abril",
+        5:"maio",
+        6:"junho",
+        7:"julho",
+        8:"agosto",
+        9:"setembro",
+        10:"outubro",
+        11:"novembro",
+        12:"dezembro"
+    
+    }
+    
+    hoje = datetime.now()
+    
+    data_emissao = (
+        f"{hoje.day} de "
+        f"{meses[hoje.month]} de "
+        f"{hoje.year}"
     )
-
+    
     elementos.append(
         Spacer(1,30)
     )
-
-    elementos.append(
-
-        Paragraph(
-            f"Porto Alegre, {data_emissao}",
-            estilos["Normal"]
-        )
-
+    
+    tabela_data = Table(
+    
+        [[
+            Paragraph(
+                f"Porto Alegre, {data_emissao}",
+                estilos["Normal"]
+            )
+        ]],
+    
+        colWidths=[18*cm]
+    
+    )
+    
+    tabela_data.setStyle(
+    
+        TableStyle([
+    
+            (
+                "ALIGN",
+                (0,0),
+                (0,0),
+                "RIGHT"
+            )
+    
+        ])
+    
     )
 
-    doc.build(
-        elementos
+    elementos.append(
+        tabela_data
     )
 
     return FileResponse(

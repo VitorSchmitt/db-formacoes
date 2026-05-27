@@ -357,145 +357,177 @@ def gerar_pdf(
     # TABELA
     # ==========================
 
-    tabela = [[
+    # ==========================
+# TABELA
+# ==========================
 
-        Paragraph(
-            "<b>Formação</b>",
-            estilos["Normal"]
-        ),
+tabela = [[
 
-        Paragraph(
-            "<b>CH</b>",
-            estilos["Normal"]
-        ),
+    Paragraph(
+        "<b>Formação</b>",
+        estilos["Normal"]
+    ),
 
-        Paragraph(
-            "<b>Término</b>",
-            estilos["Normal"]
-        )
+    Paragraph(
+        "<b>CH</b>",
+        estilos["Normal"]
+    ),
 
-    ]]
+    Paragraph(
+        "<b>Término</b>",
+        estilos["Normal"]
+    )
 
-    total = 0
+]]
 
-    for p in participacoes:
+total = 0
 
-        f = p.formacao
+for p in participacoes:
 
-        carga = (
-            f.carga_horaria or 0
-        )
+    f = p.formacao
 
-        total += carga
+    carga = (
+        f.carga_horaria or 0
+    )
 
-        tabela.append([
+    total += carga
 
-            Paragraph(
-                f.descricao,
-                estilos["Normal"]
-            ),
+    data_fim = ""
 
-            Paragraph(
-                str(carga),
-                estilos["Normal"]
-            ),
+    if f.data_termino:
 
-            Paragraph(
-                str(f.data_termino),
-                estilos["Normal"]
+        data_fim = (
+            f.data_termino.strftime(
+                "%d-%m-%Y"
             )
-
-        ])
+        )
 
     tabela.append([
 
         Paragraph(
-            "<b>Total</b>",
+            f.descricao,
             estilos["Normal"]
         ),
 
         Paragraph(
-            f"<b>{total}</b>",
+            str(carga),
             estilos["Normal"]
         ),
 
         Paragraph(
-            "",
+            data_fim,
             estilos["Normal"]
         )
 
     ])
 
+tabela.append([
 
-    tabela_pdf = Table(
+    Paragraph(
+        "<b>Total</b>",
+        estilos["Normal"]
+    ),
 
-        tabela,
+    Paragraph(
+        f"<b>{total}</b>",
+        estilos["Normal"]
+    ),
 
-        colWidths=[
-            12*cm,
-            1.5*cm,
-            3*cm
-        ]
-
+    Paragraph(
+        "",
+        estilos["Normal"]
     )
 
-    tabela_pdf.setStyle(
+])
 
-        TableStyle([
 
-            (
-                'BACKGROUND',
-                (0,0),
-                (-1,0),
-                colors.lightgrey
-            ),
+tabela_pdf = Table(
 
-            (
-                'GRID',
-                (0,0),
-                (-1,-1),
-                1,
-                colors.black
-            ),
+    tabela,
 
-            (
-                'VALIGN',
-                (0,0),
-                (-1,-1),
-                'MIDDLE'
-            ),
+    colWidths=[
+        12*cm,
+        1.5*cm,
+        3*cm
+    ]
 
-            (
-                'LEADING',
-                (0,0),
-                (-1,-1),
-                14
-            ),
+)
 
-            (
-                'ALIGN',
-                (1,1),
-                (1,-1),
-                'RIGHT'
-            ),
+tabela_pdf.setStyle(
 
-            (
-                'ALIGN',
-                (2,1),
-                (2,-1),
-                'CENTER'
-            ),
+    TableStyle([
 
-            (
-                'BACKGROUND',
-                (0,-1),
-                (-1,-1),
-                colors.lightgrey
-            )
+        (
+            'BACKGROUND',
+            (0,0),
+            (-1,0),
+            colors.lightgrey
+        ),
 
-        ])
+        (
+            'GRID',
+            (0,0),
+            (-1,-1),
+            1,
+            colors.black
+        ),
 
-    )
+        (
+            'VALIGN',
+            (0,0),
+            (-1,-1),
+            'MIDDLE'
+        ),
+
+        (
+            'LEADING',
+            (0,0),
+            (-1,-1),
+            14
+        ),
+
+        # Formação esquerda
+        (
+            'ALIGN',
+            (0,0),
+            (0,-1),
+            'LEFT'
+        ),
+
+        # CH direita
+        (
+            'ALIGN',
+            (1,0),
+            (1,-1),
+            'RIGHT'
+        ),
+
+        # Data centralizada
+        (
+            'ALIGN',
+            (2,0),
+            (2,-1),
+            'CENTER'
+        ),
+
+        # Linha total destacada
+        (
+            'BACKGROUND',
+            (0,-1),
+            (-1,-1),
+            colors.lightgrey
+        ),
+
+        (
+            'FONTNAME',
+            (0,-1),
+            (-1,-1),
+            'Helvetica-Bold'
+        )
+
+    ])
+
+)
 
     elementos.append(
         tabela_pdf

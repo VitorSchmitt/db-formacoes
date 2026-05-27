@@ -225,11 +225,10 @@ def gerar_pdf(
 
     )
 
-    estilos = (
-        styles.getSampleStyleSheet()
-    )
+    estilos = styles.getSampleStyleSheet()
 
     elementos = []
+
 
 
     # ==========================
@@ -360,9 +359,20 @@ def gerar_pdf(
 
     tabela = [[
 
-        "Formação",
-        "CH",
-        "Término"
+        Paragraph(
+            "<b>Formação</b>",
+            estilos["Normal"]
+        ),
+
+        Paragraph(
+            "<b>CH</b>",
+            estilos["Normal"]
+        ),
+
+        Paragraph(
+            "<b>Término</b>",
+            estilos["Normal"]
+        )
 
     ]]
 
@@ -380,23 +390,42 @@ def gerar_pdf(
 
         tabela.append([
 
-            f.descricao,
+            Paragraph(
+                f.descricao,
+                estilos["Normal"]
+            ),
 
-            str(carga),
+            Paragraph(
+                str(carga),
+                estilos["Normal"]
+            ),
 
-            str(
-                f.data_termino
+            Paragraph(
+                str(f.data_termino),
+                estilos["Normal"]
             )
 
         ])
 
     tabela.append([
 
-        "Total",
-        str(total),
-        ""
+        Paragraph(
+            "<b>Total</b>",
+            estilos["Normal"]
+        ),
+
+        Paragraph(
+            f"<b>{total}</b>",
+            estilos["Normal"]
+        ),
+
+        Paragraph(
+            "",
+            estilos["Normal"]
+        )
 
     ])
+
 
     tabela_pdf = Table(
 
@@ -404,7 +433,7 @@ def gerar_pdf(
 
         colWidths=[
             12*cm,
-            1*cm,
+            1.5*cm,
             3*cm
         ]
 
@@ -419,13 +448,6 @@ def gerar_pdf(
                 (0,0),
                 (-1,0),
                 colors.lightgrey
-            ),
-
-            (
-                'FONTNAME',
-                (0,0),
-                (-1,0),
-                'Helvetica-Bold'
             ),
 
             (
@@ -444,17 +466,10 @@ def gerar_pdf(
             ),
 
             (
-                'ALIGN',
+                'LEADING',
                 (0,0),
-                (0,-1),
-                'LEFT'
-            ),
-
-            (
-                'ALIGN',
-                (2,0),
-                (2,-1),
-                'CENTER'
+                (-1,-1),
+                14
             ),
 
             (
@@ -465,8 +480,15 @@ def gerar_pdf(
             ),
 
             (
+                'ALIGN',
+                (2,1),
+                (2,-1),
+                'CENTER'
+            ),
+
+            (
                 'BACKGROUND',
-                (-2,-1),
+                (0,-1),
                 (-1,-1),
                 colors.lightgrey
             )

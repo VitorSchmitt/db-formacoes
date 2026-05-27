@@ -130,6 +130,8 @@
 </div>
 
 <script>
+
+
 (() => {
 
 let filtros = {
@@ -332,53 +334,133 @@ function atualizarCards(data) {
     document.getElementById("mediaServidor").innerText = data.cards?.media_por_servidor || 0;
 }
 
-function preencherFiltros(data){
+async function preencherFiltros(data){
 
-    let lotacao=document.getElementById("filtroLotacao");
-    let curso=document.getElementById("filtroCurso");
-    let eixo=document.getElementById("filtroEixo");
+    let lotacao =
+        document.getElementById(
+            "filtroLotacao"
+        );
 
-    if (lotacao.options.length <= 1) {
+    let curso =
+        document.getElementById(
+            "filtroCurso"
+        );
 
-    (data.lotacao || [])
-        .sort((a, b) =>
-            a.lotacao.localeCompare(
-                b.lotacao,
-                'pt-BR',
-                { sensitivity: 'base' }
+    let eixo =
+        document.getElementById(
+            "filtroEixo"
+        );
+
+
+    // ==========================
+    // LOTAÇÕES
+    // ==========================
+
+    if(lotacao.options.length <= 1){
+
+        let res =
+            await fetch(
+                "/api/dashboard/lotacoes"
+            );
+
+        let lista =
+            await res.json();
+
+        lista
+        .sort((a,b)=>
+
+            a.tipo.localeCompare(
+                b.tipo,
+                "pt-BR",
+                {
+                    sensitivity:"base"
+                }
             )
+
         )
-        .forEach(x => {
+
+        .forEach(x=>{
 
             lotacao.add(
+
                 new Option(
-                    x.lotacao,
-                    x.lotacao
+                    x.tipo,
+                    x.tipo
                 )
+
             );
 
         });
-}
+
+    }
+
+
+    // ==========================
+    // CURSOS
+    // ==========================
+
     if(curso.options.length <= 1){
 
-    (data.curso || [])
-    .sort((a,b)=>
-        a.formacao.localeCompare(
-            b.formacao,
-            'pt-BR',
-            { sensitivity: 'base' }
-        )
-    )
-    .forEach(x=>{
+        let res =
+            await fetch(
+                "/api/dashboard/cursos"
+            );
 
-        curso.add(
-            new Option(
-                x.formacao,
-                x.formacao
+        let lista =
+            await res.json();
+
+        lista
+        .sort((a,b)=>
+
+            a.descricao.localeCompare(
+                b.descricao,
+                "pt-BR",
+                {
+                    sensitivity:"base"
+                }
             )
-        );
 
-    });
+        )
+
+        .forEach(x=>{
+
+            curso.add(
+
+                new Option(
+                    x.descricao,
+                    x.descricao
+                )
+
+            );
+
+        });
+
+    }
+
+
+    // ==========================
+    // EIXOS
+    // ==========================
+
+    if(eixo.options.length <=1){
+
+        (data.eixo || [])
+
+        .forEach(x=>{
+
+            eixo.add(
+
+                new Option(
+                    x.eixo,
+                    x.eixo
+                )
+
+            );
+
+        });
+
+    }
+
 }
 
     if(eixo.options.length<=1){
@@ -426,7 +508,7 @@ function montarGraficos(data) {
     } else {
 
         document.getElementById("g1").style.display = "none";
-        grafico.innerHTML = "";
+        document.getElementById("g1").innerHTML="";
     }
 
      // Top Cursos
@@ -443,7 +525,7 @@ function montarGraficos(data) {
     } else {
 
         document.getElementById("g2").style.display = "none";
-        grafico.innerHTML = "";
+        document.getElementById("g2").innerHTML="";
     }
 
     Plotly.react("g3", [{
@@ -506,7 +588,7 @@ function montarGraficos(data) {
     } else {
     
         document.getElementById("g7").style.display = "none";
-        grafico.innerHTML = "";
+        document.getElementById("g7").innerHTML="";
     
     }
     }
@@ -517,7 +599,26 @@ window.carregar = carregar;
 window.exportarPDF = exportarPDF;
 window.limparFiltros = limparFiltros;
 
-document.addEventListener("DOMContentLoaded", carregar);
+document.addEventListener(
+    "DOMContentLoaded",
+    async ()=>{
+
+        let res =
+            await fetch(
+                montarURL()
+            );
+
+        let data =
+            await res.json();
+
+        await preencherFiltros(
+            data
+        );
+
+        carregar();
+
+    }
+);
 
 })();
 </script>

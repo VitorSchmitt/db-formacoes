@@ -454,7 +454,7 @@ def dashboard(
                 }
             
                 for c in curso_data
-            ]
+            ],
 
 
             "periodo": [

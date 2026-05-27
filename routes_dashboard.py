@@ -379,45 +379,40 @@ def dashboard(
         # =====================================
         # CURSOS
         # =====================================
-
         curso_data = (
-
+        
             base.with_entities(
-
-                Lotacao.tipo,
-
+        
                 Formacao.id,
-
+        
                 Formacao.descricao,
-
+        
                 func.count(
                     Participacao.id
                 ).label(
                     "qtd"
                 )
-
+        
             )
-
+        
             .group_by(
-
-                Lotacao.tipo,
-
+        
                 Formacao.id,
-
+        
                 Formacao.descricao
-
+        
             )
-
+        
             .order_by(
-
+        
                 func.count(
                     Participacao.id
                 ).desc()
-
+        
             )
-
+        
             .all()
-
+        
         )
 
 
@@ -490,12 +485,12 @@ def dashboard(
             ],
 
             "curso":[
-
+            
                 {
-                    "formacao":c[2],
-                    "qtd":c[3]
+                    "formacao": c[1],
+                    "qtd": c[2]
                 }
-
+            
                 for c in curso_data
             ],
 

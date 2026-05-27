@@ -397,15 +397,18 @@ async function preencherFiltros(data){
 
         lista
         .sort((a,b)=>
-
-            a.tipo.localeCompare(
-                b.tipo,
+        
+            (a.tipo || "")
+            .localeCompare(
+        
+                (b.tipo || ""),
                 "pt-BR",
                 {
                     sensitivity:"base"
                 }
+        
             )
-
+        
         )
 
         .forEach(x=>{
@@ -440,16 +443,20 @@ async function preencherFiltros(data){
 
         lista
         .sort((a,b)=>
-
-            a.descricao.localeCompare(
-                b.descricao,
+        
+            (a.descricao || "")
+            .localeCompare(
+        
+                (b.descricao || ""),
                 "pt-BR",
                 {
                     sensitivity:"base"
                 }
+        
             )
-
+        
         )
+
 
         .forEach(x=>{
 
@@ -474,17 +481,19 @@ async function preencherFiltros(data){
     if(eixo.options.length <= 1){
 
         (data.eixo || [])
-
         .sort((a,b)=>
-
-            a.eixo.localeCompare(
-                b.eixo,
+        
+            (a.eixo || "")
+            .localeCompare(
+        
+                (b.eixo || ""),
                 "pt-BR",
                 {
                     sensitivity:"base"
                 }
+        
             )
-
+        
         )
 
         .forEach(x=>{

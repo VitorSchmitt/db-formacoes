@@ -363,36 +363,60 @@ function atualizarCards(data){
 }
 
 
-async function preencherFiltros(){
+async function preencherFiltros(data){
 
-    let lotacao=
+    let lotacao =
         document.getElementById(
             "filtroLotacao"
         );
 
-    let curso=
+    let curso =
         document.getElementById(
             "filtroCurso"
         );
 
+    let eixo =
+        document.getElementById(
+            "filtroEixo"
+        );
 
-    if(lotacao.options.length<=1){
 
-        let res=
+    // ==========================
+    // LOTAÇÕES
+    // ==========================
+
+    if(lotacao.options.length <= 1){
+
+        let res =
             await fetch(
                 "/api/dashboard/lotacoes"
             );
 
-        let lista=
+        let lista =
             await res.json();
 
-        lista.forEach(x=>{
+        lista
+        .sort((a,b)=>
+
+            a.tipo.localeCompare(
+                b.tipo,
+                "pt-BR",
+                {
+                    sensitivity:"base"
+                }
+            )
+
+        )
+
+        .forEach(x=>{
 
             lotacao.add(
+
                 new Option(
                     x.tipo,
                     x.tipo
                 )
+
             );
 
         });
@@ -400,23 +424,78 @@ async function preencherFiltros(){
     }
 
 
-    if(curso.options.length<=1){
+    // ==========================
+    // CURSOS
+    // ==========================
 
-        let res=
+    if(curso.options.length <= 1){
+
+        let res =
             await fetch(
                 "/api/dashboard/cursos"
             );
 
-        let lista=
+        let lista =
             await res.json();
 
-        lista.forEach(x=>{
+        lista
+        .sort((a,b)=>
+
+            a.descricao.localeCompare(
+                b.descricao,
+                "pt-BR",
+                {
+                    sensitivity:"base"
+                }
+            )
+
+        )
+
+        .forEach(x=>{
 
             curso.add(
+
                 new Option(
                     x.descricao,
                     x.descricao
                 )
+
+            );
+
+        });
+
+    }
+
+
+    // ==========================
+    // EIXOS
+    // ==========================
+
+    if(eixo.options.length <= 1){
+
+        (data.eixo || [])
+
+        .sort((a,b)=>
+
+            a.eixo.localeCompare(
+                b.eixo,
+                "pt-BR",
+                {
+                    sensitivity:"base"
+                }
+            )
+
+        )
+
+        .forEach(x=>{
+
+            eixo.add(
+
+                new Option(
+                    x.eixo,
+                    x.eixo
+                )
+
             );
 
         });

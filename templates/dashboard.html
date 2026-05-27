@@ -364,6 +364,9 @@ function atualizarCards(data){
 
 
 async function preencherFiltros(data){
+    if(!data){
+        return;
+    }
 
     let lotacao =
         document.getElementById(
@@ -576,9 +579,7 @@ document.addEventListener(
     "DOMContentLoaded",
     async()=>{
 
-        await preencherFiltros();
-
-        carregar();
+        await carregar();
 
     }
 );

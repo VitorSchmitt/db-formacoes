@@ -112,52 +112,51 @@ def cronograma(
                 x.data_inicio
                 or date.max
         )
-
         EIXOS = {
-    
-        "Ambientação Institucional/Formação Inicial":
-            "I",
-    
-        "Gestão do Trabalho/Saúde Mental e Bem Estar":
-            "II",
-    
-        "Qualificação da Prática Socioeducativa Temas Transversais":
-            "III"
-
+        
+            "Ambientação Institucional/Formação Inicial":
+                "I",
+        
+            "Gestão do Trabalho/Saúde Mental e Bem Estar":
+                "II",
+        
+            "Qualificação da Prática Socioeducativa Temas Transversais":
+                "III"
+        
         }
-
+        
         for f in formacoes:
-
+        
+            eixo = EIXOS.get(
+                plano.eixo,
+                plano.eixo
+            )
+        
             resultado.append({
-
-                eixo = EIXOS.get(
-                    plano.eixo,
-                    plano.eixo
-                )
-
+        
                 "periodo":
                     periodo_formatado(f),
-
+        
                 "descricao":
                     f.descricao,
-
+        
                 "eixo":
-                    plano.eixo,
-
+                    eixo,
+        
                 "carga_horaria":
                     f.carga_horaria,
-
+        
                 "publico":
                     f.publico_alvo,
-
+        
                 "investimento":
                     float(
                         f.investimento or 0
                     ),
-
+        
                 "status":
                     f.status
-
+        
             })
-
-    return resultado
+        
+        return resultado

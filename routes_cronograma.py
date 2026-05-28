@@ -128,8 +128,8 @@ def cronograma(
         for f in formacoes:
         
             eixo = EIXOS.get(
-                plano.eixo,
-                plano.eixo
+                f.eixo,
+                f.eixo
             )
         
             resultado.append({

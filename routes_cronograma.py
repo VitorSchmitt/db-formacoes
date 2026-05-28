@@ -102,63 +102,66 @@ def cronograma(
         .all()
     )
 
+    EIXOS = {
+
+        "Ambientação Institucional/Formação Inicial":
+            "I",
+
+        "Gestão do Trabalho/Saúde Mental e Bem Estar":
+            "II",
+
+        "Qualificação da Prática Socioeducativa Temas Transversais":
+            "III"
+
+    }
+
     resultado = []
 
     for plano in planos:
 
-        formacoes = sorted(
-            plano.formacoes,
-            key=lambda x:
-                x.data_inicio
-                or date.max
-        )
-        EIXOS = {
-        
-            "Ambientação Institucional/Formação Inicial":
-                "I",
-        
-            "Gestão do Trabalho/Saúde Mental e Bem Estar":
-                "II",
-        
-            "Qualificação da Prática Socioeducativa Temas Transversais":
-                "III"
-        
-        }
-        
-        for f in formacoes:
-        
-            eixo_original = f.eixo or ""
+        eixo_original = plano.eixo or ""
 
-            eixo = EIXOS.get(
-                eixo_original,
-                eixo_original
-            )
-        
+        eixo = EIXOS.get(
+            eixo_original,
+            eixo_original
+        )
+
+        formacoes = sorted(
+
+            plano.formacoes,
+
+            key=lambda x:
+                x.data_inicio or date.max
+
+        )
+
+        for f in formacoes:
+
             resultado.append({
-        
+
                 "periodo":
                     periodo_formatado(f),
-        
+
                 "descricao":
                     f.descricao,
-        
+
                 "eixo":
                     eixo,
-        
+
                 "carga_horaria":
                     f.carga_horaria,
-        
+
                 "publico":
                     f.publico_alvo,
-        
+
                 "investimento":
                     float(
                         f.investimento or 0
                     ),
-        
+
                 "status":
                     f.status
-        
+
             })
-        
-        return resultado
+
+    return resultado

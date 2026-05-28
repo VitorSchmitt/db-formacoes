@@ -537,18 +537,18 @@ function limparFiltros(){
 
 function montarGraficos(data){
 
-    
-
     // ==========================
     // Top Lotações
     // ==========================
 
     const g1 = document.getElementById("g1");
 
-        if (lotacoes.length > 1) {
+    if (lotacoes.length > 1) {
         
             g1.style.display = "block";
-        
+            g1.style.visibility = "visible";
+            g1.style.height = "350px";
+            
             Plotly.react("g1", [{
         
                 x: lotacoes.map(x => x.lotacao),
@@ -567,43 +567,52 @@ function montarGraficos(data){
                 Plotly.Plots.resize(g1);
             }, 100);
         
-        } else {
+    } else {
         
-            g1.style.display = "none";
-            g1.innerHTML = "";
-        }
+            g1.style.visibility = "hidden";
+            g1.style.height = "0px";
+    }
 
 
-    // ==========================
-    // Top Cursos
-    // ==========================
+    
+// ==========================
+// Top Cursos
+// ==========================
 
-    if((data.curso || []).length > 1){
+const g2 = document.getElementById("g2");
 
-        document.getElementById("g2").style.display="block";
+if ((data.curso || []).length > 1) {
 
-        Plotly.react("g2",[{
-
-            x:data.curso.map(
-                x=>x.formacao
+        g2.style.visibility = "visible";
+        g2.style.height = "350px";
+        g2.style.display = "block";
+    
+        Plotly.react("g2", [{
+    
+            x: data.curso.map(
+                x => x.formacao
             ),
-
-            y:data.curso.map(
-                x=>x.qtd
+    
+            y: data.curso.map(
+                x => Number(x.qtd || 0)
             ),
-
-            type:"bar"
-
-        }],{
-
-            title:"Cursos"
-
+    
+            type: "bar"
+    
+        }], {
+    
+            title: "Cursos"
+    
         });
-
-    }else{
-
-        document.getElementById("g2").style.display="none";
-        document.getElementById("g2").innerHTML="";
+    
+        setTimeout(() => {
+            Plotly.Plots.resize(g2);
+        }, 100);
+    
+    } else {
+    
+        g2.style.visibility = "hidden";
+        g2.style.height = "0px";
     }
 
 

@@ -390,13 +390,8 @@ async function preencherFiltros(data){
 
     if(lotacao.options.length <= 1){
 
-        let res =
-            await fetch(
-                "/api/dashboard/lotacoes"
-            );
-
-        let lista =
-            await res.json();
+        let res = await api("/api/dashboard/lotacoes");
+        let lista = await res.json();
 
         lista
         .sort((a,b)=>
@@ -436,13 +431,8 @@ async function preencherFiltros(data){
 
     if(curso.options.length <= 1){
 
-        let res =
-            await fetch(
-                "/api/dashboard/cursos"
-            );
-
-        let lista =
-            await res.json();
+        let res = await api("/api/dashboard/cursos");
+        let lista = await res.json();
 
         lista
         .sort((a,b)=>

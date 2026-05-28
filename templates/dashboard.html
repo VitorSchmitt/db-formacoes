@@ -543,6 +543,10 @@ function montarGraficos(data){
 
     const g1 = document.getElementById("g1");
 
+    const lotacoes = Array.isArray(data.lotacao)
+    ? data.lotacao
+    : (data.lotacao ? [data.lotacao] : []);
+
     if (lotacoes.length > 1) {
         
             g1.style.display = "block";
@@ -575,25 +579,30 @@ function montarGraficos(data){
 
 
     
-// ==========================
-// Top Cursos
-// ==========================
 
-const g2 = document.getElementById("g2");
-
-if ((data.curso || []).length > 1) {
-
+    // ==========================
+    // Top Cursos
+    // ==========================
+    
+    const g2 = document.getElementById("g2");
+    
+    const cursos = Array.isArray(data.curso)
+        ? data.curso
+        : (data.curso ? [data.curso] : []);
+    
+    if (cursos.length > 1) {
+    
         g2.style.visibility = "visible";
         g2.style.height = "350px";
         g2.style.display = "block";
     
         Plotly.react("g2", [{
     
-            x: data.curso.map(
+            x: cursos.map(
                 x => x.formacao
             ),
     
-            y: data.curso.map(
+            y: cursos.map(
                 x => Number(x.qtd || 0)
             ),
     
@@ -613,8 +622,8 @@ if ((data.curso || []).length > 1) {
     
         g2.style.visibility = "hidden";
         g2.style.height = "0px";
+        g2.innerHTML = "";
     }
-
 
     // ==========================
     // Participações por mês

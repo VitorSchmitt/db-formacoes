@@ -543,33 +543,35 @@ function montarGraficos(data){
     // Top Lotações
     // ==========================
 
-    const lotacoes = Array.isArray(data.lotacao)
-    ? data.lotacao
-    : (data.lotacao ? [data.lotacao] : []);
-    
-    if (lotacoes.length > 1) {
+    const g1 = document.getElementById("g1");
 
-        document.getElementById("g1").style.display = "block";
-    
-        Plotly.react("g1", [{
-    
-            x: lotacoes.map(x => x.lotacao),
-    
-            y: lotacoes.map(x => x.qtd),
-    
-            type: "bar"
-    
-        }], {
-    
-            title: "Lotações"
-    
-        });
-    
-    } else {
-    
-        document.getElementById("g1").style.display = "none";
-        document.getElementById("g1").innerHTML = "";
-    }
+        if (lotacoes.length > 1) {
+        
+            g1.style.display = "block";
+        
+            Plotly.react("g1", [{
+        
+                x: lotacoes.map(x => x.lotacao),
+        
+                y: lotacoes.map(x => Number(x.qtd || 0)),
+        
+                type: "bar"
+        
+            }], {
+        
+                title: "Lotações"
+        
+            });
+        
+            setTimeout(() => {
+                Plotly.Plots.resize(g1);
+            }, 100);
+        
+        } else {
+        
+            g1.style.display = "none";
+            g1.innerHTML = "";
+        }
 
 
     // ==========================

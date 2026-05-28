@@ -127,9 +127,11 @@ def cronograma(
         
         for f in formacoes:
         
+            eixo_original = f.eixo or ""
+
             eixo = EIXOS.get(
-                f.eixo,
-                f.eixo
+                eixo_original,
+                eixo_original
             )
         
             resultado.append({

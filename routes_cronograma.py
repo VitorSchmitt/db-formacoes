@@ -113,9 +113,27 @@ def cronograma(
                 or date.max
         )
 
+        EIXOS = {
+    
+        "Ambientação Institucional/Formação Inicial":
+            "I",
+    
+        "Gestão do Trabalho/Saúde Mental e Bem Estar":
+            "II",
+    
+        "Qualificação da Prática Socioeducativa Temas Transversais":
+            "III"
+
+        }
+
         for f in formacoes:
 
             resultado.append({
+
+                eixo = EIXOS.get(
+                    plano.eixo,
+                    plano.eixo
+                )
 
                 "periodo":
                     periodo_formatado(f),

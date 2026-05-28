@@ -141,11 +141,12 @@ async function carregarCronograma() {
                 </td>
 
                 <td>
-
-                    R$
-                    ${item.investimento}
-
-                </td>
+                   ${
+                       Number(item.investimento) === 0
+                           ? "Sem Investimento"
+                           : `R$ ${item.investimento}`
+                   }
+               </td>
 
                 <td>
                    <span class="badge
@@ -164,6 +165,23 @@ async function carregarCronograma() {
         });
 
     }
+
+    <hr>
+
+     <h4>Descrição dos Eixos</h4>
+     
+     <ul>
+         <li>
+             <strong>I - Ambientação Institucional/Formação Inicial:</strong>             
+         </li>     
+         <li>
+             <strong>II - Gestão do Trabalho,Saúde Mental e Bem-Estar:</strong>             
+         </li>     
+         <li>
+             <strong>III - Qualificação da Prática Sócio Educativa e Temas Transversais:</strong>             
+         </li>     
+         
+     </ul>
 
     catch(err){
 

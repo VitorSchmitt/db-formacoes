@@ -30,27 +30,50 @@ def get_db():
 # FORMATA PERÍODO
 # ==========================
 
+MESES = {
+
+    1: "janeiro",
+    2: "fevereiro",
+    3: "março",
+    4: "abril",
+    5: "maio",
+    6: "junho",
+    7: "julho",
+    8: "agosto",
+    9: "setembro",
+    10: "outubro",
+    11: "novembro",
+    12: "dezembro"
+
+}
+
+
 def periodo_formatado(formacao):
 
     if not formacao.data_inicio:
         return formacao.periodo or ""
 
-    inicio = formacao.data_inicio.strftime("%B")
+    inicio = MESES[
+        formacao.data_inicio.month
+    ]
 
     if (
+
         formacao.data_termino
         and
         formacao.data_inicio.month
         !=
         formacao.data_termino.month
+
     ):
 
-        fim = formacao.data_termino.strftime("%B")
+        fim = MESES[
+            formacao.data_termino.month
+        ]
 
         return f"{inicio} a {fim}"
 
     return inicio
-
 
 # ==========================
 # DADOS CRONOGRAMA

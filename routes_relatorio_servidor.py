@@ -585,14 +585,11 @@ def gerar_pdf(
         
     )       
     
-
     elementos.append(
         tabela_data
     )
     
-    doc.build(doc.build(elementos)
-        
-   
+    doc.build(elementos)
     
     return FileResponse(
         arquivo,

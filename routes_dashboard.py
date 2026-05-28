@@ -458,7 +458,124 @@ def dashboard(
             .all()
 
         )
-
+        # =====================================
+        # EIXO
+        # =====================================
+        
+        eixo_data = (
+        
+            base.with_entities(
+        
+                PlanoAnual.eixo,
+        
+                func.count(
+                    Participacao.id
+                )
+        
+            )
+        
+            .group_by(
+                PlanoAnual.eixo
+            )
+        
+            .order_by(
+                func.count(
+                    Participacao.id
+                ).desc()
+            )
+        
+            .all()
+        
+        )
+        
+        
+        # =====================================
+        # PERÍODO X EIXO
+        # =====================================
+        
+        periodo_eixo_data = (
+        
+            base.with_entities(
+        
+                func.to_char(
+                    Formacao.data_termino,
+                    "YYYY-MM"
+                ),
+        
+                PlanoAnual.eixo,
+        
+                func.count(
+                    Participacao.id
+                )
+        
+            )
+        
+            .group_by(
+        
+                func.to_char(
+                    Formacao.data_termino,
+                    "YYYY-MM"
+                ),
+        
+                PlanoAnual.eixo
+        
+            )
+        
+            .order_by(
+        
+                func.to_char(
+                    Formacao.data_termino,
+                    "YYYY-MM"
+                )
+        
+            )
+        
+            .all()
+        
+        )
+        
+        
+        # =====================================
+        # ANUAL
+        # =====================================
+        
+        anual_data = (
+        
+            base.with_entities(
+        
+                func.extract(
+                    "year",
+                    Formacao.data_termino
+                ),
+        
+                func.count(
+                    Participacao.id
+                )
+        
+            )
+        
+            .group_by(
+        
+                func.extract(
+                    "year",
+                    Formacao.data_termino
+                )
+        
+            )
+        
+            .order_by(
+        
+                func.extract(
+                    "year",
+                    Formacao.data_termino
+                )
+        
+            )
+        
+            .all()
+        
+        )
+        
 
         return {
 
@@ -502,6 +619,59 @@ def dashboard(
                 }
 
                 for p in periodo_data
+            ]
+            ,
+
+            "eixo":[
+            
+                {
+            
+                    "eixo":
+                        e[0]
+                        if e[0]
+                        else "Sem plano",
+            
+                    "qtd":
+                        e[1]
+            
+                }
+            
+                for e in eixo_data
+            ],
+            
+            
+            "periodo_eixo":[
+            
+                {
+            
+                    "mes":p[0],
+            
+                    "eixo":
+                        p[1]
+                        if p[1]
+                        else "Sem plano",
+            
+                    "qtd":p[2]
+            
+                }
+            
+                for p in periodo_eixo_data
+            ],
+            
+            
+            "anual":[
+            
+                {
+            
+                    "ano":
+                        int(a[0]),
+            
+                    "qtd":
+                        a[1]
+            
+                }
+            
+                for a in anual_data
             ]
 
         }

@@ -467,41 +467,45 @@ async function preencherFiltros(data){
     }
 
 
+    
     // ==========================
     // EIXOS
     // ==========================
-
+    
     if(eixo.options.length <= 1){
-
-        (data.eixo || [])
+    
+        let res = await api("/api/dashboard/eixos");
+        let lista = await res.json();
+    
+        lista
         .sort((a,b)=>
-        
+    
             (a.eixo || "")
             .localeCompare(
-        
+    
                 (b.eixo || ""),
                 "pt-BR",
                 {
                     sensitivity:"base"
                 }
-        
+    
             )
-        
+    
         )
-
+    
         .forEach(x=>{
-
+    
             eixo.add(
-
+    
                 new Option(
                     x.eixo,
                     x.eixo
                 )
-
+    
             );
-
+    
         });
-
+    
     }
 
 }

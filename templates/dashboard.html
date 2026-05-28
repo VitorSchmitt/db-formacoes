@@ -547,7 +547,7 @@ function montarGraficos(data){
     ? data.lotacao
     : (data.lotacao ? [data.lotacao] : []);
     
-    if (lotacoes.length > 0) {
+    if (lotacoes.length > 1) {
 
         document.getElementById("g1").style.display = "block";
     
@@ -576,7 +576,7 @@ function montarGraficos(data){
     // Top Cursos
     // ==========================
 
-    if((data.curso || []).length > 0){
+    if((data.curso || []).length > 1){
 
         document.getElementById("g2").style.display="block";
 
@@ -594,7 +594,7 @@ function montarGraficos(data){
 
         }],{
 
-            title:"Top Cursos"
+            title:"Cursos"
 
         });
 

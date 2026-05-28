@@ -190,7 +190,7 @@ def cronograma(
 # PDF CRONOGRAMA
 # ==========================
 
-@router.get("/cronograma/pdf/{ano}")
+@router.get("/api/cronograma/pdf/{ano}")
 
 def cronograma_pdf(
     ano: int,

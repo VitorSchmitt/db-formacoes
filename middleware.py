@@ -49,8 +49,8 @@ PERMISSOES = {
         "/web/plano_anual",
         "/web/cronograma",        
         "/api/dashboard",
-        "/api/dashboard",
-        "/api/plano_anual"
+        "/api/plano_anual",
+        "/api/cronograma"
     ]
     
 }

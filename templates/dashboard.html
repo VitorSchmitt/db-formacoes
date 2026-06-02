@@ -93,10 +93,7 @@
 <style>
     #g1, #g2{
         height: 350px;
-    }
-    #g3 {
-        height: 250px;
-    }
+    }    
     #g4, #g5 {
         height: 280px;
     }
@@ -109,10 +106,6 @@
 <div class="row">
     <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g1"></div></div></div></div>
     <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g2"></div></div></div></div>
-</div>
-
-<div class="row">
-    <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g3"></div></div></div></div>
 </div>
 
 <div class="row">
@@ -626,30 +619,6 @@ function montarGraficos(data){
     }
 
     // ==========================
-    // Participações por mês
-    // ==========================
-
-    Plotly.react("g3",[{
-
-        x:(data.periodo || []).map(
-            x=>x.mes
-        ),
-
-        y:(data.periodo || []).map(
-            x=>x.qtd
-        ),
-
-        type:"scatter",
-        mode:"lines+markers"
-
-    }],{
-
-        title:"Participações por Mês"
-
-    });
-
-
-    // ==========================
     // Certificados x evasão
     // ==========================
 
@@ -681,26 +650,28 @@ function montarGraficos(data){
     // Eixos
     // ==========================
 
-    if(data.eixo){
+    if (data.eixo) {
 
-        Plotly.react("g5",[{
-
-            x:data.eixo.map(
-                x=>x.eixo
+        Plotly.react("g5", [{
+    
+            labels: data.eixo.map(
+                x => x.eixo
             ),
-
-            y:data.eixo.map(
-                x=>x.qtd
+    
+            values: data.eixo.map(
+                x => x.qtd
             ),
-
-            type:"bar"
-
-        }],{
-
-            title:"Participações por Eixo"
-
+    
+            type: "pie",
+            textinfo: "label+percent+value",
+            hoverinfo: "label+percent+value"
+    
+        }], {
+    
+            title: "Participações por Eixo"
+    
         });
-
+    
     }
 
 

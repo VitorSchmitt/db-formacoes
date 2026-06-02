@@ -645,31 +645,46 @@ function montarGraficos(data){
     // Eixos
     // ==========================
 
-    if (data.eixo) {
+    Plotly.react("g5", [{
 
-        Plotly.react("g5", [{
+        labels: data.eixo.map(
+            x => x.eixo
+        ),
     
-            labels: data.eixo.map(
-                x => x.eixo
-            ),
+        values: data.eixo.map(
+            x => x.qtd
+        ),
     
-            values: data.eixo.map(
-                x => x.qtd
-            ),
+        type: "pie",
     
-            type: "pie",
-            textinfo: "label+percent+value"
-                   
-            
+        hole: 0.4,
     
-        }], {
+        textinfo: "percent",
     
-            title: "Participações por Eixo"
+        hovertemplate:
+            "<b>%{label}</b><br>" +
+            "Participações: %{value}<br>" +
+            "Percentual: %{percent}<extra></extra>"
     
-        });
+    }], {
     
-    }
-
+        title: "Participações por Eixo",
+    
+        showlegend: true,
+    
+        legend: {
+            orientation: "v"
+        },
+    
+        margin: {
+            t: 50,
+            l: 20,
+            r: 20,
+            b: 20
+        }
+    
+    });
+    
 
 
     // ==========================

@@ -617,29 +617,50 @@ function montarGraficos(data){
     // Certificados x evasão
     // ==========================
 
-    Plotly.react("g4",[{
+    Plotly.react("g4", [{
 
-        labels:[
+        labels: [
             "Certificados",
             "Evasão"
         ],
-
-        values:[
-
+    
+        values: [
+    
             data.cards?.certificados || 0,
-
+    
             data.cards?.evasao || 0
-
+    
         ],
-
-        type:"pie"
-        
-    }],{
-
-        title:"Certiicados x Evasão"
-
+    
+        type: "pie",
+    
+        hole: 0.4,
+    
+        textinfo: "percent",
+    
+        hovertemplate:
+            "<b>%{label}</b><br>" +
+            "Quantidade: %{value}<br>" +
+            "Percentual: %{percent}<extra></extra>"
+    
+    }], {
+    
+        title: "Certificados x Evasão",
+    
+        showlegend: true,
+    
+        legend: {
+            orientation: "v"
+        },
+    
+        margin: {
+            t: 50,
+            l: 20,
+            r: 20,
+            b: 20
+        }
+    
     });
-
 
     // ==========================
     // Eixos

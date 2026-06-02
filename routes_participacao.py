@@ -49,7 +49,7 @@ def listar(formacao_id: int, db: Session = Depends(get_db)):
 # ===============================
 # CRIAR
 # ===============================
-@router.post("/api/participacao")
+@router.post("/api/participacoes")
 def criar(dados: dict, db: Session = Depends(get_db)):
 
     # 🔴 VALIDAÇÃO BACKEND (obrigatório)
@@ -108,7 +108,7 @@ def criar(dados: dict, db: Session = Depends(get_db)):
 # ===============================
 # ATUALIZAR
 # ===============================
-@router.put("/api/participacao/{id}")
+@router.put("/api/participacoes/{id}")
 def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
 
     p = db.get(Participacao, id)
@@ -139,7 +139,7 @@ def atualizar(id: int, dados: dict, db: Session = Depends(get_db)):
 # ===============================
 # DELETAR
 # ===============================
-@router.delete("/api/participacao/{id}")
+@router.delete("/api/participacoes/{id}")
 def deletar(id: int, db: Session = Depends(get_db)):
 
     p = db.get(Participacao, id)
@@ -212,7 +212,7 @@ def listar_formacoes_ativas(db: Session = Depends(get_db)):
         for f in dados
     ]
     
-@router.get("/api/servidor/matricula/{matricula}")
+@router.get("/api/servidores/matricula/{matricula}")
 def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
 
     servidor = db.query(Servidor).filter(

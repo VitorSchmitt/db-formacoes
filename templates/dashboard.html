@@ -94,11 +94,11 @@
     #g1, #g2{
         height: 350px;
     }    
-    #g4, #g5 {
+    #g4,  {
         height: 280px;
     }
 
-    #g6, #g7, #g8 {
+    #g5, #g7, #g8 {
         height: 300px;
     }
 </style>
@@ -109,12 +109,11 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g4"></div></div></div></div>
-    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g5"></div></div></div></div>
+    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g4"></div></div></div></div>    
 </div>
 
 <div class="row">
-    <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g6"></div></div></div></div>
+    <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g5"></div></div></div></div>
 </div>
 
 <div class="row">
@@ -544,7 +543,7 @@ function montarGraficos(data){
         
             g1.style.display = "block";
             g1.style.visibility = "visible";
-            g1.style.height = "350px";
+            g1.style.height = "400px";
             
             Plotly.react("g1", [{
         
@@ -586,7 +585,7 @@ function montarGraficos(data){
     if (cursos.length > 1) {
     
         g2.style.visibility = "visible";
-        g2.style.height = "350px";
+        g2.style.height = "400px";
         g2.style.display = "block";
     
         Plotly.react("g2", [{
@@ -674,60 +673,6 @@ function montarGraficos(data){
     
     }
 
-
-    // ==========================
-    // Mês x Eixo
-    // ==========================
-
-    if(data.periodo_eixo){
-
-        let eixos=[
-
-            ...new Set(
-
-                data.periodo_eixo.map(
-                    x=>x.eixo
-                )
-
-            )
-
-        ];
-
-        let traces=eixos.map(eixo=>{
-
-            let dados=
-
-                data.periodo_eixo.filter(
-                    x=>x.eixo===eixo
-                );
-
-            return{
-
-                x:dados.map(
-                    x=>x.mes
-                ),
-
-                y:dados.map(
-                    x=>x.qtd
-                ),
-
-                name:eixo,
-
-                type:"bar"
-
-            };
-
-        });
-
-        Plotly.react(
-            "g6",
-            traces,
-            {
-                barmode:"stack",
-                title:"Participações por Mês e Eixo"
-            }
-        );
-    }
 
 
     // ==========================

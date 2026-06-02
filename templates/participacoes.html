@@ -111,7 +111,7 @@ if (inputMatricula) {
         timeoutMatricula = setTimeout(async () => {
             try {
 
-                let res = await api(`/api/servidor/matricula/${matricula}`);
+                let res = await api(`/api/servidores/matricula/${matricula}`);
                 let data = await res.json();
 
                 const nomeEl = document.getElementById("nome_servidor");
@@ -347,7 +347,7 @@ async function salvar(e) {
 
     try {
 
-        let res = await api("/api/participacao", {
+        let res = await api("/api/participacoes", {
             method: "POST",
             body: JSON.stringify(dados)
         });
@@ -380,7 +380,7 @@ async function deletar(id) {
 
     try {
 
-        let res = await api(`/api/participacao/${id}`, {
+        let res = await api(`/api/participacoes/${id}`, {
             method: "DELETE"
         });
 

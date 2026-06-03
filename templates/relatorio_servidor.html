@@ -144,7 +144,7 @@ async function buscar(){
 
     let resposta =
         await fetch(
-            `/api/relatorio-servidor?matricula=${encodeURIComponent(matricula)}`
+            `/api/relatorio_servidor?matricula=${encodeURIComponent(matricula)}`
         );
 
     let dados =
@@ -235,7 +235,7 @@ function gerarPDF(){
     }
 
     window.open(
-        `/api/relatorio-servidor/pdf?matricula=${encodeURIComponent(matricula)}`
+        `/api/relatorio_servidor/pdf?matricula=${encodeURIComponent(matricula)}`
     );
 
 }

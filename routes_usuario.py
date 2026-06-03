@@ -134,7 +134,7 @@ def atualizar_usuario(
 
         usuario.username = dados.username
         usuario.perfil = dados.perfil
-
+        usuario.email = dados.email
         if dados.senha:
             usuario.senha = pwd_context.hash(
                 dados.senha

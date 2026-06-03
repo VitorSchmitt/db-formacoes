@@ -50,7 +50,7 @@ def get_db():
 # TELA
 # ==========================
 
-@router.get("/web/relatorio-servidor")
+@router.get("/web/relatorio_servidor")
 def tela_relatorio(
     request: Request
 ):
@@ -67,7 +67,7 @@ def tela_relatorio(
 # CONSULTA
 # ==========================
 
-@router.get("/api/relatorio-servidor")
+@router.get("/api/relatorio_servidor")
 def relatorio_servidor(
     matricula: str,
     db: Session = Depends(get_db)
@@ -175,7 +175,7 @@ def relatorio_servidor(
 # ==========================
 
 @router.get(
-    "/api/relatorio-servidor/pdf"
+    "/api/relatorio_servidor/pdf"
 )
 def gerar_pdf(
     matricula: str,

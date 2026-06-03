@@ -39,7 +39,10 @@ PERMISSOES = {
         "/api/dashboard",       
         "/api/participacoes",        
         "/api/certificados",
-        "/api/relatorio_servidor"
+        "/api/relatorio_servidor",
+        "/api/formacoes",
+        "/api/servidores",
+        "/api/lotacoes"
     ],
     
     "operadorII": [ 
@@ -50,8 +53,8 @@ PERMISSOES = {
         "/api/dashboard",
         "/api/servidores",
         "/api/formacoes",        
-        "/api/lotacoes",
-        "/api/formacoes"
+        "/api/lotacoes"       
+        
     ],
     "custom": [ 
         "/web/dashboard",

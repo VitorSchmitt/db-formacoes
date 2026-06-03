@@ -30,19 +30,27 @@ PUBLIC_PREFIX = [
 
 PERMISSOES = {
     "admin": ["*"],
+    
     "operador": [ 
+        "/web/dashboard",        
+        "/web/participacoes",        
+        "/web/certificados",
+        "/web/relatorio_servidor",
+        "/api/dashboard",       
+        "/api/participacoes",        
+        "/api/certificados",
+        "/api/relatorio_servidor"
+    ],
+    
+    "operadorII": [ 
         "/web/dashboard",
         "/web/servidores",
-        "/web/formacoes",
-        "/web/participacoes",
-        "/web/lotacoes",
-        "/web/certificados",
+        "/web/formacoes",       
+        "/web/lotacoes",        
         "/api/dashboard",
         "/api/servidores",
-        "/api/formacoes",
-        "/api/participacoes",
-        "/api/lotacoes",
-        "/api/certificados"
+        "/api/formacoes",        
+        "/api/lotacoes"       
     ],
     "custom": [ 
         "/web/dashboard",

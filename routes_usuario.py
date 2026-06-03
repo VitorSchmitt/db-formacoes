@@ -81,7 +81,7 @@ def criar_usuario(
             username=dados.username,
             senha=senha_hash,
             perfil=dados.perfil,
-            email=dados.email
+            email=dados.email,
             ativo=True
         )
 

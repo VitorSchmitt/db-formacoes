@@ -54,7 +54,8 @@ PERMISSOES = {
         "/api/servidores",
         "/api/formacoes",        
         "/api/lotacoes",       
-        "/api/plano_anual"
+        "/api/plano_anual",
+        "/api/enums"
     ],
     "custom": [ 
         "/web/dashboard",

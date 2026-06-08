@@ -97,20 +97,17 @@ def relatorio_servidor(
         }
 
     participacoes = (
-
-        db.query(
-            Participacao
+            db.query(Participacao)
+            .join(Participacao.formacao)
+            .filter(
+                Participacao.matricula ==
+                servidor.matricula
+            )
+            .order_by(
+                Formacao.data_termino.asc()
+            )
+            .all()
         )
-
-        .filter(
-            Participacao.matricula ==
-            servidor.matricula
-        )
-
-        .all()
-
-    )
-
     resultado = []
 
     total_horas = 0
@@ -205,19 +202,17 @@ def gerar_pdf(
         }
 
     participacoes = (
-
-        db.query(
-            Participacao
+            db.query(Participacao)
+            .join(Participacao.formacao)
+            .filter(
+                Participacao.matricula ==
+                servidor.matricula
+            )
+            .order_by(
+                Formacao.data_termino.asc()
+            )
+            .all()
         )
-
-        .filter(
-            Participacao.matricula ==
-            servidor.matricula
-        )
-
-        .all()
-
-    )
 
     arquivo = "relatorio.pdf"
 

@@ -53,8 +53,8 @@ PERMISSOES = {
         "/api/dashboard",
         "/api/servidores",
         "/api/formacoes",        
-        "/api/lotacoes"       
-        
+        "/api/lotacoes",       
+        "/api/plano_anual"
     ],
     "custom": [ 
         "/web/dashboard",

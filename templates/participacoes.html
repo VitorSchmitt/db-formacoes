@@ -59,13 +59,11 @@
 
         <!-- APROVEITAMENTO -->
         <div class="col-md-4">
-            <input type="number"
-               id="aproveitamento"
-               class="form-control"
-               placeholder="Aproveitamento"
-               min="0"
-               step="0.5"
-               required>
+            <input type="text"
+                   id="aproveitamento"
+                   class="form-control"
+                   placeholder="Aproveitamento"
+                   required>
         </div>
 
     </div>
@@ -326,7 +324,7 @@ async function salvar(e) {
 
     let matricula = document.getElementById("servidor")?.value;
     let lotacao = document.getElementById("lotacao")?.value;
-    let aproveitamento = document.getElementById("aproveitamento").max = cargaHorariaFormacao;
+    let aproveitamento = document.getElementById("aproveitamento")?.value?.trim();
 
     if (!formacaoAtual)
         return mostrarMsg({ erro: "Selecione uma formação" });

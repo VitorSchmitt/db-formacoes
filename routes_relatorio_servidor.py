@@ -22,7 +22,8 @@ import os
 from database import SessionLocal
 from models import (
     Servidor,
-    Participacao
+    Participacao,
+    Formacao
 )
 
 LOGO = "static/img/logo.png"

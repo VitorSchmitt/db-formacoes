@@ -64,15 +64,24 @@ def criar(dados: dict, db: Session = Depends(get_db)):
 
     if not dados.get("aproveitamento"):
         return {"erro": "Aproveitamento obrigatório"}
+        
+    if dados.get("aproveitamento") is None:
+        return {"erro": "Aproveitamento obrigatório"}
+
+    formacao = db.get(Formacao, dados["formacao_id"])
+    
+    if not formacao:
+        return {"erro": "Formação não encontrada"}
+    
+    if float(dados["aproveitamento"]) > formacao.carga_horaria:
+        return {
+            "erro": f"Aproveitamento maior que a carga horária da formação ({formacao.carga_horaria}h)"
+        }
 
     # 🔎 validar existência
     servidor = db.get(Servidor, dados["matricula"])
     if not servidor:
         return {"erro": "Servidor não encontrado"}
-
-    formacao = db.get(Formacao, dados["formacao_id"])
-    if not formacao:
-        return {"erro": "Formação não encontrada"}
 
     lotacao = db.get(Lotacao, dados["lotacao_id"])
     if not lotacao:

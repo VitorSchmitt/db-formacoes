@@ -58,7 +58,7 @@ def relatorio_facilitadores_anual(
             "id_formacao": formacao.id,
             "titulo": formacao.nome,
             "data_inicio": formacao.data_inicio,
-            "data_termino": formacao.data_fim,
+            "data_termino": formacao.data_termino,
             "carga_horaria": formacao.carga_horaria
         })
 

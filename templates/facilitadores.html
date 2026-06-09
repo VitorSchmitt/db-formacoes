@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>🎓 Facilitadores</h2>
+
+<!-- ===================== -->
+<!-- FORMAÇÃO -->
+<!-- ===================== -->
+<div class="row mb-3">
+
+    <div class="col-md-6">
+
+        <label><b>Formação</b></label>
+
+        <select
+            id="formacao"
+            class="form-select"
+            onchange="trocarFormacao()"
+        ></select>
+
+    </div>
+
+</div>
+
+<hr>
+
+<!-- ===================== -->
+<!-- ADICIONAR -->
+<!-- ===================== -->
+
+<h5>Adicionar Facilitador</h5>
+
+<form onsubmit="salvar(event)">
+
+    <div class="row mb-3">
+
+        <div class="col-md-8">
+
+            <select
+                id="servidor"
+                class="form-select"
+                required
+            ></select>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <button
+                class="btn btn-primary w-100"
+            >
+                Adicionar
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
+<div id="msg"></div>
+
+<hr>
+
+<!-- ===================== -->
+<!-- LISTA -->
+<!-- ===================== -->
+
+<h5>Facilitadores da Formação</h5>
+
+<input
+    type="text"
+    id="busca"
+    class="form-control mb-3"
+    placeholder="Buscar..."
+    onkeyup="carregarTabela()"
+>
+
+<div id="tabela"></div>
+
+<script>
+
+let formacaoAtual = null;
+
+
+// =====================
+// FORMAÇÕES
+// =====================
+async function carregarFormacoes(){
+
+    let res =
+    await api("/api/formacoes");
+
+    let data =
+    await res.json();
+
+    let select =
+    document.getElementById(
+        "formacao"
+    );
+
+    select.innerHTML =
+    `<option value="">
+        Selecione
+    </option>`;
+
+    (data.dados || []).forEach(f => {
+
+        select.add(
+
+            new Option(
+                f.descricao,
+                f.id
+            )
+
+        );
+
+    });
+
+}
+
+
+// =====================
+// SERVIDORES
+// =====================
+async function carregarServidores(){
+
+    let res =
+    await api("/api/servidores");
+
+    let data =
+    await res.json();
+
+    let select =
+    document.getElementById(
+        "servidor"
+    );
+
+    select.innerHTML =
+    `<option value="">
+        Selecione o servidor
+    </option>`;
+
+    data
+    .sort((a,b)=>
+        a.nome.localeCompare(b.nome)
+    )
+    .forEach(s => {
+
+        select.add(
+
+            new Option(
+                `${s.nome} (${s.matricula})`,
+                s.matricula
+            )
+
+        );
+
+    });
+
+}
+
+
+// =====================
+// TROCAR FORMAÇÃO
+// =====================
+function trocarFormacao(){
+
+    formacaoAtual =
+
+    document
+    .getElementById(
+        "formacao"
+    )
+    .value;
+
+    carregarTabela();
+
+}
+
+
+// =====================
+// LISTAR
+// =====================
+async function carregarTabela(){
+
+    if(!formacaoAtual){
+
+        document
+        .getElementById(
+            "tabela"
+        )
+        .innerHTML = "";
+
+        return;
+    }
+
+    let res =
+    await api(
+        `/api/facilitador/${formacaoAtual}`
+    );
+
+    let data =
+    await res.json();
+
+    let busca =
+
+    document
+    .getElementById(
+        "busca"
+    )
+    .value
+    .toLowerCase();
+
+    let html =
+
+    `
+    <table class="table table-striped">
+
+        <thead>
+
+            <tr>
+
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th width="120">
+                    Ações
+                </th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+    `;
+
+    data
+
+    .filter(x =>
+
+        x.nome
+        .toLowerCase()
+        .includes(busca)
+
+    )
+
+    .forEach(x => {
+
+        html += `
+
+        <tr>
+
+            <td>${x.matricula}</td>
+
+            <td>${x.nome}</td>
+
+            <td>
+
+                <button
+
+                    class="btn btn-danger btn-sm"
+
+                    onclick="remover(${x.id})"
+
+                >
+
+                    🗑
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+    html += `
+        </tbody>
+    </table>
+    `;
+
+    document
+    .getElementById(
+        "tabela"
+    )
+    .innerHTML = html;
+
+}
+
+
+// =====================
+// SALVAR
+// =====================
+async function salvar(event){
+
+    event.preventDefault();
+
+    if(!formacaoAtual){
+
+        mostrarMsg(
+            "Selecione uma formação",
+            "danger"
+        );
+
+        return;
+    }
+
+    let matricula =
+
+    document
+    .getElementById(
+        "servidor"
+    )
+    .value;
+
+    if(!matricula){
+
+        mostrarMsg(
+            "Selecione um servidor",
+            "danger"
+        );
+
+        return;
+    }
+
+    let res =
+    await api(
+
+        "/api/facilitador",
+
+        {
+
+            method:"POST",
+
+            body:JSON.stringify({
+
+                matricula:
+                matricula,
+
+                formacao_id:
+                parseInt(
+                    formacaoAtual
+                )
+
+            })
+
+        }
+
+    );
+
+    let r =
+    await res.json();
+
+    if(r.erro){
+
+        mostrarMsg(
+            r.erro,
+            "danger"
+        );
+
+        return;
+    }
+
+    mostrarMsg(
+        "Facilitador adicionado",
+        "success"
+    );
+
+    carregarTabela();
+
+}
+
+
+// =====================
+// REMOVER
+// =====================
+async function remover(id){
+
+    if(
+        !confirm(
+            "Remover facilitador?"
+        )
+    ){
+        return;
+    }
+
+    await api(
+
+        `/api/facilitador/${id}`,
+
+        {
+            method:"DELETE"
+        }
+
+    );
+
+    carregarTabela();
+
+}
+
+
+// =====================
+// UI
+// =====================
+function mostrarMsg(
+    texto,
+    tipo
+){
+
+    document
+    .getElementById(
+        "msg"
+    )
+    .innerHTML =
+
+    `
+    <div
+    class="alert alert-${tipo}">
+        ${texto}
+    </div>
+    `;
+
+    setTimeout(() => {
+
+        document
+        .getElementById(
+            "msg"
+        )
+        .innerHTML = "";
+
+    },2500);
+
+}
+
+
+// =====================
+// INIT
+// =====================
+carregarFormacoes();
+carregarServidores();
+
+</script>
+
+{% endblock %}

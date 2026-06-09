@@ -214,22 +214,19 @@
             padding-left: 10px;
         }
 
-    :root {
-
-        --sidebar-bg: #1f2937;
-
-        --sidebar-hover: #374151;
-
-        --sidebar-active: #2563eb;
-
-        --content-bg: #f3f4f6;
-
-        --text-light: #f9fafb;
-
-        --text-muted: #d1d5db;
-
-        --border-color: #e5e7eb;
-    }
+        :root {
+        
+            --sidebar-bg: #f8f9fa;      /* fundo claro */
+            --sidebar-hover: #e9ecef;   /* hover cinza claro */
+            --sidebar-active: #dbeafe;  /* azul claro */
+        
+            --content-bg: #f3f4f6;
+        
+            --text-light: #111827;      /* texto preto */
+            --text-muted: #374151;      /* texto cinza escuro */
+        
+            --border-color: #d1d5db;
+        }
 
 
     /* =====================================================
@@ -288,15 +285,14 @@
 
         margin-bottom: 24px;
 
-        color: white;
+         color: #111827;
 
         letter-spacing: 0.5px;
     }
 
 
     .sidebar hr {
-
-        border-color: rgba(255,255,255,0.1);
+        border-color: #d1d5db;
     }
 
 
@@ -324,21 +320,16 @@
 
 
     .sidebar a:hover {
-
         background: var(--sidebar-hover);
-
-        color: white;
-
+        color: #111827;
         transform: translateX(3px);
     }
 
 
     .sidebar a.ativo {
-
+        
         background: var(--sidebar-active);
-
-        color: white;
-
+        color: #111827;
         font-weight: 600;
     }
 

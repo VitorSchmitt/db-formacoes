@@ -190,6 +190,65 @@ class Participacao(Base):
 
 
 # ===============================
+# FACILITADOR
+# ===============================
+class Facilitador(Base):
+
+    __tablename__ = "facilitador"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    matricula = Column(
+        String(20),
+        ForeignKey("servidor.matricula"),
+        nullable=False
+    )
+
+    formacao_id = Column(
+        Integer,
+        ForeignKey("formacao.id"),
+        nullable=False
+    )
+
+    criado_em = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    servidor = relationship(
+        "Servidor",
+        lazy="joined"
+    )
+
+    formacao = relationship(
+        "Formacao",
+        lazy="joined"
+    )
+
+    __table_args__ = (
+
+        UniqueConstraint(
+            "matricula",
+            "formacao_id",
+            name="uq_facilitador"
+        ),
+
+    )
+
+    def __repr__(self):
+
+        return (
+            f"<Facilitador "
+            f"{self.matricula} "
+            f"-> "
+            f"{self.formacao_id}>"
+        )
+
+# ===============================
 # USUÁRIO
 # ===============================
 

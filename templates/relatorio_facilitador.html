@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">
+                🎓 Relatório Anual de Facilitadores
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-3">
+                    <label class="form-label">
+                        Ano
+                    </label>
+
+                    <select
+                        id="ano"
+                        class="form-select">
+
+                        {% for ano in range(2023, 2036) %}
+                        <option
+                            value="{{ ano }}"
+                            {% if ano == current_year %}selected{% endif %}>
+                            {{ ano }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button
+                        class="btn btn-primary w-100"
+                        onclick="carregarRelatorio()">
+
+                        Consultar
+                    </button>
+                </div>
+
+                <div class="col-md-2">
+                    <button
+                        class="btn btn-danger w-100"
+                        onclick="gerarPDF()">
+
+                        PDF
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RESUMO -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-primary shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">
+                        Facilitadores
+                    </h6>
+
+                    <h2 id="totalFacilitadores">
+                        0
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-success shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">
+                        Formações
+                    </h6>
+
+                    <h2 id="totalFormacoes">
+                        0
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">
+                        Horas Ministradas
+                    </h6>
+
+                    <h2 id="totalHoras">
+                        0
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABELA -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header d-flex justify-content-between">
+
+            <h5 class="mb-0">
+                Facilitadores e Formações
+            </h5>
+
+            <span id="anoSelecionado"></span>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th width="25%">
+                                Facilitador
+                            </th>
+
+                            <th>
+                                Formação
+                            </th>
+
+                            <th width="15%">
+                                Data Final
+                            </th>
+
+                            <th width="10%">
+                                CH
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tabelaFacilitadores">
+
+                        <tr>
+                            <td colspan="4" class="text-center">
+                                Selecione um ano e clique em Consultar.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function formatarData(data) {
+
+    if (!data)
+        return "";
+
+    const d = new Date(data);
+
+    return d.toLocaleDateString("pt-BR");
+}
+
+async function carregarRelatorio() {
+
+    const ano =
+        document.getElementById("ano").value;
+
+    document.getElementById("anoSelecionado")
+        .innerHTML = `<strong>Ano:</strong> ${ano}`;
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/relatorios/facilitadores/${ano}`
+            );
+
+        if (!response.ok) {
+            throw new Error("Erro ao carregar relatório.");
+        }
+
+        const dados =
+            await response.json();
+
+        montarTabela(dados);
+
+    }
+    catch (erro) {
+
+        console.error(erro);
+
+        document.getElementById(
+            "tabelaFacilitadores"
+        ).innerHTML = `
+            <tr>
+                <td colspan="4"
+                    class="text-center text-danger">
+
+                    Erro ao carregar relatório.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function montarTabela(dados) {
+
+    const tbody =
+        document.getElementById(
+            "tabelaFacilitadores"
+        );
+
+    tbody.innerHTML = "";
+
+    let totalFormacoes = 0;
+    let totalHoras = 0;
+
+    document.getElementById(
+        "totalFacilitadores"
+    ).innerText =
+        dados.total_facilitadores || 0;
+
+    if (!dados.dados || dados.dados.length === 0) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4"
+                    class="text-center">
+
+                    Nenhum registro encontrado.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    dados.dados.forEach(facilitador => {
+
+        totalFormacoes +=
+            facilitador.quantidade_formacoes || 0;
+
+        totalHoras +=
+            facilitador.total_horas || 0;
+
+        /* Cabeçalho do facilitador */
+
+        const linhaTitulo =
+            document.createElement("tr");
+
+        linhaTitulo.classList.add(
+            "table-primary"
+        );
+
+        linhaTitulo.innerHTML = `
+            <td colspan="4">
+                <strong>
+                    ${facilitador.facilitador}
+                </strong>
+
+                <span class="float-end">
+
+                    Formações:
+                    ${facilitador.quantidade_formacoes}
+
+                    &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                    Horas:
+                    ${facilitador.total_horas}
+
+                </span>
+            </td>
+        `;
+
+        tbody.appendChild(
+            linhaTitulo
+        );
+
+        facilitador.formacoes.forEach(formacao => {
+
+            const linha =
+                document.createElement("tr");
+
+            linha.innerHTML = `
+
+                <td></td>
+
+                <td>
+                    ${formacao.titulo || ""}
+                </td>
+
+                <td>
+                    ${formatarData(
+                        formacao.data_fim
+                    )}
+                </td>
+
+                <td>
+                    ${formacao.carga_horaria || 0}
+                </td>
+
+            `;
+
+            tbody.appendChild(
+                linha
+            );
+
+        });
+
+    });
+
+    document.getElementById(
+        "totalFormacoes"
+    ).innerText =
+        totalFormacoes;
+
+    document.getElementById(
+        "totalHoras"
+    ).innerText =
+        totalHoras;
+}
+
+function gerarPDF() {
+
+    const ano =
+        document.getElementById("ano").value;
+
+    window.open(
+        `/api/relatorios/facilitadores/${ano}/pdf`,
+        "_blank"
+    );
+}
+
+window.onload = () => {
+
+    carregarRelatorio();
+
+};
+
+</script>
+
+{% endblock %}

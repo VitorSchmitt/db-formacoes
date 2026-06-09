@@ -18,7 +18,12 @@ from routes_certificados import router as certificado_router
 from routes_plano_anual import router as plano_anual_router
 from routes_cronograma import router as cronograma_router
 from routes_relatorio_servidor import router as relatorio_router
+from routes_facilitador import router as facilitador_router
+
 from middleware import AuthMiddleware
+
+
+
 
 
 app = FastAPI()
@@ -50,6 +55,7 @@ app.include_router(certificado_router)
 app.include_router(plano_anual_router)
 app.include_router(cronograma_router)
 app.include_router(relatorio_router)
+app.include_router(facilitador_router)
 
 # ===============================
 # WEB
@@ -155,5 +161,13 @@ def tela_cronograma(request: Request):
 
     return templates.TemplateResponse(
         "relatorio_servidor.html",
+        {"request": request}
+    )
+
+@app.get("/web/facilitadores")
+def tela_facilitadores(request: Request):
+
+    return templates.TemplateResponse(
+        "facilitadores.html",
         {"request": request}
     )

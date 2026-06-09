@@ -61,7 +61,7 @@ PERMISSOES = {
         "/api/planos_anual",
         "/api/enums",
         "/api/facilitador",
-        "/api/relatorio_facilitador"
+        "/api/relatorios/facilitadores"
         
     ],
     "custom": [ 

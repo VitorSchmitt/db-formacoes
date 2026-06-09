@@ -33,7 +33,7 @@ def relatorio_facilitadores_anual(
     formacoes = (
         db.query(Formacao)
         .join(Facilitador)
-        .filter(extract("year", Formacao.data_fim) == ano)
+        .filter(extract("year", Formacao.data_termino) == ano)
         .order_by(
             Facilitador.nome.asc(),
             Formacao.data_termino.asc()

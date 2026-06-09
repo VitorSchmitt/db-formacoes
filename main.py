@@ -19,7 +19,7 @@ from routes_plano_anual import router as plano_anual_router
 from routes_cronograma import router as cronograma_router
 from routes_relatorio_servidor import router as relatorio_router
 from routes_facilitador import router as facilitador_router
-from routes_relatorio_facilitador import relatorio_facilitador_router
+from routes_relatorio_facilitador import router as relatorio_facilitador_router
 
 from middleware import AuthMiddleware
 

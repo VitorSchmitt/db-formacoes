@@ -78,20 +78,28 @@
 
             admin: [
 
+                
                 ["/web/dashboard", "📊 Dashboard"],
+        
+                { grupo: "📚 Cadastros" },
                 ["/web/formacoes", "📚 Formações"],
-                ["/web/facilitadores", "🎓 Facilitadores"],
-                ["/web/relatorio_facilitador", "🎓📚 Relatório Facilitadores"],
                 ["/web/servidores", "👥 Servidores"],
+                ["/web/facilitadores", "🎓 Facilitadores"],
+                ["/web/lotacoes", "🧭 Lotações"],
+        
+                { grupo: "📋 Relatórios" },
+                ["/web/relatorio_facilitador", "🎓📚 Relatório Facilitadores"],
                 ["/web/relatorio_servidor", "👤📚 Formações por Servidor"],
                 ["/web/participacoes", "📊 Participações"],
-                ["/web/lotacoes", "🧭 Lotações"],
                 ["/web/certificados", "📜 Certificados"],
-                ["/web/cronograma", "📅 Cronograma"],               
-                ["/web/plano_anual","📘 Plano Anual"],
+        
+                { grupo: "📅 Planejamento" },
+                ["/web/cronograma", "📅 Cronograma"],
+                ["/web/plano_anual", "📘 Plano Anual"],
+        
+                { grupo: "⚙️ Administração" },
                 ["/web/usuarios", "👤 Usuários"]
             ],
-
             operador: [ 
                 ["/web/dashboard", "📊 Dashboard"],                
                 ["/web/relatorio_servidor", "👤📚 Formações por Servidor"],
@@ -131,13 +139,26 @@
             return;
         }
 
-        menus[perfil].forEach(item => {
+       menus[perfil].forEach(item => {
 
+            // Título do grupo
+            if (item.grupo) {
+        
+                container.innerHTML += `
+                    <div class="menu-grupo">
+                        ${item.grupo}
+                    </div>
+                `;
+        
+                return;
+            }
+        
+            // Item normal
             let ativo =
                 paginaAtual === item[0]
                 ? "ativo"
                 : "";
-
+        
             container.innerHTML += `
                 <a href="${item[0]}"
                    class="${ativo}">
@@ -174,6 +195,24 @@
     <!-- ESTILO -->
     <!-- ===================================================== -->
     <style>
+            .menu-grupo {
+        
+            color: #9ca3af;
+        
+            font-size: 0.75rem;
+        
+            font-weight: 700;
+        
+            text-transform: uppercase;
+        
+            letter-spacing: 1px;
+        
+            margin-top: 18px;
+        
+            margin-bottom: 8px;
+        
+            padding-left: 10px;
+        }
 
     :root {
 

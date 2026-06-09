@@ -77,7 +77,7 @@ class Servidor(Base):
     ativo = Column(Boolean, default=True)
     cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
     participacoes = relationship("Participacao", back_populates="servidor")
-    facilitacoes = relationship("Facilitador")
+    facilitacoes = relationship("Facilitador", back_populates="servidor")
     
 # ===============================
 # PLANO ANUAL
@@ -126,7 +126,8 @@ class Formacao(Base):
     criado_em = Column(DateTime, default=datetime.utcnow)
     ativo = Column(Boolean, default=True, index=True)
     participacoes = relationship("Participacao", back_populates="formacao")
-    facilitadores = relationship("Facilitador")
+    facilitadores = relationship("Facilitador", back_populates="formacao")
+    
     __table_args__ = (
 
         UniqueConstraint(
@@ -221,12 +222,12 @@ class Facilitador(Base):
 
     servidor = relationship(
         "Servidor",
-        lazy="joined"
+        back_populates="facilitacoes"
     )
 
     formacao = relationship(
         "Formacao",
-        lazy="joined"
+        back_populates="facilitadores"
     )
 
     __table_args__ = (

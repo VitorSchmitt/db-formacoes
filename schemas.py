@@ -150,3 +150,7 @@ class PlanoAnualUpdate(BaseModel):
     objetivo: Optional[str] = None
     ementa: Optional[str] = None
     ativo: Optional[bool] = None
+
+class FacilitadorCreate(BaseModel):
+    matricula: str
+    formacao_id: int

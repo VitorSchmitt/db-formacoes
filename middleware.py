@@ -21,7 +21,8 @@ PUBLIC_PATHS = [
     "/web/plano_anual",
     "/web/cronograma",
     "/web/relatorio_servidor",
-    "/web/facilitadores"
+    "/web/facilitadores",
+    "/web/relatorio_facilitador"
     
 ]
 
@@ -53,12 +54,14 @@ PERMISSOES = {
         "/web/lotacoes",        
         "/api/dashboard",
         "/web/facilitadores",
+        "/web/relatorio_facilitador",
         "/api/servidores",
         "/api/formacoes",        
         "/api/lotacoes",       
         "/api/planos_anual",
         "/api/enums",
-        "/api/facilitador"
+        "/api/facilitador",
+        "/api/relatorio_facilitador"
         
     ],
     "custom": [ 

@@ -19,7 +19,7 @@ from routes_plano_anual import router as plano_anual_router
 from routes_cronograma import router as cronograma_router
 from routes_relatorio_servidor import router as relatorio_router
 from routes_facilitador import router as facilitador_router
-from routes_relaorio_facilitador import relaorio_facilitador_router
+from routes_relatorio_facilitador import relatorio_facilitador_router
 
 from middleware import AuthMiddleware
 
@@ -57,7 +57,7 @@ app.include_router(plano_anual_router)
 app.include_router(cronograma_router)
 app.include_router(relatorio_router)
 app.include_router(facilitador_router)
-app.include_router(relaorio_facilitador_router)
+app.include_router(relatorio_facilitador_router)
 
 
 # ===============================

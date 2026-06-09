@@ -6,7 +6,7 @@ from database import SessionLocal
 from models import Facilitador, Formacao
 
 router = APIRouter(
-    prefix="/relatorios",
+    prefix="/api/relatorios",
     tags=["Relatórios"]
 )
 

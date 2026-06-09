@@ -36,7 +36,7 @@ def relatorio_facilitadores_anual(
         .filter(extract("year", Formacao.data_fim) == ano)
         .order_by(
             Facilitador.nome.asc(),
-            Formacao.data_fim.asc()
+            Formacao.data_termino.asc()
         )
         .all()
     )
@@ -58,7 +58,7 @@ def relatorio_facilitadores_anual(
             "id_formacao": formacao.id,
             "titulo": formacao.nome,
             "data_inicio": formacao.data_inicio,
-            "data_fim": formacao.data_fim,
+            "data_termino": formacao.data_fim,
             "carga_horaria": formacao.carga_horaria
         })
 

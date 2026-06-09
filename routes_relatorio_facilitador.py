@@ -41,8 +41,7 @@ def relatorio_facilitadores_anual(
             )
             .join(Facilitador.servidor)
             .join(Facilitador.formacao)
-            .filter(
-                Formacao.ativo == True,
+            .filter(                
                 Formacao.data_termino.isnot(None),
                 extract("year", Formacao.data_termino) == ano
             )

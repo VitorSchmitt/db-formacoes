@@ -238,3 +238,26 @@ def formacoes_do_facilitador(
         for f in dados
 
     ]
+
+
+@router.get("/api/servidores/matricula/{matricula}")
+def buscar_por_matricula(
+    matricula: str,
+    db: Session = Depends(get_db)
+):
+    servidor = (
+        db.query(Servidor)
+        .filter(
+            Servidor.matricula == matricula,
+            Servidor.ativo == True
+        )
+        .first()
+    )
+
+    if not servidor:
+        return {}
+
+    return {
+        "matricula": servidor.matricula,
+        "nome": servidor.nome
+    }

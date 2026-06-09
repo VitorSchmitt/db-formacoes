@@ -2,90 +2,125 @@
 
 {% block content %}
 
-<h2>🎓 Facilitadores</h2>
+<h2>🎓 Facilitadores da Formação</h2>
 
-<!-- ===================== -->
-<!-- FORMAÇÃO -->
-<!-- ===================== -->
-<div class="row mb-3">
+<div class="card mb-4">
+    <div class="card-body">
 
-    <div class="col-md-6">
+        <div class="row">
 
-        <label><b>Formação</b></label>
+            <div class="col-md-6">
+                <label>Formação</label>
 
-        <select
-            id="formacao"
-            class="form-select"
-            onchange="trocarFormacao()"
-        ></select>
+                <select
+                    id="formacao"
+                    class="form-select"
+                    onchange="carregarFacilitadores()"
+                >
+                </select>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Adicionar Facilitador
+    </div>
+
+    <div class="card-body">
+
+        <form onsubmit="salvar(event)">
+
+            <input type="hidden" id="servidor">
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <label>Matrícula</label>
+
+                    <input
+                        type="text"
+                        id="matricula"
+                        class="form-control"
+                        placeholder="Digite a matrícula"
+                        required
+                    >
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label>Servidor</label>
+
+                    <div
+                        id="nome_servidor"
+                        class="border rounded p-2 bg-light"
+                    >
+                        Informe a matrícula
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+
+                    <button
+                        class="btn btn-success w-100"
+                        type="submit"
+                    >
+                        Adicionar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="card">
+
+    <div class="card-header">
+        Facilitadores da Formação
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nome</th>
+                        <th width="120">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tabela">
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
 </div>
 
-<hr>
-
-<!-- ===================== -->
-<!-- ADICIONAR -->
-<!-- ===================== -->
-
-<h5>Adicionar Facilitador</h5>
-
-<form onsubmit="salvar(event)">
-
-    <div class="row mb-3">
-
-        <div class="col-md-8">
-
-            <select
-                id="servidor"
-                class="form-select"
-                required
-            ></select>
-
-        </div>
-
-        <div class="col-md-2">
-
-            <button
-                class="btn btn-primary w-100"
-            >
-                Adicionar
-            </button>
-
-        </div>
-
-    </div>
-
-</form>
-
-<div id="msg"></div>
-
-<hr>
-
-<!-- ===================== -->
-<!-- LISTA -->
-<!-- ===================== -->
-
-<h5>Facilitadores da Formação</h5>
-
-<input
-    type="text"
-    id="busca"
-    class="form-control mb-3"
-    placeholder="Buscar..."
-    onkeyup="carregarTabela()"
->
-
-<div id="tabela"></div>
-
 <script>
 
-let formacaoAtual = null;
-
+let timeoutMatricula;
 
 // =====================
-// FORMAÇÕES
+// CARREGAR FORMAÇÕES
 // =====================
 async function carregarFormacoes(){
 
@@ -96,200 +131,164 @@ async function carregarFormacoes(){
     await res.json();
 
     let select =
-    document.getElementById(
-        "formacao"
-    );
+    document.getElementById("formacao");
 
-    select.innerHTML =
-    `<option value="">
-        Selecione
-    </option>`;
+    select.innerHTML = "";
 
-    (data.dados || []).forEach(f => {
+    (data.dados || data).forEach(f=>{
 
         select.add(
-
             new Option(
                 f.descricao,
                 f.id
             )
-
         );
 
     });
 
+    carregarFacilitadores();
+
 }
 
-
 // =====================
-// SERVIDORES
+// AUTOCOMPLETE MATRÍCULA
 // =====================
-async function carregarServidores(){
+const inputMatricula =
+document.getElementById("matricula");
 
-    let res =
-    await api("/api/servidores");
+if(inputMatricula){
 
-    let data =
-    await res.json();
+    inputMatricula.addEventListener(
+        "input",
+        function(){
 
-    let select =
-    document.getElementById(
-        "servidor"
+            clearTimeout(
+                timeoutMatricula
+            );
+
+            let matricula =
+            this.value.trim();
+
+            if(!matricula)
+                return;
+
+            timeoutMatricula =
+            setTimeout(
+                async ()=>{
+
+                    try{
+
+                        let res =
+                        await api(
+                        `/api/servidores/matricula/${matricula}`
+                        );
+
+                        let data =
+                        await res.json();
+
+                        let nomeEl =
+                        document.getElementById(
+                            "nome_servidor"
+                        );
+
+                        if(data && data.matricula){
+
+                            document
+                            .getElementById(
+                                "servidor"
+                            )
+                            .value =
+                            data.matricula;
+
+                            nomeEl.innerHTML = `
+                                👤 ${data.nome}<br>
+                                Matrícula: ${data.matricula}
+                            `;
+
+                        }else{
+
+                            document
+                            .getElementById(
+                                "servidor"
+                            )
+                            .value = "";
+
+                            nomeEl.innerHTML = `
+                                <span class="text-danger">
+                                    Servidor não encontrado
+                                </span>
+                            `;
+
+                        }
+
+                    }catch(err){
+
+                        console.error(err);
+
+                    }
+
+                },
+                400
+            );
+
+        }
     );
 
-    select.innerHTML =
-    `<option value="">
-        Selecione o servidor
-    </option>`;
-
-    data
-    .sort((a,b)=>
-        a.nome.localeCompare(b.nome)
-    )
-    .forEach(s => {
-
-        select.add(
-
-            new Option(
-                `${s.nome} (${s.matricula})`,
-                s.matricula
-            )
-
-        );
-
-    });
-
 }
-
-
-// =====================
-// TROCAR FORMAÇÃO
-// =====================
-function trocarFormacao(){
-
-    formacaoAtual =
-
-    document
-    .getElementById(
-        "formacao"
-    )
-    .value;
-
-    carregarTabela();
-
-}
-
 
 // =====================
 // LISTAR
 // =====================
-async function carregarTabela(){
+async function carregarFacilitadores(){
 
-    if(!formacaoAtual){
+    let formacao_id =
+    document.getElementById(
+        "formacao"
+    ).value;
 
-        document
-        .getElementById(
-            "tabela"
-        )
-        .innerHTML = "";
-
+    if(!formacao_id)
         return;
-    }
 
     let res =
     await api(
-        `/api/facilitador/${formacaoAtual}`
+        `/api/facilitadores/${formacao_id}`
     );
 
     let data =
     await res.json();
 
-    let busca =
+    let html = "";
 
-    document
-    .getElementById(
-        "busca"
-    )
-    .value
-    .toLowerCase();
-
-    let html =
-
-    `
-    <table class="table table-striped">
-
-        <thead>
-
-            <tr>
-
-                <th>Matrícula</th>
-                <th>Nome</th>
-                <th width="120">
-                    Ações
-                </th>
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-    `;
-
-    data
-
-    .filter(x =>
-
-        x.nome
-        .toLowerCase()
-        .includes(busca)
-
-    )
-
-    .forEach(x => {
+    data.forEach(f=>{
 
         html += `
-
         <tr>
 
-            <td>${x.matricula}</td>
+            <td>${f.matricula}</td>
 
-            <td>${x.nome}</td>
+            <td>${f.nome}</td>
 
             <td>
 
                 <button
-
                     class="btn btn-danger btn-sm"
-
-                    onclick="remover(${x.id})"
-
+                    onclick="remover(${f.id})"
                 >
-
-                    🗑
-
+                    Excluir
                 </button>
 
             </td>
 
         </tr>
-
         `;
 
     });
 
-    html += `
-        </tbody>
-    </table>
-    `;
-
     document
-    .getElementById(
-        "tabela"
-    )
+    .getElementById("tabela")
     .innerHTML = html;
 
 }
-
 
 // =====================
 // SALVAR
@@ -298,57 +297,36 @@ async function salvar(event){
 
     event.preventDefault();
 
-    if(!formacaoAtual){
-
-        mostrarMsg(
-            "Selecione uma formação",
-            "danger"
-        );
-
-        return;
-    }
-
     let matricula =
-
-    document
-    .getElementById(
+    document.getElementById(
         "servidor"
-    )
-    .value;
+    ).value;
+
+    let formacao_id =
+    document.getElementById(
+        "formacao"
+    ).value;
 
     if(!matricula){
 
-        mostrarMsg(
-            "Selecione um servidor",
-            "danger"
+        alert(
+            "Servidor não encontrado"
         );
 
         return;
+
     }
 
     let res =
     await api(
-
         "/api/facilitador",
-
         {
-
             method:"POST",
-
             body:JSON.stringify({
-
-                matricula:
                 matricula,
-
-                formacao_id:
-                parseInt(
-                    formacaoAtual
-                )
-
+                formacao_id
             })
-
         }
-
     );
 
     let r =
@@ -356,23 +334,16 @@ async function salvar(event){
 
     if(r.erro){
 
-        mostrarMsg(
-            r.erro,
-            "danger"
-        );
-
+        alert(r.erro);
         return;
+
     }
 
-    mostrarMsg(
-        "Facilitador adicionado",
-        "success"
-    );
+    limpar();
 
-    carregarTabela();
+    carregarFacilitadores();
 
 }
-
 
 // =====================
 // REMOVER
@@ -383,64 +354,50 @@ async function remover(id){
         !confirm(
             "Remover facilitador?"
         )
-    ){
-        return;
-    }
+    )
+    return;
 
     await api(
-
         `/api/facilitador/${id}`,
-
         {
             method:"DELETE"
         }
-
     );
 
-    carregarTabela();
+    carregarFacilitadores();
 
 }
 
-
 // =====================
-// UI
+// LIMPAR
 // =====================
-function mostrarMsg(
-    texto,
-    tipo
-){
+function limpar(){
 
     document
     .getElementById(
-        "msg"
+        "matricula"
+    )
+    .value = "";
+
+    document
+    .getElementById(
+        "servidor"
+    )
+    .value = "";
+
+    document
+    .getElementById(
+        "nome_servidor"
     )
     .innerHTML =
-
-    `
-    <div
-    class="alert alert-${tipo}">
-        ${texto}
-    </div>
-    `;
-
-    setTimeout(() => {
-
-        document
-        .getElementById(
-            "msg"
-        )
-        .innerHTML = "";
-
-    },2500);
+    "Informe a matrícula";
 
 }
-
 
 // =====================
 // INIT
 // =====================
 carregarFormacoes();
-carregarServidores();
 
 </script>
 

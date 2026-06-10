@@ -11,8 +11,7 @@ class FormacaoBase(BaseModel):
     descricao: str
 
     data_inicio: Optional[date] = None
-    data_termino: Optional[date] = None
-    periodo: Optional[str] = None
+    data_termino: Optional[date] = None    
 
     carga_horaria: Optional[int] = None
     modalidade: Optional[str] = None
@@ -33,8 +32,7 @@ class FormacaoUpdate(BaseModel):
     descricao: Optional[str] = None
 
     data_inicio: Optional[date] = None
-    data_termino: Optional[date] = None
-    periodo: Optional[str] = None
+    data_termino: Optional[date] = None    
 
     carga_horaria: Optional[int] = None
     modalidade: Optional[str] = None

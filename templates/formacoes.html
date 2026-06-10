@@ -51,15 +51,7 @@
                     class="form-select"
                     required>
             </select>
-        </div>
-
-        <div class="col-md-3">
-            <input type="text"
-                   id="periodo"
-                   class="form-control"
-                   placeholder="Período"
-                   required>
-        </div>
+        </div>        
 
         <div class="col-md-3">
             <input type="text"
@@ -458,7 +450,6 @@ document.getElementById("data_inicio").value=f.data_inicio||"";
 document.getElementById("data_termino").value=f.data_termino||"";
 document.getElementById("carga").value =f.carga_horaria ?? "";
 document.getElementById("modalidade").value=f.modalidade||"";
-document.getElementById("periodo").value=f.periodo||"";
 document.getElementById("publico_alvo").value=f.publico_alvo||"";
 document.getElementById("investimento").value =f.investimento ?? "";
 document.getElementById("meta_participantes").value =f.meta_participantes ?? "";
@@ -493,9 +484,6 @@ parseInt(document.getElementById("carga").value)||0,
 
 modalidade:
 document.getElementById("modalidade").value,
-
-periodo:
-document.getElementById("periodo").value,
 
 publico_alvo:
 document.getElementById("publico_alvo").value,

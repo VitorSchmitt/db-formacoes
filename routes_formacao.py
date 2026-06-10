@@ -83,10 +83,7 @@ def listar(
                     f.data_termino.strftime("%Y-%m-%d")
                     if f.data_termino
                     else None,
-
-                "periodo":
-                    f.periodo,
-
+                
                 "carga_horaria":
                     f.carga_horaria,
 
@@ -155,8 +152,7 @@ def criar(
         "data_inicio": "Data início",
         "data_termino": "Data término",
         "carga_horaria": "Carga horária",
-        "modalidade": "Modalidade",
-        "periodo": "Período",
+        "modalidade": "Modalidade",        
         "publico_alvo": "Público-alvo",
         "meta_participantes": "Meta participantes",
         "investimento": "Investimento",
@@ -227,8 +223,7 @@ def criar(
 
             descricao=dados.get("descricao"),
             data_inicio=dados.get("data_inicio"),
-            data_termino=dados.get("data_termino"),
-            periodo=dados.get("periodo"),
+            data_termino=dados.get("data_termino"),            
             carga_horaria=dados.get("carga_horaria"),
             modalidade=dados.get("modalidade"),
             publico_alvo=dados.get("publico_alvo"),

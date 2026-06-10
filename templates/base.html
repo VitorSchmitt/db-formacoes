@@ -78,27 +78,42 @@
 
             admin: [
 
-                
                 ["/web/dashboard", "📊 Dashboard"],
-        
-                { grupo: "📚 Cadastros" },
-                ["/web/formacoes", "📚 Formações"],
-                ["/web/servidores", "👥 Servidores"],
-                ["/web/facilitadores", "🎓 Facilitadores"],
-                ["/web/lotacoes", "🧭 Lotações"],
-        
-                { grupo: "📋 Relatórios" },
-                ["/web/relatorio_facilitador", "🎓📚 Relatório Facilitadores"],
-                ["/web/relatorio_servidor", "👤📚 Formações por Servidor"],
-                ["/web/participacoes", "📊 Participações"],
-                ["/web/certificados", "📜 Certificados"],
-        
-                { grupo: "📅 Planejamento" },
-                ["/web/cronograma", "📅 Cronograma"],
-                ["/web/plano_anual", "📘 Plano Anual"],
-        
-                { grupo: "⚙️ Administração" },
-                ["/web/usuarios", "👤 Usuários"]
+            
+                {
+                    grupo: "📚 Cadastros",
+                    itens: [
+                        ["/web/formacoes", "📚 Formações"],
+                        ["/web/servidores", "👥 Servidores"],
+                        ["/web/facilitadores", "🎓 Facilitadores"],
+                        ["/web/lotacoes", "🧭 Lotações"]
+                    ]
+                },
+            
+                {
+                    grupo: "📋 Relatórios",
+                    itens: [
+                        ["/web/relatorio_facilitador", "🎓📚 Relatório Facilitadores"],
+                        ["/web/relatorio_servidor", "👤📚 Formações por Servidor"],
+                        ["/web/participacoes", "📊 Participações"],
+                        ["/web/certificados", "📜 Certificados"]
+                    ]
+                },
+            
+                {
+                    grupo: "📅 Planejamento",
+                    itens: [
+                        ["/web/cronograma", "📅 Cronograma"],
+                        ["/web/plano_anual", "📘 Plano Anual"]
+                    ]
+                },
+            
+                {
+                    grupo: "⚙️ Administração",
+                    itens: [
+                        ["/web/usuarios", "👤 Usuários"]
+                    ]
+                }
             ],
             operador: [ 
                 ["/web/dashboard", "📊 Dashboard"],                
@@ -139,21 +154,52 @@
             return;
         }
 
-       menus[perfil].forEach(item => {
+       menus[perfil].forEach((item, indice) => {
 
-            // Título do grupo
             if (item.grupo) {
         
+                const grupoId = `grupo_${indice}`;
+        
                 container.innerHTML += `
-                    <div class="menu-grupo">
-                        ${item.grupo}
+        
+                    <div
+                        class="menu-header"
+                        onclick="toggleGrupo('${grupoId}', this)"
+                    >
+        
+                        <span>${item.grupo}</span>
+        
+                        <span class="menu-seta">▸</span>
+        
+                    </div>
+        
+                    <div
+                        id="${grupoId}"
+                        class="menu-itens"
+                    >
+        
+                        ${item.itens.map(menu => {
+        
+                            let ativo =
+                                paginaAtual === menu[0]
+                                ? "ativo"
+                                : "";
+        
+                            return `
+                                <a href="${menu[0]}"
+                                   class="${ativo}">
+                                   ${menu[1]}
+                                </a>
+                            `;
+        
+                        }).join("")}
+        
                     </div>
                 `;
         
                 return;
             }
         
-            // Item normal
             let ativo =
                 paginaAtual === item[0]
                 ? "ativo"
@@ -174,9 +220,29 @@
     // =====================================================
     function logout() {
 
-        localStorage.clear();
-
-        window.location.href = "/";
+            localStorage.clear();
+    
+            window.location.href = "/";
+        }
+    
+        function toggleGrupo(id, elemento) {
+    
+        const grupo =
+            document.getElementById(id);
+    
+        const seta =
+            elemento.querySelector(".menu-seta");
+    
+        grupo.classList.toggle("aberto");
+    
+        if (grupo.classList.contains("aberto")) {
+    
+            seta.innerHTML = "▾";
+    
+        } else {
+    
+            seta.innerHTML = "▸";
+        }
     }
 
 
@@ -206,7 +272,44 @@
             margin-bottom: 8px;        
             padding-left: 10px;
         }
+        .menu-header {
 
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        
+            cursor:pointer;
+        
+            padding:10px;
+        
+            margin-top:14px;
+        
+            font-size:.85rem;
+        
+            font-weight:800;
+        
+            text-transform:uppercase;
+        
+            letter-spacing:1px;
+        
+            border-radius:8px;
+        }
+        
+        .menu-header:hover {
+            background:#eef2f7;
+        }
+        
+        .menu-itens {
+            display:none;
+        }
+        
+        .menu-itens.aberto {
+            display:block;
+        }
+        
+        .menu-seta {
+            font-size:12px;
+        }
         :root {
         
             --sidebar-bg: #f8f9fa;      /* fundo claro */

@@ -64,7 +64,7 @@ MESES = {
 def periodo_formatado(formacao):
 
     if not formacao.data_inicio:
-        return formacao.periodo or ""
+        return  ""
 
     inicio = MESES[
         formacao.data_inicio.month
@@ -254,7 +254,7 @@ def cronograma_pdf(
 
         )
 
-        tabela_dados.append([
+        tabela_dados.append([ 
 
             Paragraph(
                 item["periodo"] or "",

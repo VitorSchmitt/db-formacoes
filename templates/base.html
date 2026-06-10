@@ -388,7 +388,43 @@
 
         letter-spacing: 0.5px;
     }
+    .sidebar-logo {
 
+        background: linear-gradient(
+            135deg,
+            #2563eb,
+            #1d4ed8
+        );
+    
+        color: white;
+    
+        padding: 18px 14px;
+    
+        border-radius: 12px;
+    
+        margin-bottom: 20px;
+    
+        box-shadow:
+            0 4px 10px rgba(37,99,235,.25);
+    }
+    
+    .logo-titulo {
+    
+        font-size: 1.2rem;
+    
+        font-weight: 700;
+    
+        letter-spacing: 1px;
+    }
+
+    .logo-subtitulo {
+    
+        font-size: .82rem;
+    
+        opacity: .9;
+    
+        margin-top: 4px;
+    }
 
     .sidebar hr {
         border-color: #d1d5db;
@@ -605,10 +641,15 @@
     <!-- ===================================================== -->
     <div class="sidebar">
 
-        <h4>NTEV - FORMAÇÕES</h4>
-
-        <hr>
-
+        <div class="sidebar-logo">
+            <div class="logo-titulo">
+                NTEV
+            </div>        
+            <div class="logo-subtitulo">
+                Sistema de Formações
+            </div>
+        
+        </div>
         <div id="menu"></div>
 
         <hr>

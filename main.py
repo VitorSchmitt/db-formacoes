@@ -23,7 +23,13 @@ from routes_relatorio_facilitador import router as relatorio_facilitador_router
 
 from middleware import AuthMiddleware
 
+from fastapi.staticfiles import StaticFiles
 
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static"
+)
 
 
 

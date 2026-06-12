@@ -25,15 +25,15 @@ from middleware import AuthMiddleware
 
 from fastapi.staticfiles import StaticFiles
 
+
+
+
+app = FastAPI()
 app.mount(
     "/static",
     StaticFiles(directory="static"),
     name="static"
 )
-
-
-
-app = FastAPI()
 
 
 # middleware auth

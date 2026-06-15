@@ -158,6 +158,8 @@ def cronograma(
 
             resultado.append({
 
+                "data_termino": f.data_termino,
+
                 "periodo":
                     periodo_formatado(f),
 

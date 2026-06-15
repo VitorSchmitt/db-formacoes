@@ -182,7 +182,10 @@ def cronograma(
                     f.status
 
             })
-
+    
+    resultado.sort(
+    key=lambda x: x["data_termino"] or date.max
+    )
     return resultado
 
 

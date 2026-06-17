@@ -32,5 +32,6 @@ class AvaliacaoSupervisor(Base):
     parecer = Column(Text)
 
     contrato = relationship(
-        "ContratoEstagio"
+        "ContratoEstagio",
+        back_populates="avaliacoes"
     )

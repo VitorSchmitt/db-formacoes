@@ -14,7 +14,10 @@ from sqlalchemy.orm import relationship
 
 from database import Base
 
-from estagiarios.enums import MotivoDesligamentoEnum
+from estagiarios.enums import (
+    MotivoDesligamentoEnum,
+    SexoEnum
+)
 
 from formacoes.model import (
     Servidor,
@@ -29,7 +32,14 @@ class Estagiario(Base):
 
     nome = Column(String(200), nullable=False)
 
-    sexo = Column(String(1))
+    sexo = Column(
+        SqlEnum(
+            SexoEnum,
+            native_enum=False
+        ),
+        nullable=False,
+        default=SexoEnum.NAO_INFORMADO
+    )
 
     cpf = Column(
         String(14),

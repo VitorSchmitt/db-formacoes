@@ -251,6 +251,11 @@ class ContratoEstagio(Base):
         back_populates="contratos"
     )
 
+    avaliacoes = relationship(
+        "AvaliacaoSupervisor",
+        back_populates="contrato"
+    )
+
     lotacao = relationship(Lotacao)
 
     supervisor = relationship(Servidor)

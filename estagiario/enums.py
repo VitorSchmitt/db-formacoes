@@ -14,3 +14,9 @@ class SexoEnum(str, Enum):
     MASCULINO = "M"
     FEMININO = "F"
     NAO_INFORMADO = "N"
+
+class ClassificacaoEstagioEnum(str, Enum):
+    ENSINO_MEDIO = "ENSINO_MEDIO"
+    TECNICO = "TECNICO"
+    SUPERIOR = "SUPERIOR"
+    POS_GRADUACAO = "POS_GRADUACAO"

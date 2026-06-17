@@ -7,8 +7,8 @@ from sqlalchemy import (
 )
 
 from sqlalchemy.orm import relationship
-
 from database import Base
+from sqlalchemy import UniqueConstraint
 
 
 class AvaliacaoSupervisor(Base):
@@ -36,19 +36,6 @@ class AvaliacaoSupervisor(Base):
         back_populates="avaliacoes"
     )
 
-from sqlalchemy import (
-    Column,
-    Integer,
-    Date,
-    ForeignKey,
-    Text
-)
-
-from sqlalchemy.orm import relationship
-
-from database import Base
-
-
 class FrequenciaEstagio(Base):
     __tablename__ = "frequencias_estagio"
 
@@ -66,11 +53,73 @@ class FrequenciaEstagio(Base):
     )
 
     horas_realizadas = Column(
-        Integer,
+        Numeric(4, 2),
         nullable=False
     )
 
     observacao = Column(Text)
+
+    contrato = relationship(
+        "ContratoEstagio",
+        back_populates="frequencias"
+    )
+
+
+class PagamentoEstagio(Base):
+    __tablename__ = "pagamentos_estagio"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "contrato_id",
+            "competencia",
+            name="uq_pagamento_competencia"
+        ),
+    )
+
+    id = Column(Integer, primary_key=True)
+
+    contrato_id = Column(
+        Integer,
+        ForeignKey("contratos_estagio.id"),
+        nullable=False
+    )
+
+    competencia = Column(
+        String(7),
+        nullable=False
+    )
+
+    data_fechamento = Column(
+        Date,
+        nullable=False
+    )
+
+    horas_apuradas = Column(
+        Numeric(6, 2),
+        nullable=False
+    )
+
+    valor_hora_aplicado = Column(
+        Numeric(10, 2),
+        nullable=False
+    )
+
+    valor_vale_alimentacao = Column(
+        Numeric(10, 2),
+        nullable=False,
+        default=0
+    )
+
+    valor_vale_transporte = Column(
+        Numeric(10, 2),
+        nullable=False,
+        default=0
+    )
+
+    valor_total = Column(
+        Numeric(10, 2),
+        nullable=False
+    )
 
     contrato = relationship(
         "ContratoEstagio"

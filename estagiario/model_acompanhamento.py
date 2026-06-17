@@ -1,9 +1,12 @@
 from sqlalchemy import (
     Column,
     Integer,
+    String,
     Date,
+    Numeric,
     ForeignKey,
-    Text
+    Text,
+    UniqueConstraint
 )
 
 from sqlalchemy.orm import relationship
@@ -38,6 +41,15 @@ class AvaliacaoSupervisor(Base):
 
 class FrequenciaEstagio(Base):
     __tablename__ = "frequencias_estagio"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "contrato_id",
+            "data",
+            name="uq_frequencia_contrato_data"
+        ),
+    )
+
 
     id = Column(Integer, primary_key=True)
 
@@ -122,5 +134,6 @@ class PagamentoEstagio(Base):
     )
 
     contrato = relationship(
-        "ContratoEstagio"
+        "ContratoEstagio",
+        back_populates="pagamentos"
     )

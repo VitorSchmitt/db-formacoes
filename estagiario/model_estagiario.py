@@ -1,3 +1,27 @@
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Date,
+    Boolean,
+    ForeignKey,
+    Numeric,
+    Text,
+    Enum as SqlEnum
+)
+
+from sqlalchemy.orm import relationship
+
+from database import Base
+
+from estagiarios.enums import MotivoDesligamentoEnum
+
+from formacoes.model import (
+    Servidor,
+    Lotacao
+)
+
+
 class Estagiario(Base):
     __tablename__ = "estagiarios"
 
@@ -38,7 +62,11 @@ class Estagiario(Base):
     # Responsável
     nome_responsavel = Column(String(200))
 
-    cpf_responsavel = Column(String(14))
+    cpf_responsavel =  Column(
+        String(14),
+        unique=True,
+        nullable=False
+    )
 
     parentesco_responsavel = Column(String(50))
 
@@ -122,21 +150,6 @@ class BeneficioEstagiario(Base):
         unique=True
     )
 
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Date,
-    ForeignKey,
-    Text,
-    Enum as SqlEnum
-)
-
-from sqlalchemy.orm import relationship
-
-from database import Base
-
-from estagiarios.enums import MotivoDesligamentoEnum
 
 
 class ContratoEstagio(Base):
@@ -228,13 +241,9 @@ class ContratoEstagio(Base):
         back_populates="contratos"
     )
 
-    lotacao = relationship(
-        "Lotacao"
-    )
+    lotacao = relationship(Lotacao)
 
-    supervisor = relationship(
-        "Servidor"
-    )
+    supervisor = relationship(Servidor)
 
     classificacao = relationship(
         "ClassificacaoEstagio"

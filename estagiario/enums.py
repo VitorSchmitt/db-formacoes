@@ -9,3 +9,8 @@ class MotivoDesligamentoEnum(str, Enum):
     BAIXO_DESEMPENHO = "BAIXO_DESEMPENHO"
     INASSIDUIDADE = "INASSIDUIDADE"
     OUTROS = "OUTROS"
+
+class SexoEnum(str, Enum):
+    MASCULINO = "M"
+    FEMININO = "F"
+    NAO_INFORMADO = "N"

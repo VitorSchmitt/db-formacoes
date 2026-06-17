@@ -5,6 +5,8 @@ class Estagiario(Base):
 
     nome = Column(String(200), nullable=False)
 
+    sexo = Column(String(1))
+
     cpf = Column(
         String(14),
         unique=True,
@@ -48,4 +50,196 @@ class Estagiario(Base):
         "ContratoEstagio",
         back_populates="estagiario",
         cascade="all, delete-orphan"
+    )
+
+class ClassificacaoEstagio(Base):
+    __tablename__ = "classificacoes_estagio"
+
+    id = Column(Integer, primary_key=True)
+
+    codigo = Column(
+        String(20),
+        nullable=False,
+        unique=True
+    )
+
+    descricao = Column(
+        String(100),
+        nullable=False
+    )
+
+    valores = relationship(
+        "ValorBolsaEstagio",
+        back_populates="classificacao"
+    )
+
+class ValorBolsaEstagio(Base):
+    __tablename__ = "valores_bolsa_estagio"
+
+    id = Column(Integer, primary_key=True)
+
+    classificacao_id = Column(
+        Integer,
+        ForeignKey("classificacoes_estagio.id"),
+        nullable=False
+    )
+
+    valor_hora = Column(
+        Numeric(10, 2),
+        nullable=False
+    )
+
+    data_inicio_vigencia = Column(
+        Date,
+        nullable=False
+    )
+
+    classificacao = relationship(
+        "ClassificacaoEstagio",
+        back_populates="valores"
+    )
+
+class BeneficioEstagiario(Base):
+    __tablename__ = "beneficios_estagiario"
+
+    id = Column(Integer, primary_key=True)
+
+    valor_vale_alimentacao = Column(
+        Numeric(10, 2),
+        nullable=False,
+        default=0
+    )
+
+    valor_vale_transporte = Column(
+        Numeric(10, 2),
+        nullable=False,
+        default=0
+    )
+
+    data_inicio_vigencia = Column(
+        Date,
+        nullable=False,
+        unique=True
+    )
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Date,
+    ForeignKey,
+    Text,
+    Enum as SqlEnum
+)
+
+from sqlalchemy.orm import relationship
+
+from database import Base
+
+from estagiarios.enums import MotivoDesligamentoEnum
+
+
+class ContratoEstagio(Base):
+    __tablename__ = "contratos_estagio"
+
+    id = Column(Integer, primary_key=True)
+
+    # Relacionamentos
+    estagiario_id = Column(
+        Integer,
+        ForeignKey("estagiarios.id"),
+        nullable=False
+    )
+
+    lotacao_id = Column(
+        Integer,
+        ForeignKey("lotacoes.id"),
+        nullable=False
+    )
+
+    supervisor_id = Column(
+        Integer,
+        ForeignKey("servidores.id"),
+        nullable=False
+    )
+
+    classificacao_id = Column(
+        Integer,
+        ForeignKey("classificacoes_estagio.id"),
+        nullable=False
+    )
+
+    beneficio_id = Column(
+        Integer,
+        ForeignKey("beneficios_estagiario.id"),
+        nullable=False
+    )
+
+    # Dados do contrato
+    numero_contrato = Column(
+        String(30),
+        unique=True,
+        nullable=False
+    )
+
+    data_assinatura = Column(
+        Date,
+        nullable=False
+    )
+
+    data_inicio = Column(
+        Date,
+        nullable=False
+    )
+
+    data_fim = Column(
+        Date,
+        nullable=False
+    )
+
+    carga_horaria_diaria = Column(
+        Integer,
+        nullable=False
+    )
+
+    carga_horaria_semanal = Column(
+        Integer,
+        nullable=False
+    )
+
+    # Encerramento
+    data_desligamento = Column(Date)
+
+    motivo_desligamento = Column(
+        SqlEnum(
+            MotivoDesligamentoEnum,
+            native_enum=False
+        )
+    )
+
+    observacao_desligamento = Column(Text)
+
+    # Observações gerais
+    observacoes = Column(Text)
+
+    # Relacionamentos ORM
+    estagiario = relationship(
+        "Estagiario",
+        back_populates="contratos"
+    )
+
+    lotacao = relationship(
+        "Lotacao"
+    )
+
+    supervisor = relationship(
+        "Servidor"
+    )
+
+    classificacao = relationship(
+        "ClassificacaoEstagio"
+    )
+
+    beneficio = relationship(
+        "BeneficioEstagiario"
     )

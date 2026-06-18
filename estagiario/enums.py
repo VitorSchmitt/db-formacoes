@@ -15,4 +15,10 @@ class SexoEnum(str, Enum):
     FEMININO = "F"
     NAO_INFORMADO = "N"
 
+class AvaliacaoSupervisorEnum(str, Enum):
+    INSUFICIENTE = "INSUFICIENTE"
+    SATISFATORIO = "SATISFATORIO"
+    BOM = "BOM"
+    PLENAMENTE_SATISFATORIO = "PLENAMENTE_SATISFATORIO"
+
 

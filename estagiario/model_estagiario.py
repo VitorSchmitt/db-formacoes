@@ -117,14 +117,16 @@ class ClassificacaoEstagio(Base):
 
 class ValorBolsaEstagio(Base):
     __tablename__ = "valores_bolsa_estagio"
-
-    id = Column(Integer, primary_key=True)
-
-    UniqueConstraint(
-        "classificacao_id",
-        "data_inicio_vigencia"
+    
+    __table_args__ = (
+        UniqueConstraint(
+            "classificacao_id",
+            "data_inicio_vigencia",
+            name="uq_valor_bolsa_vigencia"
+        ),
     )
-
+    
+    id = Column(Integer, primary_key=True)
     classificacao_id = Column(
         Integer,
         ForeignKey("classificacoes_estagio.id"),

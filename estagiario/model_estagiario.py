@@ -73,8 +73,7 @@ class Estagiario(Base):
     nome_responsavel = Column(String(200))
 
     cpf_responsavel =  Column(
-        String(14),
-        unique=True,
+        String(14),        
         nullable=False
     )
 
@@ -284,9 +283,11 @@ class ContratoEstagio(Base):
     supervisor = relationship(Servidor)
 
     classificacao = relationship(
-        "ClassificacaoEstagio"
+        "ClassificacaoEstagio",
+        back_populates="contratos"
     )
 
     beneficio = relationship(
-        "BeneficioEstagiario"
+        "BeneficioEstagiario",
+        back_populates="contratos"
     )

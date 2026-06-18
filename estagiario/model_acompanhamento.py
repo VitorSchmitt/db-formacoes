@@ -11,7 +11,8 @@ from sqlalchemy import (
 
 from sqlalchemy.orm import relationship
 from database import Base
-from sqlalchemy import UniqueConstraint
+from estagiarios.enums import AvaliacaoSupervisorEnum
+
 
 
 class AvaliacaoSupervisor(Base):
@@ -30,7 +31,13 @@ class AvaliacaoSupervisor(Base):
         nullable=False
     )
 
-    nota = Column(Integer)
+    avaliacao = Column(
+        SqlEnum(
+            AvaliacaoSupervisorEnum,
+            native_enum=False
+        ),
+        nullable=False
+    )
 
     parecer = Column(Text)
 

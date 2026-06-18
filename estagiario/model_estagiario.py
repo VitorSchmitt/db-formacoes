@@ -120,6 +120,11 @@ class ValorBolsaEstagio(Base):
 
     id = Column(Integer, primary_key=True)
 
+    UniqueConstraint(
+        "classificacao_id",
+        "data_inicio_vigencia"
+    )
+
     classificacao_id = Column(
         Integer,
         ForeignKey("classificacoes_estagio.id"),

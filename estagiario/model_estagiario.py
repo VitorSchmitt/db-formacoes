@@ -110,6 +110,11 @@ class ClassificacaoEstagio(Base):
         "ValorBolsaEstagio",
         back_populates="classificacao"
     )
+    
+    contratos = relationship(
+        "ContratoEstagio",
+        back_populates="classificacao"
+    )
 
 class ValorBolsaEstagio(Base):
     __tablename__ = "valores_bolsa_estagio"
@@ -159,6 +164,11 @@ class BeneficioEstagiario(Base):
         nullable=False,
         unique=True
     )
+
+    contratos = relationship(
+            "ContratoEstagio",
+            back_populates="beneficio"
+        )
 
 
 
@@ -263,11 +273,11 @@ class ContratoEstagio(Base):
         cascade="all, delete-orphan"
     )
 
-pagamentos = relationship(
-    "PagamentoEstagio",
-    back_populates="contrato",
-    cascade="all, delete-orphan"
-)
+    pagamentos = relationship(
+        "PagamentoEstagio",
+        back_populates="contrato",
+        cascade="all, delete-orphan"
+    )
 
     lotacao = relationship(Lotacao)
 

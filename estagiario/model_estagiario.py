@@ -188,17 +188,17 @@ class ContratoEstagio(Base):
         Integer,
         ForeignKey("estagiarios.id"),
         nullable=False
-    )
+    )    
 
     lotacao_id = Column(
         Integer,
-        ForeignKey("lotacoes.id"),
+        ForeignKey("lotacao.id"),
         nullable=False
     )
 
-    supervisor_id = Column(
-        Integer,
-        ForeignKey("servidores.id"),
+    supervisor_matricula = Column(
+        String(20),
+        ForeignKey("servidor.matricula"),
         nullable=False
     )
 

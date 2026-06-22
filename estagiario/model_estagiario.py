@@ -90,14 +90,19 @@ class Estagiario(Base):
     )
 
 class ClassificacaoEstagio(Base):
+
     __tablename__ = "classificacoes_estagio"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True
+    )
 
     codigo = Column(
         String(20),
         nullable=False,
-        unique=True
+        unique=True,
+        index=True
     )
 
     descricao = Column(
@@ -105,15 +110,28 @@ class ClassificacaoEstagio(Base):
         nullable=False
     )
 
+    ativo = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
+
+
     valores = relationship(
         "ValorBolsaEstagio",
-        back_populates="classificacao"
+        back_populates="classificacao",
+        cascade="all, delete-orphan"
     )
-    
+
+
     contratos = relationship(
         "ContratoEstagio",
         back_populates="classificacao"
     )
+
+
+    def __repr__(self):
+        return f"<ClassificacaoEstagio {self.codigo} - {self.descricao}>"
 
 class ValorBolsaEstagio(Base):
     __tablename__ = "valores_bolsa_estagio"

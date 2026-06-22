@@ -25,7 +25,7 @@ from models import (
     Lotacao
 )
 
-from model_acompanhamento import (
+from estagiario.model_acompanhamento import (
     AvaliacaoSupervisor,
     FrequenciaEstagio,
     PagamentoEstagio

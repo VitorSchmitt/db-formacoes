@@ -15,7 +15,7 @@ from sqlalchemy.orm import relationship
 
 from database import Base
 
-from estagiarios.enums import (
+from estagiario.enums import (
     MotivoDesligamentoEnum,
     SexoEnum
 )

@@ -162,5 +162,6 @@ class FacilitadorCreate(BaseModel):
 # ===============================
 
 class ClassificacaoSchema(BaseModel):
+    codigo: str       # Adicionado aqui!
     descricao: str
     ativo: bool

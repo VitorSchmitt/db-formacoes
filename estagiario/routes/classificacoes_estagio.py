@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -13,7 +13,9 @@ router = APIRouter(
 
 
 
-# LISTAGEM HTML
+# ===============================
+# LISTAGEM
+# ===============================
 
 @router.get("/")
 def listar(
@@ -23,7 +25,9 @@ def listar(
 
     classificacoes = (
         db.query(ClassificacaoEstagio)
-        .order_by(ClassificacaoEstagio.codigo)
+        .order_by(
+            ClassificacaoEstagio.codigo
+        )
         .all()
     )
 
@@ -38,7 +42,9 @@ def listar(
 
 
 
-# NOVO
+# ===============================
+# NOVO FORM
+# ===============================
 
 @router.get("/novo")
 def novo(
@@ -48,20 +54,39 @@ def novo(
     return request.app.state.templates.TemplateResponse(
         "estagiario/classificacao_form.html",
         {
-            "request": request
+            "request":request
         }
     )
 
 
 
-# SALVAR NOVO
+# ===============================
+# SALVAR
+# ===============================
 
 @router.post("/novo")
 def criar(
-    codigo: str = Form(...),
-    descricao: str = Form(...),
-    db: Session = Depends(get_db)
+    codigo:str = Form(...),
+    descricao:str = Form(...),
+    db:Session = Depends(get_db)
 ):
+
+
+    existe = (
+        db.query(ClassificacaoEstagio)
+        .filter(
+            ClassificacaoEstagio.codigo == codigo
+        )
+        .first()
+    )
+
+
+    if existe:
+        return RedirectResponse(
+            "/estagiario/classificacoes/novo?erro=duplicado",
+            status_code=303
+        )
+
 
 
     classificacao = ClassificacaoEstagio(
@@ -72,7 +97,6 @@ def criar(
 
 
     db.add(classificacao)
-
     db.commit()
 
 
@@ -83,7 +107,9 @@ def criar(
 
 
 
-# EDITAR
+# ===============================
+# EDITAR FORM
+# ===============================
 
 @router.get("/{id}/editar")
 def editar(
@@ -102,6 +128,14 @@ def editar(
     )
 
 
+    if not classificacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Classificação não encontrada"
+        )
+
+
+
     return request.app.state.templates.TemplateResponse(
         "estagiario/classificacao_form.html",
         {
@@ -112,14 +146,16 @@ def editar(
 
 
 
+# ===============================
 # ATUALIZAR
+# ===============================
 
 @router.post("/{id}/editar")
 def atualizar(
     id:int,
     codigo:str=Form(...),
     descricao:str=Form(...),
-    ativo:bool=Form(False),
+    ativo:str=Form(None),
     db:Session=Depends(get_db)
 ):
 
@@ -133,12 +169,22 @@ def atualizar(
     )
 
 
+    if not classificacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Registro não encontrado"
+        )
+
+
+
     classificacao.codigo = codigo
     classificacao.descricao = descricao
-    classificacao.ativo = ativo
+    classificacao.ativo = ativo == "on"
+
 
 
     db.commit()
+
 
 
     return RedirectResponse(
@@ -148,13 +194,16 @@ def atualizar(
 
 
 
-# ATIVAR / INATIVAR
+# ===============================
+# ALTERAR STATUS
+# ===============================
 
 @router.get("/{id}/status")
 def alterar_status(
     id:int,
     db:Session=Depends(get_db)
 ):
+
 
     classificacao = (
         db.query(ClassificacaoEstagio)
@@ -165,10 +214,17 @@ def alterar_status(
     )
 
 
+    if not classificacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Registro não encontrado"
+        )
+
+
     classificacao.ativo = not classificacao.ativo
 
-
     db.commit()
+
 
 
     return RedirectResponse(

@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models.classificacao_estagio import ClassificacaoEstagio
+from model_estagiario.classificacao_estagio import ClassificacaoEstagio
 
 
 router = APIRouter(

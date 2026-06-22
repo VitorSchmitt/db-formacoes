@@ -25,6 +25,12 @@ from models import (
     Lotacao
 )
 
+from model_acompanhamento import (
+    AvaliacaoSupervisor,
+    FrequenciaEstagio,
+    PagamentoEstagio
+)
+
 
 class Estagiario(Base):
     __tablename__ = "estagiarios"

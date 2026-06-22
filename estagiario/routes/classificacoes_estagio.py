@@ -1,233 +1,67 @@
-from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from database import get_db
 from model_estagiario import ClassificacaoEstagio
-
+from schemas import ClassificacaoSchema 
 
 router = APIRouter(
-    prefix="/estagiario/templates/classificacoes",
+    prefix="/api/classificacoes-estagio",
     tags=["Classificações Estágio"]
 )
 
-
-
-# ===============================
-# LISTAGEM
-# ===============================
-
-@router.get("/")
-def listar(
-    request: Request,
-    db: Session = Depends(get_db)
-):
-
-    classificacoes = (
-        db.query(ClassificacaoEstagio)
-        .order_by(
-            ClassificacaoEstagio.codigo
-        )
-        .all()
-    )
-
-
-    return request.app.state.templates.TemplateResponse(
-        "estagiario/templates/classificacoes.html",
+# LISTAGEM (Retorna JSON com o código incluído)
+@router.get("/", response_model=List[dict])
+def listar(db: Session = Depends(get_db)):
+    classificacoes = db.query(ClassificacaoEstagio).order_by(ClassificacaoEstagio.id).all()
+    return [
         {
-            "request": request,
-            "classificacoes": classificacoes
-        }
-    )
+            "id": c.id, 
+            "codigo": c.codigo,      # Incluído aqui
+            "descricao": c.descricao, 
+            "ativo": c.ativo
+        } 
+        for c in classificacoes
+    ]
 
-
-
-# ===============================
-# NOVO FORM
-# ===============================
-
-@router.get("/novo")
-def novo(
-    request: Request
-):
-
-    return request.app.state.templates.TemplateResponse(
-        "estagiario/templates/classificacao_form.html",
-        {
-            "request":request
-        }
-    )
-
-
-
-# ===============================
-# SALVAR
-# ===============================
-
-@router.post("/novo")
-def criar(
-    codigo:str = Form(...),
-    descricao:str = Form(...),
-    db:Session = Depends(get_db)
-):
-
-
-    existe = (
-        db.query(ClassificacaoEstagio)
-        .filter(
-            ClassificacaoEstagio.codigo == codigo
-        )
-        .first()
-    )
-
-
+# SALVAR (POST)
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def criar(dados: ClassificacaoSchema, db: Session = Depends(get_db)):
+    # Verifica se já existe o código (já que ele é UNIQUE no seu Model)
+    existe = db.query(ClassificacaoEstagio).filter(ClassificacaoEstagio.codigo == dados.codigo).first()
     if existe:
-        return RedirectResponse(
-            "/estagiario/templates/classificacoes/novo?erro=duplicado",
-            status_code=303
-        )
-
-
+        raise HTTPException(status_code=400, detail="Este código já está cadastrado.")
 
     classificacao = ClassificacaoEstagio(
-        codigo=codigo,
-        descricao=descricao,
-        ativo=True
+        codigo=dados.codigo,         # Incluído aqui
+        descricao=dados.descricao,
+        ativo=dados.ativo
     )
-
-
     db.add(classificacao)
     db.commit()
+    return {"mensagem": "Criado com sucesso"}
 
-
-    return RedirectResponse(
-        "/estagiario/templates/classificacoes/",
-        status_code=303
-    )
-
-
-
-# ===============================
-# EDITAR FORM
-# ===============================
-
-@router.get("/{id}/editar")
-def editar(
-    id:int,
-    request:Request,
-    db:Session=Depends(get_db)
-):
-
-
-    classificacao = (
-        db.query(ClassificacaoEstagio)
-        .filter(
-            ClassificacaoEstagio.id == id
-        )
-        .first()
-    )
-
-
+# ATUALIZAR (PUT)
+@router.put("/{id}")
+def atualizar(id: int, dados: ClassificacaoSchema, db: Session = Depends(get_db)):
+    classificacao = db.query(ClassificacaoEstagio).filter(ClassificacaoEstagio.id == id).first()
+    
     if not classificacao:
-        raise HTTPException(
-            status_code=404,
-            detail="Classificação não encontrada"
-        )
-
-
-
-    return request.app.state.templates.TemplateResponse(
-        "estagiario/templates/classificacoes.html",
-        {
-            "request":request,
-            "classificacao":classificacao
-        }
-    )
-
-
-
-# ===============================
-# ATUALIZAR
-# ===============================
-
-@router.post("/{id}/editar")
-def atualizar(
-    id:int,
-    codigo:str=Form(...),
-    descricao:str=Form(...),
-    ativo:str=Form(None),
-    db:Session=Depends(get_db)
-):
-
-
-    classificacao = (
-        db.query(ClassificacaoEstagio)
-        .filter(
-            ClassificacaoEstagio.id == id
-        )
-        .first()
-    )
-
-
-    if not classificacao:
-        raise HTTPException(
-            status_code=404,
-            detail="Registro não encontrado"
-        )
-
-
-
-    classificacao.codigo = codigo
-    classificacao.descricao = descricao
-    classificacao.ativo = ativo == "on"
-
-
-
+        raise HTTPException(status_code=404, detail="Registro não encontrado")
+    
+    # Verifica duplicidade de código com OUTROS registros ao editar
+    codigo_duplicado = db.query(ClassificacaoEstagio).filter(
+        ClassificacaoEstagio.codigo == dados.codigo, 
+        ClassificacaoEstagio.id != id
+    ).first()
+    if codigo_duplicado:
+        raise HTTPException(status_code=400, detail="Este código já está em uso por outra classificação.")
+        
+    classificacao.codigo = dados.codigo       # Incluído aqui
+    classificacao.descricao = dados.descricao
+    classificacao.ativo = dados.ativo
+    
     db.commit()
+    return {"mensagem": "Atualizado com sucesso"}
 
-
-
-    return RedirectResponse(
-        "/estagiario/templates/classificacoes/",
-        status_code=303
-    )
-
-
-
-# ===============================
-# ALTERAR STATUS
-# ===============================
-
-@router.get("/{id}/status")
-def alterar_status(
-    id:int,
-    db:Session=Depends(get_db)
-):
-
-
-    classificacao = (
-        db.query(ClassificacaoEstagio)
-        .filter(
-            ClassificacaoEstagio.id == id
-        )
-        .first()
-    )
-
-
-    if not classificacao:
-        raise HTTPException(
-            status_code=404,
-            detail="Registro não encontrado"
-        )
-
-
-    classificacao.ativo = not classificacao.ativo
-
-    db.commit()
-
-
-
-    return RedirectResponse(
-        "/estagiario/classificacoes/",
-        status_code=303
-    )

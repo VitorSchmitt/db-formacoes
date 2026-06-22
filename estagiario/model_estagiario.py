@@ -20,7 +20,7 @@ from estagiario.enums import (
     SexoEnum
 )
 
-from model import (
+from models import (
     Servidor,
     Lotacao
 )

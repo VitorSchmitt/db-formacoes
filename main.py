@@ -21,20 +21,21 @@ from routes_relatorio_servidor import router as relatorio_router
 from routes_facilitador import router as facilitador_router
 from routes_relatorio_facilitador import router as relatorio_facilitador_router
 
-from middleware import AuthMiddleware
+# ==========================================
+# NOVO IMPORT: Rota de Classificações de Estágio
+# ==========================================
+from estagiario.routes.classificacoes_estagio import router as classificacoes_estagio_router
 
+from middleware import AuthMiddleware
 from fastapi.staticfiles import StaticFiles
 
-
-
-
 app = FastAPI()
+
 app.mount(
     "/static",
     StaticFiles(directory="static"),
     name="static"
 )
-
 
 # middleware auth
 app.add_middleware(AuthMiddleware)
@@ -45,12 +46,10 @@ app.add_middleware(
     secret_key="super-secret-key"
 )
 
-
-
 # templates
 templates = Jinja2Templates(directory="templates")
 
-# routers
+# routers atuais
 app.include_router(login_router)
 app.include_router(usuario_router)
 app.include_router(servidor_router)
@@ -65,6 +64,11 @@ app.include_router(relatorio_router)
 app.include_router(facilitador_router)
 app.include_router(relatorio_facilitador_router)
 
+# ==========================================
+# INCLUSÃO DO NOVO ROUTER DE ESTÁGIOS
+# ==========================================
+app.include_router(classificacoes_estagio_router)
+
 
 # ===============================
 # WEB
@@ -72,30 +76,24 @@ app.include_router(relatorio_facilitador_router)
 
 @app.get("/")
 def home(request: Request):
-
     db = SessionLocal()
-
     try:
         tem_usuario = db.query(Usuario).first()
-
         if not tem_usuario:
             return templates.TemplateResponse(
                 "usuarios.html",
                 {"request": request}
             )
-
         return templates.TemplateResponse(
             "login.html",
             {"request": request}
         )
-
     finally:
         db.close()
 
 
 @app.get("/web/dashboard")
 def dashboard(request: Request):
-
     return templates.TemplateResponse(
         "dashboard.html",
         {"request": request}
@@ -104,7 +102,6 @@ def dashboard(request: Request):
 
 @app.get("/web/servidores")
 def tela_servidores(request: Request):
-
     return templates.TemplateResponse(
         "servidores.html",
         {"request": request}
@@ -113,7 +110,6 @@ def tela_servidores(request: Request):
 
 @app.get("/web/formacoes")
 def tela_formacoes(request: Request):
-
     return templates.TemplateResponse(
         "formacoes.html",
         {"request": request}
@@ -122,7 +118,6 @@ def tela_formacoes(request: Request):
 
 @app.get("/web/participacoes")
 def tela_participacoes(request: Request):
-
     return templates.TemplateResponse(
         "participacoes.html",
         {"request": request}
@@ -131,7 +126,6 @@ def tela_participacoes(request: Request):
 
 @app.get("/web/usuarios")
 def tela_usuarios(request: Request):
-
     return templates.TemplateResponse(
         "usuarios.html",
         {"request": request}
@@ -139,35 +133,27 @@ def tela_usuarios(request: Request):
 
 @app.get("/web/lotacoes")
 def tela_lotacoes(request: Request):
-
     return templates.TemplateResponse(
         "lotacao.html",
         {"request": request}
     )
     
 @app.get("/web/plano_anual")
-def tela_plano(
-    request: Request
-):
-
+def tela_plano(request: Request):
     return templates.TemplateResponse(
         "plano_anual.html",
-        {
-            "request":request
-        }
+        {"request": request}
     )
 
 @app.get("/web/cronograma")
 def tela_cronograma(request: Request):
-
     return templates.TemplateResponse(
         "cronograma.html",
         {"request": request}
     )
 
 @app.get("/web/relatorio_servidor")
-def tela_cronograma(request: Request):
-
+def tela_relatorio_servidor(request: Request):  # Corrigido nome duplicado da função
     return templates.TemplateResponse(
         "relatorio_servidor.html",
         {"request": request}
@@ -175,16 +161,24 @@ def tela_cronograma(request: Request):
 
 @app.get("/web/facilitadores")
 def tela_facilitadores(request: Request):
-
     return templates.TemplateResponse(
         "facilitadores.html",
         {"request": request}
     )
 
 @app.get("/web/relatorio_facilitador")
-def tela_cronograma(request: Request):
-
+def tela_relatorio_facilitador(request: Request):  # Corrigido nome duplicado da função
     return templates.TemplateResponse(
         "relatorio_facilitador.html",
+        {"request": request}
+    )
+
+# ==========================================
+# NOVA ROTA WEB: Renderiza o HTML da Classificação
+# ==========================================
+@app.get("/web/classificacoes_estagio")
+def tela_classificacoes_estagio(request: Request):
+    return templates.TemplateResponse(
+        "estagiario/templates/classificacoes.html",
         {"request": request}
     )

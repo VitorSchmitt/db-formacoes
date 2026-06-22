@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<div class="container mt-4">
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h3>
+        Classificações de Estágio
+    </h3>
+
+
+    <button
+        class="btn btn-primary"
+        onclick="novo()">
+
+        + Nova Classificação
+
+    </button>
+
+
+</div>
+
+
+
+<!-- FORMULÁRIO -->
+
+<div class="card mb-4" id="card-form" style="display:none">
+
+
+<div class="card-header">
+
+Cadastro de Classificação
+
+</div>
+
+
+
+<div class="card-body">
+
+
+<input type="hidden" id="id">
+
+
+
+<div class="row">
+
+
+<div class="col-md-3">
+
+<label>Código</label>
+
+<input 
+id="codigo"
+class="form-control">
+
+
+</div>
+
+
+
+<div class="col-md-7">
+
+<label>Descrição</label>
+
+<input 
+id="descricao"
+class="form-control">
+
+
+</div>
+
+
+
+<div class="col-md-2">
+
+<label>Status</label>
+
+
+<select id="ativo"
+class="form-control">
+
+
+<option value="true">
+Ativo
+</option>
+
+
+<option value="false">
+Inativo
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+<div class="mt-3">
+
+
+<button
+class="btn btn-success"
+onclick="salvar()">
+
+Salvar
+
+</button>
+
+
+<button
+class="btn btn-secondary"
+onclick="fecharForm()">
+
+Cancelar
+
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- LISTA -->
+
+
+<table class="table table-bordered table-hover">
+
+
+<thead>
+
+
+<tr>
+
+<th>Código</th>
+
+<th>Descrição</th>
+
+<th>Status</th>
+
+<th width="150">
+Ações
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+<tbody id="lista">
+
+
+</tbody>
+
+
+</table>
+
+
+
+</div>
+
+
+
+
+
+
+<script>
+
+
+
+const API =
+"/api/classificacoes-estagio";
+
+
+
+
+// carregar lista
+
+async function carregar(){
+
+
+let resposta =
+await fetch(API);
+
+
+
+let dados =
+await resposta.json();
+
+
+
+let html="";
+
+
+
+dados.forEach(c=>{
+
+
+html += `
+
+<tr>
+
+
+<td>
+${c.codigo}
+</td>
+
+
+<td>
+${c.descricao}
+</td>
+
+
+
+<td>
+
+${
+
+c.ativo
+
+?
+
+'<span class="badge bg-success">Ativo</span>'
+
+:
+
+'<span class="badge bg-danger">Inativo</span>'
+
+}
+
+</td>
+
+
+
+<td>
+
+
+<button
+class="btn btn-sm btn-warning"
+onclick="editar(${c.id})">
+
+Editar
+
+</button>
+
+
+
+<button
+class="btn btn-sm ${c.ativo?'btn-danger':'btn-success'}"
+onclick="ativar(${c.id},${!c.ativo})">
+
+
+${
+
+c.ativo
+?
+"Inativar"
+:
+"Ativar"
+
+}
+
+
+</button>
+
+
+</td>
+
+
+</tr>
+
+
+`;
+
+
+
+});
+
+
+
+document
+.getElementById("lista")
+.innerHTML = html;
+
+
+
+}
+
+
+
+
+// abrir novo
+
+
+function novo(){
+
+
+document
+.getElementById("card-form")
+.style.display="block";
+
+
+document
+.getElementById("id")
+.value="";
+
+
+document
+.getElementById("codigo")
+.value="";
+
+
+document
+.getElementById("descricao")
+.value="";
+
+
+document
+.getElementById("ativo")
+.value="true";
+
+
+}
+
+
+
+
+
+// editar
+
+
+async function editar(id){
+
+
+let resposta =
+await fetch(
+API + "/" + id
+);
+
+
+
+let c =
+await resposta.json();
+
+
+
+document
+.getElementById("card-form")
+.style.display="block";
+
+
+
+document
+.getElementById("id")
+.value=c.id;
+
+
+
+document
+.getElementById("codigo")
+.value=c.codigo;
+
+
+
+document
+.getElementById("descricao")
+.value=c.descricao;
+
+
+
+document
+.getElementById("ativo")
+.value=c.ativo;
+
+
+
+}
+
+
+
+
+
+// salvar
+
+
+async function salvar(){
+
+
+
+let id =
+document.getElementById("id").value;
+
+
+
+let dados={
+
+
+codigo:
+document.getElementById("codigo").value,
+
+
+descricao:
+document.getElementById("descricao").value,
+
+
+ativo:
+document.getElementById("ativo").value=="true"
+
+
+};
+
+
+
+
+
+let metodo =
+id ? "PUT" : "POST";
+
+
+
+let url =
+id ? API+"/"+id : API;
+
+
+
+await fetch(
+url,
+{
+
+method:metodo,
+
+
+headers:{
+
+"Content-Type":
+"application/json"
+
+},
+
+
+body:
+JSON.stringify(dados)
+
+
+});
+
+
+
+fecharForm();
+
+carregar();
+
+
+}
+
+
+
+
+// ativar / inativar
+
+
+async function ativar(id,status){
+
+
+
+await fetch(
+API+"/"+id+"/status",
+{
+
+method:"PUT",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+
+body:
+JSON.stringify({
+
+ativo:status
+
+})
+
+});
+
+
+
+carregar();
+
+
+
+}
+
+
+
+
+function fecharForm(){
+
+
+document
+.getElementById("card-form")
+.style.display="none";
+
+
+}
+
+
+
+carregar();
+
+
+</script>
+
+
+
+{% endblock %}

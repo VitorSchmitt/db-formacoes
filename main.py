@@ -47,7 +47,8 @@ app.add_middleware(
 )
 
 # templates
-templates = Jinja2Templates(directory="templates")
+# Altere a inicialização dos templates para aceitar múltiplos diretórios
+templates = Jinja2Templates(directory=["templates", "estagiario/templates"])
 
 # routers atuais
 app.include_router(login_router)
@@ -176,10 +177,9 @@ def tela_relatorio_facilitador(request: Request):  # Corrigido nome duplicado da
 # ==========================================
 # NOVA ROTA WEB: Renderiza o HTML da Classificação
 # ==========================================
-
 @app.get("/web/estagiario/classificacoes")
 def tela_classificacoes_estagio(request: Request):
     return templates.TemplateResponse(
-        "../estagiario/templates/classificacoes.html",
+        "classificacoes.html",  # <-- Agora ele acha direto, sem precisar de "../"
         {"request": request}
     )

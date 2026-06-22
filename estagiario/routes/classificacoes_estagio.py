@@ -7,7 +7,7 @@ from model_estagiario import ClassificacaoEstagio
 from schemas import ClassificacaoSchema 
 
 router = APIRouter(
-    prefix="/api/classificacoes-estagio",
+    prefix="/api/classificacoes_estagio",
     tags=["Classificações Estágio"]
 )
 

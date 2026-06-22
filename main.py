@@ -179,6 +179,6 @@ def tela_relatorio_facilitador(request: Request):  # Corrigido nome duplicado da
 @app.get("/web/classificacoes_estagio")
 def tela_classificacoes_estagio(request: Request):
     return templates.TemplateResponse(
-        "estagiario/templates/classificacoes.html",
+        "../estagiario/templates/classificacoes.html",
         {"request": request}
     )

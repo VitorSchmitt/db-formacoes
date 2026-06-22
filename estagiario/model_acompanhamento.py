@@ -11,7 +11,7 @@ from sqlalchemy import (
 
 from sqlalchemy.orm import relationship
 from database import Base
-from estagiarios.enums import AvaliacaoSupervisorEnum
+from estagiario.enums import AvaliacaoSupervisorEnum
 from sqlalchemy import Enum as SqlEnum
 
 

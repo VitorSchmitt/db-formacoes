@@ -1,493 +1,178 @@
 {% extends "base.html" %}
 
-
 {% block content %}
-
 
 <div class="container mt-4">
 
-
-    <!-- CABEÇALHO -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-
-
         <div>
-            <h3>
-                Classificações de Estágio
-            </h3>
-
-            <small class="text-muted">
-                Cadastro das modalidades de estágio
-            </small>
+            <h3>Classificações de Estágio</h3>
+            <small class="text-muted">Cadastro das modalidades de estágio</small>
         </div>
-
-
-        <button 
-            class="btn btn-primary"
-            onclick="novo()">
-
+        <button class="btn btn-primary" onclick="novo()">
             + Nova Classificação
-
         </button>
-
-
     </div>
-
-
-
-    <!-- FORMULÁRIO -->
 
     <div class="card mb-4" id="formCard" style="display:none;">
-
-
-        <div class="card-header">
-            Cadastro
-        </div>
-
-
+        <div class="card-header">Cadastro</div>
         <div class="card-body">
-
-
-            <input 
-                type="hidden"
-                id="id">
-
+            
+            <input type="hidden" id="id">
 
             <div class="row">
-
-
-                <div class="col-md-8">
-
-
-                    <label>
-                        Descrição
-                    </label>
-
-
-                    <input 
-                        type="text"
-                        class="form-control"
-                        id="descricao">
-
-
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Código</label>
+                    <input type="text" class="form-control" id="codigo" placeholder="Ex: EST-01">
                 </div>
 
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="descricao" placeholder="Ex: Estágio Obrigatório">
+                </div>
 
-                <div class="col-md-4">
-
-
-                    <label>
-                        Situação
-                    </label>
-
-
-                    <select 
-                        class="form-control"
-                        id="ativo">
-
-
-                        <option value="true">
-                            Ativo
-                        </option>
-
-
-                        <option value="false">
-                            Inativo
-                        </option>
-
-
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Situação</label>
+                    <select class="form-control" id="ativo">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
                     </select>
-
-
                 </div>
-
-
             </div>
 
-
-
-            <div class="mt-3">
-
-
-                <button 
-                    class="btn btn-success"
-                    onclick="salvar()">
-
-                    Salvar
-
-                </button>
-
-
-                <button 
-                    class="btn btn-secondary"
-                    onclick="cancelar()">
-
-                    Cancelar
-
-                </button>
-
-
+            <div class="mt-2">
+                <button class="btn btn-success" onclick="salvar()">Salvar</button>
+                <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
             </div>
-
-
         </div>
-
-
     </div>
-
-
-
-
-
-    <!-- TABELA -->
-
 
     <div class="card">
-
-
         <div class="card-body">
-
-
-            <table 
-                class="table table-hover">
-
-
+            <table class="table table-hover">
                 <thead>
-
                     <tr>
-
-                        <th>
-                            Código
-                        </th>
-
-
-                        <th>
-                            Descrição
-                        </th>
-
-
-                        <th>
-                            Situação
-                        </th>
-
-
-                        <th>
-                            Ações
-                        </th>
-
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>Situação</th>
+                        <th>Ações</th>
                     </tr>
-
-
                 </thead>
-
-
                 <tbody id="lista">
-
-
-                </tbody>
-
-
+                    </tbody>
             </table>
-
-
         </div>
-
-
     </div>
-
-
 
 </div>
 
-
-
-
-
 <script>
-
-
 const url = "/api/classificacoes-estagio";
 
+document.addEventListener("DOMContentLoaded", carregar);
 
-
-document.addEventListener(
-    "DOMContentLoaded",
-    carregar
-);
-
-
-
-function carregar(){
-
-
+// 1. CARREGAR / LISTAR
+function carregar() {
     fetch(url)
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error("Erro ao buscar dados da API");
+        return r.json();
+    })
     .then(dados => {
-
-
-        let html="";
-
-
+        let html = "";
         dados.forEach(item => {
-
-
             html += `
-
             <tr>
-
-
+                <td>${item.codigo}</td>
+                <td>${item.descricao}</td>
                 <td>
-                    ${item.id}
-                </td>
-
-
-                <td>
-                    ${item.descricao}
-                </td>
-
-
-                <td>
-
-                    ${
-                    item.ativo
-                    ?
-                    '<span class="badge bg-success">Ativo</span>'
-                    :
-                    '<span class="badge bg-danger">Inativo</span>'
+                    ${item.ativo 
+                        ? '<span class="badge bg-success">Ativo</span>' 
+                        : '<span class="badge bg-danger">Inativo</span>'
                     }
-
                 </td>
-
-
-
                 <td>
-
-
-                    <button
-                        class="btn btn-sm btn-warning"
-                        onclick='editar(${JSON.stringify(item)})'>
-
+                    <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(item)})'>
                         Editar
-
-                    </button>
-
-
-
-                    <button
-                        class="btn btn-sm btn-danger"
-                        onclick="excluir(${item.id})">
-
-                        Excluir
-
-                    </button>
-
-
+                    </button>                    
                 </td>
-
-
             </tr>
-
             `;
-
-
         });
-
-
-
         document.getElementById("lista").innerHTML = html;
-
-
-    });
-
-
+    })
+    .catch(err => console.error("Erro:", err));
 }
 
-
-
-
-
-
-function novo(){
-
-
+// 2. ABRIR FORMULÁRIO DE NOVO REGISTRO
+function novo() {
     limpar();
-
-    document
-    .getElementById("formCard")
-    .style.display="block";
-
-
+    document.getElementById("formCard").style.style.display = "block";
 }
 
-
-
-
-
-
-
-function editar(item){
-
-
-    document.getElementById("formCard")
-    .style.display="block";
-
-
-    document.getElementById("id")
-    .value=item.id;
-
-
-    document.getElementById("descricao")
-    .value=item.descricao;
-
-
-    document.getElementById("ativo")
-    .value=item.ativo;
-
-
+// 3. EDITAR REGISTRO EXISTENTE
+function editar(item) {
+    document.getElementById("formCard").style.style.display = "block";
+    document.getElementById("id").value = item.id;
+    document.getElementById("codigo").value = item.codigo;
+    document.getElementById("descricao").value = item.descricao;
+    document.getElementById("ativo").value = String(item.ativo);
 }
 
+// 4. SALVAR (POST ou PUT)
+function salvar() {
+    const id = document.getElementById("id").value;
 
-
-
-
-
-
-
-function salvar(){
-
-
-
-    let id =
-    document.getElementById("id").value;
-
-
-
-    let dados = {
-
-
-        descricao:
-        document.getElementById("descricao").value,
-
-
-        ativo:
-        document.getElementById("ativo").value === "true"
-
-
+    const dados = {
+        codigo: document.getElementById("codigo").value.trim(),
+        descricao: document.getElementById("descricao").value.trim(),
+        ativo: document.getElementById("ativo").value === "true"
     };
 
+    // Validação simples no Front-end antes de mandar pro back-end
+    if (!dados.codigo || !dados.descricao) {
+        alert("Por favor, preencha todos os campos obrigatórios (Código e Descrição).");
+        return;
+    }
 
+    const metodo = id ? "PUT" : "POST";
+    const destino = id ? `${url}/${id}` : url;
 
-    let metodo =
-    id ? "PUT" : "POST";
-
-
-
-    let destino =
-    id ? `${url}/${id}` : url;
-
-
-
-
-    fetch(destino,{
-
-
+    fetch(destino, {
         method: metodo,
-
-
-        headers:{
-
-            "Content-Type":
-            "application/json"
-
+        headers: {
+            "Content-Type": "application/json"
         },
-
-
-        body:
-        JSON.stringify(dados)
-
-
+        body: JSON.stringify(dados)
     })
-
-    .then(()=>{
-
-        cancelar();
-
-        carregar();
-
-    });
-
-
-}
-
-
-
-
-
-
-
-function excluir(id){
-
-
-    if(!confirm(
-        "Deseja excluir esta classificação?"
-    ))
-    return;
-
-
-
-    fetch(
-        `${url}/${id}`,
-        {
-            method:"DELETE"
+    .then(async response => {
+        if (!response.ok) {
+            const erroApi = await response.json();
+            throw new Error(erroApi.detail || "Erro ao processar requisição.");
         }
-    )
-
-    .then(()=>carregar());
-
-
+        cancelar();
+        carregar();
+    })
+    .catch(err => {
+        alert("Erro ao salvar: " + err.message);
+    });
 }
 
 
 
-
-
-
-
-function cancelar(){
-
-
+// 6. CANCELAR OPERAÇÃO
+function cancelar() {
     limpar();
-
-
-    document
-    .getElementById("formCard")
-    .style.display="none";
-
-
+    document.getElementById("formCard").style.style.display = "none";
 }
 
-
-
-
-
-
-
-function limpar(){
-
-
-    document.getElementById("id").value="";
-
-    document.getElementById("descricao").value="";
-
-    document.getElementById("ativo").value="true";
-
-
+// 7. LIMPAR CAMPOS DO FORMULÁRIO
+function limpar() {
+    document.getElementById("id").value = "";
+    document.getElementById("codigo").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("ativo").value = "true";
 }
-
-
-
 </script>
-
-
 
 {% endblock %}

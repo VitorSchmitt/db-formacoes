@@ -7,199 +7,159 @@
 <div class="container mt-4">
 
 
-    <!-- CABEÇALHO -->
-
     <div class="d-flex justify-content-between align-items-center mb-3">
 
-        <div>
-            <h3>
-                Classificações de Estágio
-            </h3>
 
-            <small class="text-muted">
-                Cadastro das modalidades de estágio
-            </small>
-        </div>
+        <h3>
+
+            {% if classificacao %}
+                Editar Classificação de Estágio
+            {% else %}
+                Nova Classificação de Estágio
+            {% endif %}
+
+        </h3>
 
 
-        <a href="/estagiario/classificacoes/novo"
-           class="btn btn-primary">
+        <a href="/estagiario/classificacoes/"
+           class="btn btn-secondary">
 
-            + Nova Classificação
+            Voltar
 
         </a>
+
 
     </div>
 
 
 
-    <!-- TABELA -->
 
     <div class="card shadow-sm">
 
 
-        <div class="card-body p-0">
+        <div class="card-body">
 
 
-            <table class="table table-hover mb-0">
+            {% if classificacao %}
 
+            <form method="post"
+                  action="/estagiario/classificacoes/{{ classificacao.id }}/editar">
 
-                <thead class="table-light">
+            {% else %}
 
-                    <tr>
+            <form method="post"
+                  action="/estagiario/classificacoes/novo">
 
-                        <th style="width:120px">
-                            Código
-                        </th>
+            {% endif %}
 
-                        <th>
-                            Descrição
-                        </th>
 
-                        <th style="width:120px">
-                            Status
-                        </th>
 
-                        <th style="width:180px">
-                            Ações
-                        </th>
+                <!-- CÓDIGO -->
 
-                    </tr>
 
-                </thead>
+                <div class="mb-3">
 
 
+                    <label class="form-label">
 
-                <tbody>
+                        Código
 
+                    </label>
 
-                {% for item in classificacoes %}
 
+                    <input type="text"
+                           name="codigo"
+                           class="form-control"
+                           required
+                           value="{{ classificacao.codigo if classificacao else '' }}">
 
-                    <tr>
 
+                </div>
 
-                        <td>
 
-                            {{ item.codigo }}
 
-                        </td>
 
+                <!-- DESCRIÇÃO -->
 
 
-                        <td>
+                <div class="mb-3">
 
-                            {{ item.descricao }}
 
-                        </td>
+                    <label class="form-label">
 
+                        Descrição
 
+                    </label>
 
-                        <td>
 
+                    <input type="text"
+                           name="descricao"
+                           class="form-control"
+                           required
+                           value="{{ classificacao.descricao if classificacao else '' }}">
 
-                            {% if item.ativo %}
 
-                                <span class="badge bg-success">
-                                    Ativo
-                                </span>
+                </div>
 
-                            {% else %}
 
-                                <span class="badge bg-secondary">
-                                    Inativo
-                                </span>
 
-                            {% endif %}
 
 
-                        </td>
+                {% if classificacao %}
 
 
+                <!-- STATUS -->
 
-                        <td>
 
+                <div class="form-check mb-3">
 
-                            <a href="/estagiario/classificacoes/{{ item.id }}/editar"
-                               class="btn btn-sm btn-outline-primary">
 
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="ativo"
+                           id="ativo"
+                           {% if classificacao.ativo %}
+                           checked
+                           {% endif %}>
 
-                                Editar
 
+                    <label class="form-check-label"
+                           for="ativo">
 
-                            </a>
+                        Ativo
 
+                    </label>
 
 
-                            {% if item.ativo %}
+                </div>
 
 
-                            <a href="/estagiario/classificacoes/{{ item.id }}/status"
-                               class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('Deseja inativar esta classificação?')">
+                {% endif %}
 
 
-                                Inativar
 
 
-                            </a>
 
 
-                            {% else %}
+                <div class="text-end">
 
 
+                    <button type="submit"
+                            class="btn btn-primary">
 
-                            <a href="/estagiario/classificacoes/{{ item.id }}/status"
-                               class="btn btn-sm btn-outline-success"
-                               onclick="return confirm('Deseja ativar esta classificação?')">
 
+                        Salvar
 
-                                Ativar
 
+                    </button>
 
-                            </a>
 
+                </div>
 
 
-                            {% endif %}
 
 
-
-                        </td>
-
-
-
-                    </tr>
-
-
-
-                {% else %}
-
-
-
-                    <tr>
-
-                        <td colspan="4"
-                            class="text-center text-muted py-4">
-
-
-                            Nenhuma classificação cadastrada.
-
-
-                        </td>
-
-
-                    </tr>
-
-
-
-                {% endfor %}
-
-
-                </tbody>
-
-
-            </table>
+            </form>
 
 
         </div>

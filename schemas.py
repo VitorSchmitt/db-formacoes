@@ -152,3 +152,15 @@ class PlanoAnualUpdate(BaseModel):
 class FacilitadorCreate(BaseModel):
     matricula: str
     formacao_id: int
+
+# ===============================
+# ESTAGIARIO
+# ===============================
+
+# ===============================
+# CLASSIFICACAO
+# ===============================
+
+class ClassificacaoSchema(BaseModel):
+    descricao: str
+    ativo: bool

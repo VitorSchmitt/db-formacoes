@@ -7,7 +7,7 @@ from model_estagiario import ClassificacaoEstagio
 
 
 router = APIRouter(
-    prefix="/estagiario/classificacoes",
+    prefix="/estagiario/templates/classificacoes",
     tags=["Classificações Estágio"]
 )
 
@@ -33,7 +33,7 @@ def listar(
 
 
     return request.app.state.templates.TemplateResponse(
-        "estagiario/classificacoes.html",
+        "estagiario/templates/classificacoes.html",
         {
             "request": request,
             "classificacoes": classificacoes
@@ -52,7 +52,7 @@ def novo(
 ):
 
     return request.app.state.templates.TemplateResponse(
-        "estagiario/classificacao_form.html",
+        "estagiario/templates/classificacao_form.html",
         {
             "request":request
         }
@@ -83,7 +83,7 @@ def criar(
 
     if existe:
         return RedirectResponse(
-            "/estagiario/classificacoes/novo?erro=duplicado",
+            "/estagiario/templates/classificacoes/novo?erro=duplicado",
             status_code=303
         )
 
@@ -101,7 +101,7 @@ def criar(
 
 
     return RedirectResponse(
-        "/estagiario/classificacoes/",
+        "/estagiario/templates/classificacoes/",
         status_code=303
     )
 
@@ -137,7 +137,7 @@ def editar(
 
 
     return request.app.state.templates.TemplateResponse(
-        "estagiario/classificacao_form.html",
+        "estagiario/templates/classificacoes.html",
         {
             "request":request,
             "classificacao":classificacao
@@ -188,7 +188,7 @@ def atualizar(
 
 
     return RedirectResponse(
-        "/estagiario/classificacoes/",
+        "/estagiario/templates/classificacoes/",
         status_code=303
     )
 

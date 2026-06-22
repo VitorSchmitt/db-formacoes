@@ -7,11 +7,13 @@ from model_estagiario import ClassificacaoEstagio
 
 
 router = APIRouter(
-    prefix="/api/classificacoes-estagio",
+    prefix="/estagiario/classificacoes",
     tags=["Classificações Estágio"]
 )
 
 
+
+# LISTAGEM HTML
 
 @router.get("/")
 def listar(
@@ -25,8 +27,9 @@ def listar(
         .all()
     )
 
+
     return request.app.state.templates.TemplateResponse(
-        "classificacoes/lista.html",
+        "estagiario/classificacoes.html",
         {
             "request": request,
             "classificacoes": classificacoes
@@ -35,19 +38,23 @@ def listar(
 
 
 
+# NOVO
+
 @router.get("/novo")
 def novo(
     request: Request
 ):
 
     return request.app.state.templates.TemplateResponse(
-        "classificacoes/form.html",
+        "estagiario/classificacao_form.html",
         {
             "request": request
         }
     )
 
 
+
+# SALVAR NOVO
 
 @router.post("/novo")
 def criar(
@@ -56,28 +63,35 @@ def criar(
     db: Session = Depends(get_db)
 ):
 
+
     classificacao = ClassificacaoEstagio(
         codigo=codigo,
-        descricao=descricao
+        descricao=descricao,
+        ativo=True
     )
 
+
     db.add(classificacao)
+
     db.commit()
 
 
     return RedirectResponse(
-        "/classificacoes-estagio/",
+        "/estagiario/classificacoes/",
         status_code=303
     )
 
 
 
+# EDITAR
+
 @router.get("/{id}/editar")
 def editar(
-    id: int,
-    request: Request,
-    db: Session = Depends(get_db)
+    id:int,
+    request:Request,
+    db:Session=Depends(get_db)
 ):
+
 
     classificacao = (
         db.query(ClassificacaoEstagio)
@@ -89,23 +103,26 @@ def editar(
 
 
     return request.app.state.templates.TemplateResponse(
-        "classificacoes/form.html",
+        "estagiario/classificacao_form.html",
         {
-            "request": request,
-            "classificacao": classificacao
+            "request":request,
+            "classificacao":classificacao
         }
     )
 
 
 
+# ATUALIZAR
+
 @router.post("/{id}/editar")
 def atualizar(
-    id: int,
-    codigo: str = Form(...),
-    descricao: str = Form(...),
-    ativo: bool = Form(False),
-    db: Session = Depends(get_db)
+    id:int,
+    codigo:str=Form(...),
+    descricao:str=Form(...),
+    ativo:bool=Form(False),
+    db:Session=Depends(get_db)
 ):
+
 
     classificacao = (
         db.query(ClassificacaoEstagio)
@@ -125,6 +142,36 @@ def atualizar(
 
 
     return RedirectResponse(
-        "/classificacoes-estagio/",
+        "/estagiario/classificacoes/",
+        status_code=303
+    )
+
+
+
+# ATIVAR / INATIVAR
+
+@router.get("/{id}/status")
+def alterar_status(
+    id:int,
+    db:Session=Depends(get_db)
+):
+
+    classificacao = (
+        db.query(ClassificacaoEstagio)
+        .filter(
+            ClassificacaoEstagio.id == id
+        )
+        .first()
+    )
+
+
+    classificacao.ativo = not classificacao.ativo
+
+
+    db.commit()
+
+
+    return RedirectResponse(
+        "/estagiario/classificacoes/",
         status_code=303
     )

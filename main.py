@@ -176,7 +176,8 @@ def tela_relatorio_facilitador(request: Request):  # Corrigido nome duplicado da
 # ==========================================
 # NOVA ROTA WEB: Renderiza o HTML da Classificação
 # ==========================================
-@app.get("/web/classificacoes")
+
+@app.get("/web/estagiario/classificacoes")
 def tela_classificacoes_estagio(request: Request):
     return templates.TemplateResponse(
         "../estagiario/templates/classificacoes.html",

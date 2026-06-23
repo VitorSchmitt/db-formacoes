@@ -165,3 +165,13 @@ class ClassificacaoSchema(BaseModel):
     codigo: str       # Adicionado aqui!
     descricao: str
     ativo: bool
+
+# ===============================
+# VALOR BOLSA ESTAGIO
+# ===============================
+class ValorBolsaSchema(BaseModel):
+    classificacao_id: int
+    valor_hora: Decimal
+    data_inicio_vigencia: date
+
+    

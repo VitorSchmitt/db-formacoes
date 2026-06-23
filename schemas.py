@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr
 from datetime import date
 from decimal import Decimal
 from typing import Optional
-
+from estagiario.enums import SexoEnum
 
 # ===============================
 # FORMAÇÃO
@@ -181,7 +181,7 @@ class ValorBolsaSchema(BaseModel):
 
 class EstagiarioSchema(BaseModel):
     nome: str
-    sexo: str  # Ex: "MASCULINO", "FEMININO", "NAO_INFORMADO"
+    sexo: SexoEnum  # <--- Agora valida usando o Enum real do Python
     cpf: str
     data_nascimento: Optional[date] = None
     email: Optional[str] = None
@@ -199,6 +199,10 @@ class EstagiarioSchema(BaseModel):
     parentesco_responsavel: Optional[str] = None
     telefone_responsavel: Optional[str] = None
     email_responsavel: Optional[str] = None
+
+    class Config:
+            from_attributes = True
+            use_enum_values = True # Garante que o Pydantic envie o valor/string do enum ao serializar
 
     
 

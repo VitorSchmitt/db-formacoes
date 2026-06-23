@@ -155,7 +155,7 @@ class FacilitadorCreate(BaseModel):
     formacao_id: int
 
 # ===============================
-# ESTAGIARIO
+# ESTAGIARIO - CLASSES
 # ===============================
 
 # ===============================

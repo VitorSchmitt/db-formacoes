@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import date
 from decimal import Decimal
 from typing import Optional
@@ -174,5 +174,32 @@ class ValorBolsaSchema(BaseModel):
     classificacao_id: int
     valor_hora: Decimal
     data_inicio_vigencia: date
+
+# ===============================
+# ESTAGIARIO
+# ===============================
+
+class EstagiarioSchema(BaseModel):
+    nome: str
+    sexo: str  # Ex: "MASCULINO", "FEMININO", "NAO_INFORMADO"
+    cpf: str
+    data_nascimento: Optional[date] = None
+    email: Optional[str] = None
+    telefone: Optional[str] = None
+    endereco: Optional[str] = None
+    instituicao_ensino: Optional[str] = None
+    curso: Optional[str] = None
+    semestre: Optional[str] = None
+    ativo: bool = True
+    observacoes: Optional[str] = None
+    
+    # Responsável
+    nome_responsavel: Optional[str] = None
+    cpf_responsavel: Optional[str] = None
+    parentesco_responsavel: Optional[str] = None
+    telefone_responsavel: Optional[str] = None
+    email_responsavel: Optional[str] = None
+
+    
 
     

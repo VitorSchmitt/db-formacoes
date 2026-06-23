@@ -187,7 +187,7 @@ def tela_classificacoes_estagio(request: Request):
 @app.get("/web/estagiario/valores_bolsa_estagio")
 def tela_valores_bolsa_estagio(request: Request):
     return templates.TemplateResponse(
-        "tela_valores_bolsa_estagio.html",  
+        "valores_bolsa_estagio.html",  
         {"request": request}
     )
     

@@ -25,7 +25,7 @@ from routes_relatorio_facilitador import router as relatorio_facilitador_router
 # NOVO IMPORT: Rota de Classificações de Estágio
 # ==========================================
 from estagiario.routes.classificacoes_estagio import router as classificacoes_estagio_router
-from estagiario.routes.valor_bolsa import router as valor_bolsa_router
+from estagiario.routes.valor_bolsa_estagio import router as valor_bolsa_router
 from middleware import AuthMiddleware
 from fastapi.staticfiles import StaticFiles
 

@@ -183,4 +183,12 @@ def tela_classificacoes_estagio(request: Request):
         "classificacoes.html",  # <-- Agora ele acha direto, sem precisar de "../"
         {"request": request}
     )
+
+@app.get("/web/estagiario/valores_bolsa_estagio")
+def tela_valores_bolsa_estagio(request: Request):
+    return templates.TemplateResponse(
+        "tela_valores_bolsa_estagio.html",  
+        {"request": request}
+    )
+    
     

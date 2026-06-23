@@ -26,6 +26,9 @@ from routes_relatorio_facilitador import router as relatorio_facilitador_router
 # ==========================================
 from estagiario.routes.classificacoes_estagio import router as classificacoes_estagio_router
 from estagiario.routes.valor_bolsa_estagio import router as valor_bolsa_router
+from estagiario.routes.estagiario import router as estagiario_router
+
+
 from middleware import AuthMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -65,11 +68,13 @@ app.include_router(relatorio_router)
 app.include_router(facilitador_router)
 app.include_router(relatorio_facilitador_router)
 
+
 # ==========================================
 # INCLUSÃO DO NOVO ROUTER DE ESTÁGIOS
 # ==========================================
 app.include_router(classificacoes_estagio_router)
 app.include_router(valor_bolsa_router)
+app.include_router(estagiario_router)
 
 # ===============================
 # WEB
@@ -188,6 +193,12 @@ def tela_classificacoes_estagio(request: Request):
 def tela_valores_bolsa_estagio(request: Request):
     return templates.TemplateResponse(
         "valores_bolsa_estagio.html",  
+        {"request": request}
+    )
+@app.get("/web/estagiario/estagiarios")
+def tela_estagiarios(request: Request):
+    return templates.TemplateResponse(
+        "estagiarios.html",  
         {"request": request}
     )
     

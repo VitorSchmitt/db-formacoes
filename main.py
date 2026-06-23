@@ -25,7 +25,7 @@ from routes_relatorio_facilitador import router as relatorio_facilitador_router
 # NOVO IMPORT: Rota de Classificações de Estágio
 # ==========================================
 from estagiario.routes.classificacoes_estagio import router as classificacoes_estagio_router
-
+from estagiario.routes.valor_bolsa import router as valor_bolsa_router
 from middleware import AuthMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -69,7 +69,7 @@ app.include_router(relatorio_facilitador_router)
 # INCLUSÃO DO NOVO ROUTER DE ESTÁGIOS
 # ==========================================
 app.include_router(classificacoes_estagio_router)
-
+app.include_router(valor_bolsa_router)
 
 # ===============================
 # WEB
@@ -183,3 +183,4 @@ def tela_classificacoes_estagio(request: Request):
         "classificacoes.html",  # <-- Agora ele acha direto, sem precisar de "../"
         {"request": request}
     )
+    

@@ -266,10 +266,11 @@ class ContratoEstagio(Base):
         nullable=False
     )
 
-    carga_horaria_semanal = Column(
-        Integer,
+    horario = Column(
+        String(100),
         nullable=False
     )
+
 
     # Encerramento
     data_desligamento = Column(Date)

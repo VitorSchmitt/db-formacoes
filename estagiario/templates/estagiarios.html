@@ -230,24 +230,43 @@ function editar(item) {
 function salvar() {
     const id = document.getElementById("id").value;
 
+    // Captura os valores básicos do formulário
+    let nomeResponsavel = document.getElementById("nome_responsavel").value.trim();
+    let cpfResponsavel = document.getElementById("cpf_responsavel").value.trim();
+    let parentescoResponsavel = document.getElementById("parentesco_responsavel").value.trim();
+    let telefoneResponsavel = document.getElementById("telefone_responsavel").value.trim();
+    let emailResponsavel = document.getElementById("email_responsavel").value.trim();
+
+    // Regra: Se não houver nome do responsável, define tudo como "NÃO INFORMADO"
+    if (!nomeResponsavel) {
+        nomeResponsavel = "NÃO INFORMADO";
+        cpfResponsavel = "NÃO INFORMADO";
+        parentescoResponsavel = "NÃO INFORMADO";
+        telefoneResponsavel = "NÃO INFORMADO";
+        emailResponsavel = "NÃO INFORMADO";
+    }
+
     const dados = {
-        nome: document.getElementById("nome").value.trim(),
-        sexo: document.getElementById("sexo").value,
+        // .toUpperCase() garante que o texto vá em caixa alta para a API
+        nome: document.getElementById("nome").value.trim().toUpperCase(),
+        sexo: document.getElementById("sexo").value, // Enums costumam ficar em inglês/padrão do banco
         cpf: document.getElementById("cpf").value.trim(),
         data_nascimento: document.getElementById("data_nascimento").value || null,
-        email: document.getElementById("email").value.trim() || null,
+        email: (document.getElementById("email").value.trim() || "NÃO INFORMADO").toUpperCase(),
         telefone: document.getElementById("telefone").value.trim() || null,
-        endereco: document.getElementById("endereco").value.trim() || null,
-        instituicao_ensino: document.getElementById("instituicao_ensino").value.trim() || null,
-        curso: document.getElementById("curso").value.trim() || null,
-        semestre: document.getElementById("semestre").value.trim() || null,
+        endereco: (document.getElementById("endereco").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        instituicao_ensino: (document.getElementById("instituicao_ensino").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        curso: (document.getElementById("curso").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        semestre: (document.getElementById("semestre").value.trim() || "NÃO INFORMADO").toUpperCase(),
         ativo: document.getElementById("ativo").value === "true",
-        observacoes: document.getElementById("observacoes").value.trim() || null,
-        nome_responsavel: document.getElementById("nome_responsavel").value.trim() || null,
-        cpf_responsavel: document.getElementById("cpf_responsavel").value.trim() || null,
-        parentesco_responsavel: document.getElementById("parentesco_responsavel").value.trim() || null,
-        telefone_responsavel: document.getElementById("telefone_responsavel").value.trim() || null,
-        email_responsavel: document.getElementById("email_responsavel").value.trim() || null
+        observacoes: document.getElementById("observacoes").value.trim() ? document.getElementById("observacoes").value.trim().toUpperCase() : null,
+        
+        // Dados do responsável tratados
+        nome_responsavel: nomeResponsavel.toUpperCase(),
+        cpf_responsavel: cpfResponsavel.toUpperCase(),
+        parentesco_responsavel: parentescoResponsavel.toUpperCase(),
+        telefone_responsavel: telefoneResponsavel.toUpperCase(),
+        email_responsavel: emailResponsavel.toUpperCase()
     };
 
     if (!dados.nome || !dados.cpf) {
@@ -275,7 +294,74 @@ function salvar() {
         alert("Erro ao salvar: " + err.message);
     });
 }
+// 4. SALVAR (POST ou PUT)
+function salvar() {
+    const id = document.getElementById("id").value;
 
+    // Captura os valores básicos do formulário
+    let nomeResponsavel = document.getElementById("nome_responsavel").value.trim();
+    let cpfResponsavel = document.getElementById("cpf_responsavel").value.trim();
+    let parentescoResponsavel = document.getElementById("parentesco_responsavel").value.trim();
+    let telefoneResponsavel = document.getElementById("telefone_responsavel").value.trim();
+    let emailResponsavel = document.getElementById("email_responsavel").value.trim();
+
+    // Regra: Se não houver nome do responsável, define tudo como "NÃO INFORMADO"
+    if (!nomeResponsavel) {
+        nomeResponsavel = "NÃO INFORMADO";
+        cpfResponsavel = "NÃO INFORMADO";
+        parentescoResponsavel = "NÃO INFORMADO";
+        telefoneResponsavel = "NÃO INFORMADO";
+        emailResponsavel = "NÃO INFORMADO";
+    }
+
+    const dados = {
+        // .toUpperCase() garante que o texto vá em caixa alta para a API
+        nome: document.getElementById("nome").value.trim().toUpperCase(),
+        sexo: document.getElementById("sexo").value, // Enums costumam ficar em inglês/padrão do banco
+        cpf: document.getElementById("cpf").value.trim(),
+        data_nascimento: document.getElementById("data_nascimento").value || null,
+        email: (document.getElementById("email").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        telefone: document.getElementById("telefone").value.trim() || null,
+        endereco: (document.getElementById("endereco").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        instituicao_ensino: (document.getElementById("instituicao_ensino").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        curso: (document.getElementById("curso").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        semestre: (document.getElementById("semestre").value.trim() || "NÃO INFORMADO").toUpperCase(),
+        ativo: document.getElementById("ativo").value === "true",
+        observacoes: document.getElementById("observacoes").value.trim() ? document.getElementById("observacoes").value.trim().toUpperCase() : null,
+        
+        // Dados do responsável tratados
+        nome_responsavel: nomeResponsavel.toUpperCase(),
+        cpf_responsavel: cpfResponsavel.toUpperCase(),
+        parentesco_responsavel: parentescoResponsavel.toUpperCase(),
+        telefone_responsavel: telefoneResponsavel.toUpperCase(),
+        email_responsavel: emailResponsavel.toUpperCase()
+    };
+
+    if (!dados.nome || !dados.cpf) {
+        alert("Por favor, preencha os campos obrigatórios (Nome e CPF).");
+        return;
+    }
+
+    const metodo = id ? "PUT" : "POST";
+    const destino = id ? `${url}/${id}` : url;
+
+    fetch(destino, {
+        method: metodo,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const erroApi = await response.json();
+            throw new Error(erroApi.detail || "Erro ao processar requisição.");
+        }
+        cancelar();
+        carregar();
+    })
+    .catch(err => {
+        alert("Erro ao salvar: " + err.message);
+    });
+}
 // 5. CANCELAR
 function cancelar() {
     limpar();

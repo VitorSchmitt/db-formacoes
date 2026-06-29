@@ -33,9 +33,9 @@
                 <div class="col-md-2 mb-3">
                     <label class="form-label">Sexo *</label>
                     <select class="form-control" id="sexo">
-                        <option value="MASCULINO">Masculino</option>
-                        <option value="FEMININO">Feminino</option>
-                        <option value="NAO_INFORMADO" selected>Não Informado</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Feminino</option>
+                        <option value="N" selected>Não Informado</option>
                     </select>
                 </div>
                 <div class="col-md-3 mb-3">
@@ -379,7 +379,7 @@ function cancelar() {
 function limpar() {
     document.getElementById("id").value = "";
     document.getElementById("nome").value = "";
-    document.getElementById("sexo").value = "NAO_INFORMADO";
+    document.getElementById("sexo").value = "N"; 
     document.getElementById("cpf").value = "";
     document.getElementById("data_nascimento").value = "";
     document.getElementById("email").value = "";

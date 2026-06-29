@@ -200,10 +200,7 @@ class EstagiarioSchema(BaseModel):
     telefone_responsavel: Optional[str] = None
     email_responsavel: Optional[str] = None
 
-    class Config:
-            from_attributes = True
-            use_enum_values = True # Garante que o Pydantic envie o valor/string do enum ao serializar
-
+    
     
 
     

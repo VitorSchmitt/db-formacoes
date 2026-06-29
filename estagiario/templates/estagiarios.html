@@ -298,14 +298,12 @@ function salvar() {
 function salvar() {
     const id = document.getElementById("id").value;
 
-    // Captura os valores básicos do formulário
     let nomeResponsavel = document.getElementById("nome_responsavel").value.trim();
     let cpfResponsavel = document.getElementById("cpf_responsavel").value.trim();
     let parentescoResponsavel = document.getElementById("parentesco_responsavel").value.trim();
     let telefoneResponsavel = document.getElementById("telefone_responsavel").value.trim();
     let emailResponsavel = document.getElementById("email_responsavel").value.trim();
 
-    // Regra: Se não houver nome do responsável, define tudo como "NÃO INFORMADO"
     if (!nomeResponsavel) {
         nomeResponsavel = "NÃO INFORMADO";
         cpfResponsavel = "NÃO INFORMADO";
@@ -314,12 +312,15 @@ function salvar() {
         emailResponsavel = "NÃO INFORMADO";
     }
 
+    // Tratamento estrito para o campo data_nascimento
+    const dataInput = document.getElementById("data_nascimento").value;
+    const dataFormatada = dataInput && dataInput.trim() !== "" ? dataInput : null;
+
     const dados = {
-        // .toUpperCase() garante que o texto vá em caixa alta para a API
         nome: document.getElementById("nome").value.trim().toUpperCase(),
-        sexo: document.getElementById("sexo").value, // Enums costumam ficar em inglês/padrão do banco
+        sexo: document.getElementById("sexo").value, 
         cpf: document.getElementById("cpf").value.trim(),
-        data_nascimento: document.getElementById("data_nascimento").value || null,
+        data_nascimento: dataFormatada, // Evita enviar string vazia para o tipo date
         email: (document.getElementById("email").value.trim() || "NÃO INFORMADO").toUpperCase(),
         telefone: document.getElementById("telefone").value.trim() || null,
         endereco: (document.getElementById("endereco").value.trim() || "NÃO INFORMADO").toUpperCase(),
@@ -329,7 +330,6 @@ function salvar() {
         ativo: document.getElementById("ativo").value === "true",
         observacoes: document.getElementById("observacoes").value.trim() ? document.getElementById("observacoes").value.trim().toUpperCase() : null,
         
-        // Dados do responsável tratados
         nome_responsavel: nomeResponsavel.toUpperCase(),
         cpf_responsavel: cpfResponsavel.toUpperCase(),
         parentesco_responsavel: parentescoResponsavel.toUpperCase(),
@@ -353,7 +353,14 @@ function salvar() {
     .then(async response => {
         if (!response.ok) {
             const erroApi = await response.json();
-            throw new Error(erroApi.detail || "Erro ao processar requisição.");
+            // Se for erro 422, o FastAPI retorna os detalhes no objeto 'detail'
+            if (response.status === 422) {
+                console.error("Erro de Validação do FastAPI (422):", erroApi.detail);
+                alert("Erro de validação nos campos: " + JSON.stringify(erroApi.detail));
+            } else {
+                throw new Error(erroApi.detail || "Erro ao processar requisição.");
+            }
+            return;
         }
         cancelar();
         carregar();

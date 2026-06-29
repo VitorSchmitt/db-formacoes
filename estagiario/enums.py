@@ -11,9 +11,9 @@ class MotivoDesligamentoEnum(str, Enum):
     OUTROS = "OUTROS"
 
 class SexoEnum(str, Enum):
-    MASCULINO = "M"
-    FEMININO = "F"
-    NAO_INFORMADO = "N"
+    MASCULINO = "MASCULINO"
+    FEMININO = "FEMININO"
+    NAO_INFORMADO = "NÃO INFORMADO"
 
 class AvaliacaoSupervisorEnum(str, Enum):
     INSUFICIENTE = "INSUFICIENTE"

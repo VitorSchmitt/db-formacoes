@@ -209,7 +209,7 @@ class EstagiarioSchema(BaseModel):
 # ===============================
 
 
-class BeneficioEstagiarioUpdate(BaseModel):
+class BeneficioEstagiarioSchema(BaseModel):
     valor_vale_alimentacao: Optional[float] = None
     valor_vale_transporte: Optional[float] = None
     data_inicio_vigencia: Optional[date] = None
@@ -218,7 +218,7 @@ class BeneficioEstagiarioUpdate(BaseModel):
 # ===============================
 # CONTRATO  ESTAGIÁRIO
 # ===============================
-class ContratoEstagioUpdate(BaseModel):
+class ContratoEstagioSchema(BaseModel):
     estagiario_id: Optional[int] = None
     lotacao_id: Optional[int] = None
     supervisor_matricula: Optional[str] = None

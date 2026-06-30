@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import ContratoEstagio
+from estagiario.model_estagiario  import ContratoEstagio
 from schemas import ContratoEstagioSchema, DesligamentoContratoSchema
 
 router_contrato = APIRouter(prefix="/api/contratos_estagio", tags=["Contratos de Estágio"])

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from estagiario.model_estagiario  import ContratoEstagio
-from schemas import ContratoEstagioSchema
+from estagiario.model_estagiario import ContratoEstagio
+from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput
 
 router_contrato = APIRouter(prefix="/api/contratos_estagio", tags=["Contratos de Estágio"])
 
@@ -36,7 +36,7 @@ def listar_contratos(db: Session = Depends(get_db)):
     ]
 
 @router_contrato.post("/", status_code=status.HTTP_201_CREATED)
-def criar_contrato(dados: ContratoEstagioSchema, db: Session = Depends(get_db)):
+def criar_contrato(dados: ContratoEstagioCreate, db: Session = Depends(get_db)):
     existe = db.query(ContratoEstagio).filter(ContratoEstagio.numero_contrato == dados.numero_contrato).first()
     if existe:
         raise HTTPException(status_code=400, detail="Número de contrato já existente.")
@@ -47,26 +47,29 @@ def criar_contrato(dados: ContratoEstagioSchema, db: Session = Depends(get_db)):
     return {"mensagem": "Contrato cadastrado com sucesso"}
 
 @router_contrato.put("/{id}")
-def atualizar_contrato(id: int, dados: ContratoEstagioSchema, db: Session = Depends(get_db)):
+def atualizar_contrato(id: int, dados: ContratoEstagioUpdate, db: Session = Depends(get_db)):
     contrato = db.query(ContratoEstagio).filter(ContratoEstagio.id == id).first()
     if not contrato:
         raise HTTPException(status_code=404, detail="Contrato não encontrado")
     
-    conflito = db.query(ContratoEstagio).filter(
-        ContratoEstagio.numero_contrato == dados.numero_contrato, 
-        ContratoEstagio.id != id
-    ).first()
-    if conflito:
-        raise HTTPException(status_code=400, detail="Outro contrato já utiliza este número.")
+    if dados.numero_contrato:
+        conflito = db.query(ContrageEstagio).filter(
+            ContratoEstagio.numero_contrato == dados.numero_contrato, 
+            ContratoEstagio.id != id
+        ).first()
+        if conflito:
+            raise HTTPException(status_code=400, detail="Outro contrato já utiliza este número.")
 
-    for key, value in dados.model_dump().items():
+    # Atualiza apenas os campos que foram enviados na requisição
+    dados_atualizados = dados.model_dump(exclude_unset=True)
+    for key, value in dados_atualizados.items():
         setattr(contrato, key, value)
         
     db.commit()
     return {"mensagem": "Contrato atualizado com sucesso"}
 
 @router_contrato.post("/{id}/desligar")
-def desligar_contrato(id: int, dados: ContratoEstagioSchema, db: Session = Depends(get_db)):
+def desligar_contrato(id: int, dados: DesligamentoContratoInput, db: Session = Depends(get_db)):
     contrato = db.query(ContratoEstagio).filter(ContratoEstagio.id == id).first()
     if not contrato:
         raise HTTPException(status_code=404, detail="Contrato não encontrado")

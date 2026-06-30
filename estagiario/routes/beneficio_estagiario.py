@@ -6,7 +6,7 @@ from database import get_db
 from models import BeneficioEstagiario 
 from schemas import BeneficioEstagiarioSchema
 
-router_beneficio = APIRouter(prefix="/api/beneficios_estagiario", tags=["Benefícios Estagiário"])
+router_beneficio = APIRouter(prefix="/api/beneficio_estagiario", tags=["Benefícios Estagiário"])
 
 @router_beneficio.get("/", response_model=List[dict])
 def listar_beneficios(db: Session = Depends(get_db)):

@@ -200,6 +200,47 @@ class EstagiarioSchema(BaseModel):
     telefone_responsavel: Optional[str] = None
     email_responsavel: Optional[str] = None
 
+
+
+# Enum para os motivos de desligamento
+class MotivoDesligamentoEnum(str, Enum):
+    FIM_CONTRATO = "Fim do Contrato"
+    RESCISAO_ESTAGIARIO = "Rescisão pelo Estagiário"
+    RESCISAO_EMPRESA = "Rescisão pela Empresa"
+    OUTRO = "Outro"
+
+# --- SCHEMAS PARA BENEFÍCIO ESTAGIÁRIO ---
+class BeneficioEstagiarioSchema(BaseModel):
+    valor_vale_alimentacao: float = Field(..., ge=0, description="Valor do Vale Alimentação")
+    valor_vale_transporte: float = Field(..., ge=0, description="Valor do Vale Transporte")
+    data_inicio_vigencia: date
+
+    class Config:
+        from_attributes = True
+
+# --- SCHEMAS PARA CONTRATO ESTÁGIO ---
+class ContratoEstagioSchema(BaseModel):
+    estagiario_id: int
+    lotacao_id: int
+    supervisor_matricula: str
+    classificacao_id: int
+    beneficio_id: int
+    numero_contrato: str
+    data_assinatura: date
+    data_inicio: date
+    data_fim: date
+    carga_horaria_diaria: int = Field(..., gt=0, le=24)
+    horario: str
+    observacoes: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class DesligamentoContratoSchema(BaseModel):
+    data_desligamento: date
+    motivo_desligamento: MotivoDesligamentoEnum
+    observacao_desligamento: Optional[str] = None
+
     
     
 

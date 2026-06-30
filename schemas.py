@@ -209,7 +209,14 @@ class EstagiarioSchema(BaseModel):
 # ===============================
 
 
-class BeneficioEstagiarioSchema(BaseModel):
+# USAR NO POST: Garante que os dados obrigatórios do banco venham na requisição
+class BeneficioEstagiarioCreate(BaseModel):
+    valor_vale_alimentacao: float
+    valor_vale_transporte: float
+    data_inicio_vigencia: date
+
+# USAR NO PUT: Segue o padrão solicitado com campos opcionais para atualização
+class BeneficioEstagiarioUpdate(BaseModel):
     valor_vale_alimentacao: Optional[float] = None
     valor_vale_transporte: Optional[float] = None
     data_inicio_vigencia: Optional[date] = None

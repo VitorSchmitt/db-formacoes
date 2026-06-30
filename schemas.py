@@ -235,11 +235,6 @@ class ContratoEstagioSchema(BaseModel):
     motivo_desligamento: Optional[MotivoDesligamentoEnum] = None
     observacao_desligamento: Optional[str] = None
 
-# Schema focado exclusivamente na ação de encerramento do contrato
-class DesligamentoContratoUpdate(BaseModel):
-    data_desligamento: Optional[date] = None
-    motivo_desligamento: Optional[MotivoDesligamentoEnum] = None
-    observacao_desligamento: Optional[str] = None
 
     
     

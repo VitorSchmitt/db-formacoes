@@ -225,7 +225,23 @@ class BeneficioEstagiarioUpdate(BaseModel):
 # ===============================
 # CONTRATO  ESTAGIÁRIO
 # ===============================
-class ContratoEstagioSchema(BaseModel):
+# Usado no POST de criação
+class ContratoEstagioCreate(BaseModel):
+    estagiario_id: int
+    lotacao_id: int
+    supervisor_matricula: str
+    classificacao_id: int
+    beneficio_id: int
+    numero_contrato: str
+    data_assinatura: date
+    data_inicio: date
+    data_fim: date
+    carga_horaria_diaria: int
+    horario: str
+    observacoes: Optional[str] = None
+
+# Usado no PUT de edição
+class ContratoEstagioUpdate(BaseModel):
     estagiario_id: Optional[int] = None
     lotacao_id: Optional[int] = None
     supervisor_matricula: Optional[str] = None
@@ -238,8 +254,11 @@ class ContratoEstagioSchema(BaseModel):
     carga_horaria_diaria: Optional[int] = None
     horario: Optional[str] = None
     observacoes: Optional[str] = None
-    data_desligamento: Optional[date] = None
-    motivo_desligamento: Optional[MotivoDesligamentoEnum] = None
+
+# Usado especificamente na rota de desligamento
+class DesligamentoContratoInput(BaseModel):
+    data_desligamento: date
+    motivo_desligamento: MotivoDesligamentoEnum
     observacao_desligamento: Optional[str] = None
 
 

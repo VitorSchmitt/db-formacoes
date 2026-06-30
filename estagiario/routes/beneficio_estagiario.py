@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 # Substitua pelos seus caminhos reais de importação
-from models import BeneficioEstagiario 
+from estagiario.model_estagiario import BeneficioEstagiario 
 from schemas import BeneficioEstagiarioSchema
 
 router_beneficio = APIRouter(prefix="/api/beneficio_estagiario", tags=["Benefícios Estagiário"])

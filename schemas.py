@@ -203,37 +203,41 @@ class EstagiarioSchema(BaseModel):
 
 
 
+# ===============================
+# BENEFÍCIO ESTAGIÁRIO
+# ===============================
 
-# --- SCHEMAS PARA BENEFÍCIO ESTAGIÁRIO ---
-class BeneficioEstagiarioSchema(BaseModel):
-    valor_vale_alimentacao: float = Field(..., ge=0, description="Valor do Vale Alimentação")
-    valor_vale_transporte: float = Field(..., ge=0, description="Valor do Vale Transporte")
-    data_inicio_vigencia: date
 
-    class Config:
-        from_attributes = True
+class BeneficioEstagiarioUpdate(BaseModel):
+    valor_vale_alimentacao: Optional[float] = None
+    valor_vale_transporte: Optional[float] = None
+    data_inicio_vigencia: Optional[date] = None
 
-# --- SCHEMAS PARA CONTRATO ESTÁGIO ---
-class ContratoEstagioSchema(BaseModel):
-    estagiario_id: int
-    lotacao_id: int
-    supervisor_matricula: str
-    classificacao_id: int
-    beneficio_id: int
-    numero_contrato: str
-    data_assinatura: date
-    data_inicio: date
-    data_fim: date
-    carga_horaria_diaria: int = Field(..., gt=0, le=24)
-    horario: str
+
+# ===============================
+# CONTRATO  ESTAGIÁRIO
+# ===============================
+class ContratoEstagioUpdate(BaseModel):
+    estagiario_id: Optional[int] = None
+    lotacao_id: Optional[int] = None
+    supervisor_matricula: Optional[str] = None
+    classificacao_id: Optional[int] = None
+    beneficio_id: Optional[int] = None
+    numero_contrato: Optional[str] = None
+    data_assinatura: Optional[date] = None
+    data_inicio: Optional[date] = None
+    data_fim: Optional[date] = None
+    carga_horaria_diaria: Optional[int] = None
+    horario: Optional[str] = None
     observacoes: Optional[str] = None
+    data_desligamento: Optional[date] = None
+    motivo_desligamento: Optional[MotivoDesligamentoEnum] = None
+    observacao_desligamento: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
-class DesligamentoContratoSchema(BaseModel):
-    data_desligamento: date
-    motivo_desligamento: MotivoDesligamentoEnum
+# Schema focado exclusivamente na ação de encerramento do contrato
+class DesligamentoContratoUpdate(BaseModel):
+    data_desligamento: Optional[date] = None
+    motivo_desligamento: Optional[MotivoDesligamentoEnum] = None
     observacao_desligamento: Optional[str] = None
 
     

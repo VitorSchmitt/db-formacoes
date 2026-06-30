@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from estagiario.model_estagiario  import ContratoEstagio
-from schemas import ContratoEstagioSchema, DesligamentoContratoSchema
+from schemas import ContratoEstagioSchema
 
 router_contrato = APIRouter(prefix="/api/contratos_estagio", tags=["Contratos de Estágio"])
 
@@ -66,7 +66,7 @@ def atualizar_contrato(id: int, dados: ContratoEstagioSchema, db: Session = Depe
     return {"mensagem": "Contrato atualizado com sucesso"}
 
 @router_contrato.post("/{id}/desligar")
-def desligar_contrato(id: int, dados: DesligamentoContratoSchema, db: Session = Depends(get_db)):
+def desligar_contrato(id: int, dados: ContratoEstagioSchema, db: Session = Depends(get_db)):
     contrato = db.query(ContratoEstagio).filter(ContratoEstagio.id == id).first()
     if not contrato:
         raise HTTPException(status_code=404, detail="Contrato não encontrado")

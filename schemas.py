@@ -202,12 +202,7 @@ class EstagiarioSchema(BaseModel):
 
 
 
-# Enum para os motivos de desligamento
-class MotivoDesligamentoEnum(str, Enum):
-    FIM_CONTRATO = "Fim do Contrato"
-    RESCISAO_ESTAGIARIO = "Rescisão pelo Estagiário"
-    RESCISAO_EMPRESA = "Rescisão pela Empresa"
-    OUTRO = "Outro"
+
 
 # --- SCHEMAS PARA BENEFÍCIO ESTAGIÁRIO ---
 class BeneficioEstagiarioSchema(BaseModel):

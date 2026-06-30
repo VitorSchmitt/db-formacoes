@@ -27,6 +27,9 @@ from routes_relatorio_facilitador import router as relatorio_facilitador_router
 from estagiario.routes.classificacoes_estagio import router as classificacoes_estagio_router
 from estagiario.routes.valor_bolsa_estagio import router as valor_bolsa_router
 from estagiario.routes.estagiario import router as estagiario_router
+from estagiario.routes.beneficio_estagiario import router as beneficio_router
+from estagiario.routes.contrato_estagiario import router as contrato_router
+
 
 
 from middleware import AuthMiddleware
@@ -75,6 +78,8 @@ app.include_router(relatorio_facilitador_router)
 app.include_router(classificacoes_estagio_router)
 app.include_router(valor_bolsa_router)
 app.include_router(estagiario_router)
+app.include_router(beneficio_router)
+app.include_router(contrato_router)
 
 # ===============================
 # WEB
@@ -199,6 +204,20 @@ def tela_valores_bolsa_estagio(request: Request):
 def tela_estagiarios(request: Request):
     return templates.TemplateResponse(
         "estagiarios.html",  
+        {"request": request}
+    )
+
+@app.get("/web/estagiario/beneficios")
+def tela_beneficios(request: Request):
+    return templates.TemplateResponse(
+        "beneficios.html",  
+        {"request": request}
+    )
+
+@app.get("/web/estagiario/contratos")
+def tela_contratos(request: Request):
+    return templates.TemplateResponse(
+        "contratos.html",  
         {"request": request}
     )
     

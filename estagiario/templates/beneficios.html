@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Benefícios do Estagiário</h3>
+            <small class="text-muted">Gestão histórica dos valores de Vale Alimentação e Transporte</small>
+        </div>
+        <button class="btn btn-primary" onclick="novo()">+ Novo Benefício</button>
+    </div>
+
+    <div class="card mb-4" id="formCard" style="display:none;">
+        <div class="card-header">Cadastro de Benefício</div>
+        <div class="card-body">
+            <input type="hidden" id="id">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Vale Alimentação (R$)</label>
+                    <input type="number" step="0.01" class="form-control" id="valor_vale_alimentacao">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Vale Transporte (R$)</label>
+                    <input type="number" step="0.01" class="form-control" id="valor_vale_transporte">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Início da Vigência</label>
+                    <input type="date" class="form-control" id="data_inicio_vigencia">
+                </div>
+            </div>
+            <div class="mt-2">
+                <button class="btn btn-success" onclick="salvar()">Salvar</button>
+                <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Vale Alimentação</th>
+                        <th>Vale Transporte</th>
+                        <th>Início da Vigência</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const url = "/api/beneficios_estagiario";
+
+document.addEventListener("DOMContentLoaded", carregar);
+
+function carregar() {
+    fetch(url).then(r => r.json()).then(dados => {
+        let html = "";
+        dados.forEach(item => {
+            const dataFmt = item.data_inicio_vigencia.split("-").reverse().join("/");
+            const vaFmt = item.valor_vale_alimentacao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const vtFmt = item.valor_vale_transporte.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            html += `
+                <tr>
+                    <td>${vaFmt}</td>
+                    <td>${vtFmt}</td>
+                    <td>${dataFmt}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(item)})'>Editar</button>
+                    </td>
+                </tr>`;
+        });
+        document.getElementById("lista").innerHTML = html;
+    });
+}
+
+function novo() { limpar(); document.getElementById("formCard").style.display = "block"; }
+function cancelar() { limpar(); document.getElementById("formCard").style.display = "none"; }
+function limpar() { 
+    document.getElementById("id").value = ""; 
+    document.getElementById("valor_vale_alimentacao").value = ""; 
+    document.getElementById("valor_vale_transporte").value = ""; 
+    document.getElementById("data_inicio_vigencia").value = ""; 
+}
+
+function editar(item) {
+    document.getElementById("formCard").style.display = "block";
+    document.getElementById("id").value = item.id;
+    document.getElementById("valor_vale_alimentacao").value = item.valor_vale_alimentacao;
+    document.getElementById("valor_vale_transporte").value = item.valor_vale_transporte;
+    document.getElementById("data_inicio_vigencia").value = item.data_inicio_vigencia;
+}
+
+function salvar() {
+    const id = document.getElementById("id").value;
+    const dados = {
+        valor_vale_alimentacao: parseFloat(document.getElementById("valor_vale_alimentacao").value),
+        valor_vale_transporte: parseFloat(document.getElementById("valor_vale_transporte").value),
+        data_inicio_vigencia: document.getElementById("data_inicio_vigencia").value
+    };
+    if(isNaN(dados.valor_vale_alimentacao) || isNaN(dados.valor_vale_transporte) || !dados.data_inicio_vigencia) {
+        alert("Preencha todos os campos!"); return;
+    }
+    const metodo = id ? "PUT" : "POST";
+    const destino = id ? `${url}/${id}` : url;
+
+    fetch(destino, {
+        method: metodo,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(dados)
+    }).then(async r => {
+        if(!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+        cancelar(); carregar();
+    }).catch(err => alert(err.message));
+}
+</script>
+{% endblock %}

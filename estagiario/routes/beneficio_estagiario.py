@@ -55,14 +55,7 @@ def atualizar_beneficio(id: int, dados: BeneficioEstagiarioUpdate, db: Session =
         setattr(beneficio, chave, valor)
         
     db.commit()
-    return {"mensagem": "Benefício actualizado com sucesso"}from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
-from database import get_db
-
-# Ajuste as importações para os novos schemas criados
-from estagiario.model_estagiario import BeneficioEstagiario 
-from schemas import BeneficioEstagiarioCreate, BeneficioEstagiarioUpdate
+    return {"mensagem": "Benefício actualizado com sucesso"}
 
 # Mantido o prefixo original do seu back-end
 router_beneficio = APIRouter(prefix="/api/beneficio_estagiario", tags=["Benefícios Estagiário"])

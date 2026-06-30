@@ -96,7 +96,8 @@
 </div>
 
 <script>
-const urlContratos = "/api/contratos";
+// CORREÇÃO: URL sincronizada exatamente com a rota do Back-end
+const urlContratos = "/api/contratos_estagio";
 
 document.addEventListener("DOMContentLoaded", () => {
     carregarSelects();
@@ -104,13 +105,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function carregarSelects() {
-    // Carrega dinamicamente as opções das chaves estrangeiras relacionais
     fetch("/api/estagiarios").then(r => r.json()).then(d => preencherSelect("estagiario_id", d, 'id', 'nome'));
     fetch("/api/lotacao").then(r => r.json()).then(d => preencherSelect("lotacao_id", d, 'id', 'descricao'));
     fetch("/api/servidores").then(r => r.json()).then(d => preencherSelect("supervisor_matricula", d, 'matricula', 'nome'));
     fetch("/api/classificacoes_estagio").then(r => r.json()).then(d => preencherSelect("classificacao_id", d.filter(c => c.ativo), 'id', 'descricao'));
     
-    fetch("/api/beneficios_estagiario").then(r => r.json()).then(d => {
+    fetch("/api/beneficio_estagiario/").then(r => r.json()).then(d => {
         let s = document.getElementById("beneficio_id");
         s.innerHTML = '<option value="">Selecione...</option>' + d.map(b => `<option value="${b.id}">Vigência: ${b.data_inicio_vigencia.split("-").reverse().join("/")} (VA: ${b.valor_vale_alimentacao} | VT: ${b.valor_vale_transporte})</option>`).join('');
     });
@@ -166,7 +166,6 @@ function editar(c) {
     });
 }
 
-// Envia dados coletados para criar ou atualizar
 function salvar() {
     const id = document.getElementById("id").value;
     const dados = {
@@ -196,12 +195,11 @@ function salvar() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(dados)
     }).then(async r => {
-        if(!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+        if(!r.ok) { const e = await r.json(); throw new Error(e.detail || "Erro ao salvar contrato."); }
         cancelar(); carregarContratos();
     }).catch(err => alert(err.message));
 }
 
-// Função rápida usando o Prompt Nativo do Navegador para Processo de Encerramento (Desligamento)
 function solicitarDesligamento(id) {
     const data = prompt("Digite a data de desligamento (AAAA-MM-DD):");
     if(!data) return;
@@ -214,7 +212,7 @@ function solicitarDesligamento(id) {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ data_desligamento: data, motivo_desligamento: motivo, observacao_desligamento: obs })
     }).then(async r => {
-        if(!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+        if(!r.ok) { const e = await r.json(); throw new Error(e.detail || "Erro ao desligar contrato."); }
         carregarContratos();
     }).catch(err => alert(err.message));
 }

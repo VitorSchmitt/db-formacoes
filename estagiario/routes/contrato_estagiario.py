@@ -52,7 +52,7 @@ def atualizar_contrato(id: int, dados: ContratoEstagioUpdate, db: Session = Depe
         raise HTTPException(status_code=404, detail="Contrato não encontrado")
     
     if dados.numero_contrato:
-        conflito = db.query(ContrageEstagio).filter(
+        conflito = db.query(ContratoEstagio).filter(
             ContratoEstagio.numero_contrato == dados.numero_contrato, 
             ContratoEstagio.id != id
         ).first()

@@ -194,13 +194,7 @@ class BeneficioEstagiario(Base):
         Date,
         nullable=False,
         unique=True
-    )
-
-    contratos = relationship(
-            "ContratoEstagio",
-            back_populates="beneficio"
-        )
-
+    )    
 
 
 class ContratoEstagio(Base):

@@ -231,13 +231,7 @@ class ContratoEstagio(Base):
         Integer,
         ForeignKey("classificacoes_estagio.id"),
         nullable=False
-    )
-
-    beneficio_id = Column(
-        Integer,
-        ForeignKey("beneficios_estagiario.id"),
-        nullable=False
-    )
+    )    
 
     # Dados do contrato
     numero_contrato = Column(
@@ -320,7 +314,4 @@ class ContratoEstagio(Base):
         back_populates="contratos"
     )
 
-    beneficio = relationship(
-        "BeneficioEstagiario",
-        back_populates="contratos"
-    )
+    

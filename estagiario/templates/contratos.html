@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function carregarSelects() {
     fetch("/api/estagiarios").then(r => r.json()).then(d => preencherSelect("estagiario_id", d, 'id', 'nome'));
-    fetch("/api/lotacao").then(r => r.json()).then(d => preencherSelect("lotacao_id", d, 'id', 'descricao'));
+    fetch("/api/lotacoes").then(r => r.json()).then(d => preencherSelect("lotacao_id", d, 'id', 'descricao'));
     fetch("/api/servidores").then(r => r.json()).then(d => preencherSelect("supervisor_matricula", d, 'matricula', 'nome'));
     fetch("/api/classificacoes_estagio").then(r => r.json()).then(d => preencherSelect("classificacao_id", d.filter(c => c.ativo), 'id', 'descricao'));   
     

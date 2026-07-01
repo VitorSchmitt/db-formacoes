@@ -230,8 +230,7 @@ class ContratoEstagioCreate(BaseModel):
     estagiario_id: int
     lotacao_id: int
     supervisor_matricula: str
-    classificacao_id: int
-    beneficio_id: int
+    classificacao_id: int    
     numero_contrato: str
     data_assinatura: date
     data_inicio: date
@@ -245,8 +244,7 @@ class ContratoEstagioUpdate(BaseModel):
     estagiario_id: Optional[int] = None
     lotacao_id: Optional[int] = None
     supervisor_matricula: Optional[str] = None
-    classificacao_id: Optional[int] = None
-    beneficio_id: Optional[int] = None
+    classificacao_id: Optional[int] = None    
     numero_contrato: Optional[str] = None
     data_assinatura: Optional[date] = None
     data_inicio: Optional[date] = None

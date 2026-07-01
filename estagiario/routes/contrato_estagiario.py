@@ -5,9 +5,9 @@ from database import get_db
 from estagiario.model_estagiario import ContratoEstagio
 from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput
 
-router_contrato = APIRouter(prefix="/api/contratos_estagio", tags=["Contratos de Estágio"])
+router = APIRouter(prefix="/api/contrato_estagio", tags=["Contratos de Estágio"])
 
-@router_contrato.get("/", response_model=List[dict])
+@router.get("/", response_model=List[dict])
 def listar_contratos(db: Session = Depends(get_db)):
     contratos = db.query(ContratoEstagio).all()
     return [
@@ -35,7 +35,7 @@ def listar_contratos(db: Session = Depends(get_db)):
         } for c in contratos
     ]
 
-@router_contrato.post("/", status_code=status.HTTP_201_CREATED)
+@route.post("/", status_code=status.HTTP_201_CREATED)
 def criar_contrato(dados: ContratoEstagioCreate, db: Session = Depends(get_db)):
     existe = db.query(ContratoEstagio).filter(ContratoEstagio.numero_contrato == dados.numero_contrato).first()
     if existe:
@@ -46,7 +46,7 @@ def criar_contrato(dados: ContratoEstagioCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"mensagem": "Contrato cadastrado com sucesso"}
 
-@router_contrato.put("/{id}")
+@router.put("/{id}")
 def atualizar_contrato(id: int, dados: ContratoEstagioUpdate, db: Session = Depends(get_db)):
     contrato = db.query(ContratoEstagio).filter(ContratoEstagio.id == id).first()
     if not contrato:
@@ -68,7 +68,7 @@ def atualizar_contrato(id: int, dados: ContratoEstagioUpdate, db: Session = Depe
     db.commit()
     return {"mensagem": "Contrato atualizado com sucesso"}
 
-@router_contrato.post("/{id}/desligar")
+@router.post("/{id}/desligar")
 def desligar_contrato(id: int, dados: DesligamentoContratoInput, db: Session = Depends(get_db)):
     contrato = db.query(ContratoEstagio).filter(ContratoEstagio.id == id).first()
     if not contrato:

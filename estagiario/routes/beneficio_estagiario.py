@@ -58,6 +58,6 @@ def atualizar_beneficio(id: int, dados: BeneficioEstagiarioUpdate, db: Session =
         setattr(beneficio, chave, valor)
         
     db.commit()
-    return {"mensagem": "Benefício actualizado com sucesso"}
+    return {"mensagem": "Benefício atualizado com sucesso"}
 
 

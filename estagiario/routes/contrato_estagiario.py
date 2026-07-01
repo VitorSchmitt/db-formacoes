@@ -35,7 +35,7 @@ def listar_contratos(db: Session = Depends(get_db)):
         } for c in contratos
     ]
 
-@route.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def criar_contrato(dados: ContratoEstagioCreate, db: Session = Depends(get_db)):
     existe = db.query(ContratoEstagio).filter(ContratoEstagio.numero_contrato == dados.numero_contrato).first()
     if existe:

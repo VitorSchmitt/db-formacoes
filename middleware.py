@@ -34,19 +34,29 @@ PERMISSOES = {
     "admin": ["*"],
 
 
-    "operadorIII":[
-        "/web/beneficios",        
-        "/web/classificacoes",        
-        "/web/contratos",
-        "/web/valores_bolsa_auxilio",
-        "/web/estagiarios",
+    "operadorIII": [
+
+        # ===========================
+        # TELAS WEB
+        # ===========================
+        "/web/estagiario/beneficios",
+        "/web/estagiario/classificacoes",
+        "/web/estagiario/contratos",
+        "/web/estagiario/estagiarios",
+        "/web/estagiario/valores_bolsa_estagio",
+    
+        # ===========================
+        # APIS
+        # ===========================
         "/api/beneficio_estagiario",
         "/api/classificacoes_estagio",
         "/api/contrato_estagio",
         "/api/estagiarios",
         "/api/valores_bolsa_estagio",
+    
+        # Dados auxiliares
         "/api/servidores",
-        "/api/lotacoes"
+        "/api/lotacoes",
     ],
     
     "operador": [ 

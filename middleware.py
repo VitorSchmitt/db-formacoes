@@ -32,6 +32,11 @@ PUBLIC_PREFIX = [
 
 PERMISSOES = {
     "admin": ["*"],
+
+
+    "operadorIII":[
+
+    ],
     
     "operador": [ 
         "/web/dashboard",        

@@ -43,7 +43,7 @@ PERMISSOES = {
         "/api/beneficio_estagiario"
         "/api/classificacoes_estagio"
         "/api/contrato_estagio"
-
+        "/api/estagiarios"
         "/api/servidores",
         "/api/lotacoes"
     ],

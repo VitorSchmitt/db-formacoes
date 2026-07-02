@@ -40,10 +40,11 @@ PERMISSOES = {
         "/web/contratos",
         "/web/valores_bolsa_auxilio",
         "/web/estagiarios",
-        "/api/beneficio_estagiario"
-        "/api/classificacoes_estagio"
-        "/api/contrato_estagio"
-        "/api/estagiarios"
+        "/api/beneficio_estagiario",
+        "/api/classificacoes_estagio",
+        "/api/contrato_estagio",
+        "/api/estagiarios",
+        "/api/valores_bolsa_estagio",
         "/api/servidores",
         "/api/lotacoes"
     ],

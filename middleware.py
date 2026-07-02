@@ -41,7 +41,7 @@ PERMISSOES = {
         "/web/valores_bolsa_auxilio",
         "/web/estagiarios",
         "/api/beneficio_estagiario"
-
+        "/api/classificacoes_estagio"
 
 
         "/api/servidores",

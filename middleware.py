@@ -35,7 +35,17 @@ PERMISSOES = {
 
 
     "operadorIII":[
+        "/web/beneficios",        
+        "/web/classificacoes",        
+        "/web/contratos",
+        "/web/valores_bolsa_auxilio",
+        "/web/estagiarios",
+        
 
+
+
+        "/api/servidores",
+        "/api/lotacoes"
     ],
     
     "operador": [ 

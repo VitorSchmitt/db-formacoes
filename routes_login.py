@@ -103,13 +103,36 @@ async def login(
     }
 
     # =========================================
-    # RETORNO
+    # DEFINE DESTINO
     # =========================================
-    return {
-        "ok": True,
-        "redirect": "/web/dashboard",
-        "perfil": user.perfil
-    }
+    perfil = user.perfil
+
+    if perfil == "operadorIII":
+        destino = "/web/estagiario/estagiarios"
+
+    elif perfil == "operadorII":
+        destino = "/web/dashboard"
+
+    elif perfil == "operador":
+        destino = "/web/dashboard"
+
+    elif perfil == "custom":
+        destino = "/web/dashboard"
+
+    elif perfil == "admin":
+        destino = "/web/dashboard"
+
+    else:
+        destino = "/"
+
+    # =========================================
+    # REDIRECIONA
+    # =========================================
+    return RedirectResponse(
+        url=destino,
+        status_code=303
+    )
+
 
 
 # =====================================================

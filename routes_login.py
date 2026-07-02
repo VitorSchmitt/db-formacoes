@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Request, Form, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 

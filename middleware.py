@@ -42,7 +42,7 @@ PERMISSOES = {
         "/web/estagiarios",
         "/api/beneficio_estagiario"
         "/api/classificacoes_estagio"
-
+        "/api/contrato_estagio"
 
         "/api/servidores",
         "/api/lotacoes"

@@ -75,15 +75,15 @@ def relatorio_pdf(
     if not formacao:
         return {"erro": "Formação não encontrada"}
 
+    carga_minima = formacao.carga_horaria * 0.75
+
     participantes = (
         db.query(Participacao)
         .join(Servidor)
         .outerjoin(Lotacao)
         .filter(
             Participacao.formacao_id == formacao_id,
-            Participacao.aproveitamento >= (
-                Formacao.carga_horaria * 0.75
-            )
+            Participacao.aproveitamento >= carga_minima
         )
         .order_by(Servidor.nome)
         .all()

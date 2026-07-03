@@ -93,8 +93,8 @@ def relatorio_pdf(
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
-        topMargin=1.5*cm,
-        bottomMargin=1.5*cm
+        topMargin=1*cm,
+        bottomMargin=1*cm
     )
 
     styles = getSampleStyleSheet()
@@ -147,7 +147,7 @@ def relatorio_pdf(
 
     tabela_pdf = Table(
         tabela,
-        colWidths=[3*cm,8*cm,5*cm,3*cm]
+        colWidths=[1*cm,9*cm,6*cm,1*cm]
     )
 
     tabela_pdf.setStyle(TableStyle([
@@ -160,7 +160,7 @@ def relatorio_pdf(
 
         ("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
 
-        ("ALIGN",(0,0),(-1,-1),"CENTER"),
+        ("ALIGN",(0,0),(-1,-1),"LEFT"),
 
         ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
 

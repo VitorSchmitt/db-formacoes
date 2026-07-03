@@ -123,6 +123,13 @@ def relatorio_pdf(
 
     elementos.append(
         Paragraph(
+            "CFP/NTEV",
+            titulo
+        )
+    )
+    elementos.append(Spacer(1,0.5*cm))
+    elementos.append(
+        Paragraph(
             f"<b>Formação:</b> {formacao.descricao}",
             styles["Normal"]
         )

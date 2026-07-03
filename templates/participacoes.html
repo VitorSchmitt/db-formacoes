@@ -14,6 +14,22 @@
     </div>
 </div>
 
+<div class="d-flex justify-content-between mb-3">
+    <input
+        type="text"
+        id="busca"
+        class="form-control me-2"
+        placeholder="Buscar..."
+        onkeyup="carregarTabela()">
+
+    <button
+        class="btn btn-danger"
+        onclick="gerarPDF()">
+        <i class="bi bi-file-earmark-pdf"></i>
+        PDF
+    </button>
+</div>
+
 <hr>
 
 <!-- ===================== -->
@@ -412,6 +428,22 @@ function mostrarMsg(r) {
     }
 
     setTimeout(() => msg.innerHTML = "", 2500);
+}
+// =====================
+// GERAR PDF
+// =====================
+function gerarPDF(){
+
+    if(!formacaoAtual){
+        alert("Selecione uma formação.");
+        return;
+    }
+
+    window.open(
+        `/api/participacoes/${formacaoAtual}/relatorio`,
+        "_blank"
+    );
+
 }
 
 // =====================

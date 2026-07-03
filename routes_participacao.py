@@ -6,7 +6,7 @@ from models import Participacao, Servidor, Formacao, Lotacao
 from io import BytesIO
 from fastapi.responses import StreamingResponse
 from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -17,6 +17,7 @@ from reportlab.platypus import (
     Paragraph,
     Spacer
 )
+
 
 router = APIRouter()
 
@@ -98,6 +99,13 @@ def relatorio_pdf(
     )
 
     styles = getSampleStyleSheet()
+    estilo_tabela = ParagraphStyle(
+        "Tabela",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=8,
+        leading=10,   # espaço entre linhas
+    )
 
     titulo = styles["Heading1"]
     titulo.alignment = TA_CENTER
@@ -139,18 +147,20 @@ def relatorio_pdf(
     for p in participantes:
 
         tabela.append([
-            p.matricula,
-            p.servidor.nome,
-            p.lotacao.descricao if p.lotacao else "",
-            f"{p.aproveitamento} h"
+            Paragraph(str(p.matricula), estilo_tabela),
+            Paragraph(p.servidor.nome, estilo_tabela),
+            Paragraph(p.lotacao.descricao if p.lotacao else "", estilo_tabela),
+            Paragraph(f"{p.aproveitamento} h", estilo_tabela),
         ])
 
     tabela_pdf = Table(
         tabela,
-        colWidths=[1*cm,9*cm,6*cm,1*cm]
+        colWidths=[2.2*cm,8.5*cm,6.2*cm,2.1*cm]
     )
 
     tabela_pdf.setStyle(TableStyle([
+
+        ("TOPPADDING", (0,0), (-1,-1), 4),      
 
         ("BACKGROUND",(0,0),(-1,0),colors.grey),
 
@@ -164,7 +174,9 @@ def relatorio_pdf(
 
         ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
 
-        ("BOTTOMPADDING",(0,0),(-1,0),8),
+        ("WORDWRAP", (0,0), (-1,-1), "CJK"),
+
+        ("BOTTOMPADDING", (0,0), (-1,-1), 4),
 
     ]))
 

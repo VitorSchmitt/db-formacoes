@@ -124,7 +124,7 @@ def relatorio_pdf(
     elementos.append(
         Paragraph(
             "CFP/NTEV",
-            titulo
+            styles["Normal"]
         )
     )
     elementos.append(Spacer(1,0.5*cm))

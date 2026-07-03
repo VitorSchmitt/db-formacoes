@@ -3,6 +3,20 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
 from models import Participacao, Servidor, Formacao, Lotacao
+from io import BytesIO
+from fastapi.responses import StreamingResponse
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Table,
+    TableStyle,
+    Paragraph,
+    Spacer
+)
 
 router = APIRouter()
 
@@ -45,6 +59,138 @@ def listar(formacao_id: int, db: Session = Depends(get_db)):
     for p in dados
 ]
 
+# ===============================
+# LISTAR POR FORMAÇÃO - PDF
+# ===============================
+
+@router.get("/api/participacoes/{formacao_id}/relatorio")
+def relatorio_pdf(
+    formacao_id: int,
+    db: Session = Depends(get_db)
+):
+
+    formacao = db.get(Formacao, formacao_id)
+
+    if not formacao:
+        return {"erro": "Formação não encontrada"}
+
+    participantes = (
+        db.query(Participacao)
+        .join(Servidor)
+        .outerjoin(Lotacao)
+        .filter(
+            Participacao.formacao_id == formacao_id,
+            Participacao.aproveitamento >= (
+                Formacao.carga_horaria * 0.75
+            )
+        )
+        .order_by(Servidor.nome)
+        .all()
+    )
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        topMargin=1.5*cm,
+        bottomMargin=1.5*cm
+    )
+
+    styles = getSampleStyleSheet()
+
+    titulo = styles["Heading1"]
+    titulo.alignment = TA_CENTER
+
+    elementos = []
+
+    elementos.append(
+        Paragraph(
+            "RELATÓRIO DE PARTICIPAÇÃO EM FORMAÇÃO",
+            titulo
+        )
+    )
+
+    elementos.append(Spacer(1,0.5*cm))
+
+    elementos.append(
+        Paragraph(
+            f"<b>Formação:</b> {formacao.descricao}",
+            styles["Normal"]
+        )
+    )
+
+    elementos.append(
+        Paragraph(
+            f"<b>Carga Horária:</b> {formacao.carga_horaria} horas",
+            styles["Normal"]
+        )
+    )
+
+    elementos.append(Spacer(1,0.5*cm))
+
+    tabela = [[
+        "Matrícula",
+        "Nome",
+        "Lotação",
+        "Aproveitamento"
+    ]]
+
+    for p in participantes:
+
+        tabela.append([
+            p.matricula,
+            p.servidor.nome,
+            p.lotacao.descricao if p.lotacao else "",
+            f"{p.aproveitamento} h"
+        ])
+
+    tabela_pdf = Table(
+        tabela,
+        colWidths=[3*cm,8*cm,5*cm,3*cm]
+    )
+
+    tabela_pdf.setStyle(TableStyle([
+
+        ("BACKGROUND",(0,0),(-1,0),colors.grey),
+
+        ("TEXTCOLOR",(0,0),(-1,0),colors.white),
+
+        ("GRID",(0,0),(-1,-1),0.5,colors.black),
+
+        ("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
+
+        ("ALIGN",(0,0),(-1,-1),"CENTER"),
+
+        ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+
+        ("BOTTOMPADDING",(0,0),(-1,0),8),
+
+    ]))
+
+    elementos.append(tabela_pdf)
+
+    elementos.append(Spacer(1,0.5*cm))
+
+    elementos.append(
+        Paragraph(
+            f"<b>Total de aprovados:</b> {len(participantes)}",
+            styles["Normal"]
+        )
+    )
+
+    doc.build(elementos)
+
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition":
+            f'inline; filename="participacao_{formacao_id}.pdf"'
+        }
+    )
 
 # ===============================
 # CRIAR

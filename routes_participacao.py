@@ -117,9 +117,7 @@ def relatorio_pdf(
             "RELATÓRIO DE PARTICIPAÇÃO EM FORMAÇÃO",
             titulo
         )
-    )
-
-    elementos.append(Spacer(1,0.5*cm))
+    )    
 
     elementos.append(
         Paragraph(

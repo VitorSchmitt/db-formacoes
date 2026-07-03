@@ -18,6 +18,8 @@ from reportlab.platypus import (
     Spacer
 )
 
+from pdf_utils import adicionar_logos
+
 
 router = APIRouter()
 
@@ -111,6 +113,7 @@ def relatorio_pdf(
     titulo.alignment = TA_CENTER
 
     elementos = []
+    adicionar_logos(elementos)
 
     elementos.append(
         Paragraph(

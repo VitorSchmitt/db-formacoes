@@ -141,8 +141,7 @@ def gerar_pdf_certificado(
     elementos = []
 
     adicionar_cabecalho(
-        elementos,
-        styles,
+        elementos,        
         "DECLARAÇÃO DE PARTICIPAÇÃO EM FORMAÇÃO"
     )       
     

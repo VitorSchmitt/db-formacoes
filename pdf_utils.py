@@ -2,7 +2,7 @@ import os
 
 from reportlab.platypus import Image, Table, TableStyle, Spacer
 from reportlab.lib.units import cm
-
+from reportlab.lib.enums import TA_CENTER
 
 LOGO = "static/img/logo.png"
 FASE = "static/img/fase.png"

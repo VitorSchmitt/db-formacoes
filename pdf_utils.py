@@ -125,8 +125,7 @@ def aplicar_estilo_tabela(tabela, estilos_extras=None):
 
 
 def criar_documento_pdf(
-        arquivo,
-        **kwargs
+        arquivo,       
     ):
         return SimpleDocTemplate(
             arquivo,
@@ -134,7 +133,7 @@ def criar_documento_pdf(
             leftMargin=1.5 * cm,
             topMargin=1.5 * cm,
             bottomMargin=1 * cm,
-            **kwargs
+            pagesize=landscape(A4)
         )
 
 

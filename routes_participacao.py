@@ -96,14 +96,7 @@ def relatorio_pdf(
     doc = criar_documento_pdf(buffer)
 
     styles = getSampleStyleSheet()
-    estilo_tabela = ParagraphStyle(
-        "Tabela",
-        parent=styles["BodyText"],
-        fontName="Helvetica",
-        fontSize=8,
-        leading=10,   # espaço entre linhas
-    )
-
+    estilo_tabela = obter_estilo_tabela()
     elementos = []
 
     adicionar_cabecalho(

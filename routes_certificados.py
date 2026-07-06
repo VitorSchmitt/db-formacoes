@@ -9,7 +9,7 @@ from models import Participacao, Formacao, Servidor
 
 from tempfile import NamedTemporaryFile
 from datetime import datetime
-from pdf_utils import adicionar_logos
+from pdf_utils import adicionar_cabecalho
 
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -138,23 +138,14 @@ def gerar_pdf_certificado(
         bottomMargin=40
     )    
 
-    # ==========================
-    # LOGOS
-    # ==========================
     elementos = []
-    adicionar_logos(elementos)
-    
-    
-    # =========================
-    # TÍTULO
-    # =========================
 
-    elementos.append(
-        Paragraph(
-            "Declaração de Participação em Formação",
-            estilo_titulo
-        )
-    )
+    adicionar_cabecalho(
+        elementos,
+        styles,
+        "DECLARAÇÃO DE PARTICIPAÇÃO EM FORMAÇÃO"
+    )       
+    
 
     elementos.append(
         Paragraph(

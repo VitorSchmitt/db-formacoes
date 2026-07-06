@@ -138,10 +138,12 @@ def gerar_pdf_certificado(
         bottomMargin=40
     )    
 
-    # =========================
-    # LOGOS 
-    # =========================
-
+    # ==========================
+    # LOGOS
+    # ==========================
+     elementos = []
+     adicionar_logos(elementos)
+    
     
     # =========================
     # TÍTULO

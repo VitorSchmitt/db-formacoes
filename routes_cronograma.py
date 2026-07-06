@@ -7,7 +7,13 @@ from models import PlanoAnual
 
 from tempfile import NamedTemporaryFile
 from datetime import date
-from pdf_utils import adicionar_cabecalho
+from pdf_utils import (
+    adicionar_cabecalho,
+    criar_documento_pdf,
+    aplicar_estilo_tabela,
+    adicionar_data_emissao,
+    obter_estilo_tabela
+)
 from reportlab.platypus import (    
     Paragraph,
     Spacer,

@@ -112,8 +112,7 @@ def relatorio_pdf(
     elementos = []
 
     adicionar_cabecalho(
-        elementos,
-        styles,
+        elementos,       
         "RELATÓRIO DE PARTICIPAÇÃO EM FORMAÇÃO"
     )    
     

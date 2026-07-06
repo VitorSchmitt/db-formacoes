@@ -183,3 +183,18 @@ def adicionar_data_emissao(elementos, estilo_direita):
 
     elementos.append(Spacer(1, 30))
     elementos.append(tabela)
+
+def obter_estilo_tabela():
+    """
+    Retorna o estilo utilizado nas células das tabelas.
+    """
+
+    styles = getSampleStyleSheet()
+
+    return ParagraphStyle(
+        "Tabela",
+        parent=styles["BodyText"],
+        fontName="Helvetica",
+        fontSize=8,
+        leading=10,
+    )

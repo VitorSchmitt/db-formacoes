@@ -236,8 +236,8 @@ def gerar_pdf(
     # ==========================
     # LOGOS
     # ==========================
-     elementos = []
-     adicionar_logos(elementos)
+    elementos = []
+    adicionar_logos(elementos)
     
 
     # ==========================

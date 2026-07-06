@@ -207,7 +207,7 @@ def cronograma_pdf(
         suffix=".pdf"
     ) as temp:
 
-    caminho = temp.name
+        caminho = temp.name
 
     doc = criar_documento_pdf(
         caminho,

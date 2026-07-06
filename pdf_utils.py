@@ -1,6 +1,9 @@
 import os
+from reportlab.lib.units import cm
+from reportlab.lib import colors
 
 from reportlab.platypus import (
+    SimpleDocTemplate,
     Image,
     Table,
     TableStyle,
@@ -8,7 +11,7 @@ from reportlab.platypus import (
     Paragraph
 )
 
-from reportlab.lib.units import cm
+
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.styles import getSampleStyleSheet
 
@@ -115,4 +118,19 @@ def aplicar_estilo_tabela(tabela, estilos_extras=None):
         estilos.extend(estilos_extras)
 
     tabela.setStyle(TableStyle(estilos))
+
+
+
+def criar_documento_pdf(arquivo):
+    """
+    Cria um documento PDF com as margens padrão.
+    """
+
+    return SimpleDocTemplate(
+        arquivo,
+        rightMargin=1 * cm,
+        leftMargin=1 * cm,
+        topMargin=1 * cm,
+        bottomMargin=1 * cm
+    )
     

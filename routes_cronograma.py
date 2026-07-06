@@ -222,7 +222,12 @@ def cronograma_pdf(
 
     styles = getSampleStyleSheet()
 
-    elementos = []
+    # ==========================
+    # LOGOS
+    # ==========================
+     elementos = []
+     adicionar_logos(elementos)
+    
 
     titulo = Paragraph(
         f"<b>Cronograma Anual {ano}</b>",

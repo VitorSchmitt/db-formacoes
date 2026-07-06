@@ -124,19 +124,18 @@ def aplicar_estilo_tabela(tabela, estilos_extras=None):
 
 
 
-def criar_documento_pdf(arquivo):
-    """
-    Cria um documento PDF com as margens padrão.
-    """
-
-    return SimpleDocTemplate(
+def criar_documento_pdf(
         arquivo,
-        rightMargin=1.5 * cm,
-        leftMargin=1.5 * cm,
-        topMargin=1.5 * cm,
-        bottomMargin=1 * cm
-    )
-
+        **kwargs
+    ):
+        return SimpleDocTemplate(
+            arquivo,
+            rightMargin=1.5 * cm,
+            leftMargin=1.5 * cm,
+            topMargin=1.5 * cm,
+            bottomMargin=1 * cm,
+            **kwargs
+        )
 
 
 

@@ -21,7 +21,6 @@ from reportlab.platypus import (
 )
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 
 
@@ -215,10 +214,7 @@ def cronograma_pdf(
 
         caminho = temp.name
 
-    doc = criar_documento_pdf(
-        caminho,
-        pagesize=landscape(A4)
-    )
+    doc = criar_documento_pdf(caminho)
 
     styles = getSampleStyleSheet()
 

@@ -94,7 +94,7 @@ def relatorio_pdf(
 
     buffer = BytesIO()
 
-    doc = criar_documento_pdf(buffer)
+    doc = criar_documento_pdf(buffer,orientacao="portrait")
 
     styles = getSampleStyleSheet()
     estilo_tabela = obter_estilo_tabela()

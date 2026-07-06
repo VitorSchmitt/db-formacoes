@@ -225,15 +225,12 @@ def gerar_pdf(
 
     )
 
-    estilos = (
-        styles.getSampleStyleSheet()
-    )
+    estilos = getSampleStyleSheet()
 
     elementos = []
 
     adicionar_cabecalho(
-        elementos,
-        styles,
+        elementos,        
         "RELATÓRIO DE FORMAÇÕES"
     )
 
@@ -265,7 +262,7 @@ def gerar_pdf(
     
     estilo_esquerda = estilos["Normal"]
     
-    estilo_direita = styles.ParagraphStyle(
+    estilo_direita = ParagraphStyle(
         "direita",
         parent=estilos["Normal"],
         alignment=2   # RIGHT

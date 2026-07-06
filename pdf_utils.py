@@ -1,4 +1,4 @@
-import os
+mport os
 
 from reportlab.platypus import (
     Image,
@@ -7,8 +7,11 @@ from reportlab.platypus import (
     Spacer,
     Paragraph
 )
+
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.styles import getSampleStyleSheet
+
 
 LOGO = "static/img/logo.png"
 FASE = "static/img/fase.png"
@@ -58,17 +61,19 @@ def adicionar_logos(elementos):
     elementos.append(tabela)
     elementos.append(Spacer(1, 12))
 
-def adicionar_cabecalho(elementos, styles, titulo):
+def adicionar_cabecalho(elementos, titulo):
     """
     Adiciona o cabeçalho padrão dos relatórios.
     """
 
+    styles = getSampleStyleSheet()
+
     adicionar_logos(elementos)
 
-    estilo_titulo = styles["Heading1"].clone("TituloRelatorio")
+    estilo_titulo = styles["Heading1"]
     estilo_titulo.alignment = TA_CENTER
 
-    estilo_subtitulo = styles["Normal"].clone("SubtituloRelatorio")
+    estilo_subtitulo = styles["Normal"]
     estilo_subtitulo.alignment = TA_CENTER
 
     elementos.append(
@@ -88,3 +93,4 @@ def adicionar_cabecalho(elementos, styles, titulo):
     elementos.append(
         Spacer(1, 0.5 * cm)
     )
+    

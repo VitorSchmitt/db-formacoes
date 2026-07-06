@@ -18,7 +18,7 @@ from reportlab.platypus import (
     Spacer
 )
 
-from utils import adicionar_cabecalho
+from pdf_utils import adicionar_cabecalho
 
 
 router = APIRouter()

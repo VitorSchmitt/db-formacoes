@@ -225,8 +225,8 @@ def cronograma_pdf(
     # ==========================
     # LOGOS
     # ==========================
-     elementos = []
-     adicionar_logos(elementos)
+    elementos = []
+    adicionar_logos(elementos)
     
 
     titulo = Paragraph(

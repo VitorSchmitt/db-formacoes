@@ -51,3 +51,34 @@ def adicionar_logos(elementos):
 
     elementos.append(tabela)
     elementos.append(Spacer(1, 12))
+
+def adicionar_cabecalho(elementos, styles, titulo):
+    """
+    Adiciona o cabeçalho padrão dos relatórios.
+    """
+
+    adicionar_logos(elementos)
+
+    estilo_titulo = styles["Heading1"].clone("TituloRelatorio")
+    estilo_titulo.alignment = TA_CENTER
+
+    estilo_subtitulo = styles["Normal"].clone("SubtituloRelatorio")
+    estilo_subtitulo.alignment = TA_CENTER
+
+    elementos.append(
+        Paragraph(
+            titulo.upper(),
+            estilo_titulo
+        )
+    )
+
+    elementos.append(
+        Paragraph(
+            "CFP / NTEV",
+            estilo_subtitulo
+        )
+    )
+
+    elementos.append(
+        Spacer(1, 0.5 * cm)
+    )

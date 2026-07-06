@@ -25,7 +25,7 @@ from models import (
     Participacao,
     Formacao
 )
-
+from pdf_utils import adicionar_logos
 
 router = APIRouter()
 

@@ -18,7 +18,7 @@ from reportlab.platypus import (
     Spacer
 )
 
-from pdf_utils import adicionar_logos
+from utils import adicionar_cabecalho
 
 
 router = APIRouter()
@@ -109,26 +109,14 @@ def relatorio_pdf(
         leading=10,   # espaço entre linhas
     )
 
-    titulo = styles["Heading1"]
-    titulo.alignment = TA_CENTER
-
     elementos = []
-    adicionar_logos(elementos)
 
-    elementos.append(
-        Paragraph(
-            "RELATÓRIO DE PARTICIPAÇÃO EM FORMAÇÃO",
-            titulo
-        )
+    adicionar_cabecalho(
+        elementos,
+        styles,
+        "RELATÓRIO DE PARTICIPAÇÃO EM FORMAÇÃO"
     )    
-
-    elementos.append(
-        Paragraph(
-            "CFP/NTEV",
-            styles["Normal"]
-        )
-    )
-    elementos.append(Spacer(1,0.5*cm))
+    
     elementos.append(
         Paragraph(
             f"<b>Formação:</b> {formacao.descricao}",

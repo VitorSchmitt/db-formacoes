@@ -5,15 +5,10 @@ from database import SessionLocal
 from models import Participacao, Servidor, Formacao, Lotacao
 from io import BytesIO
 from fastapi.responses import StreamingResponse
-from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Table,
-    TableStyle,
+from reportlab.platypus import (    
+    Table,    
     Paragraph,
     Spacer
 )
@@ -98,12 +93,7 @@ def relatorio_pdf(
 
     buffer = BytesIO()
 
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        topMargin=1*cm,
-        bottomMargin=1*cm
-    )
+    doc = criar_documento_pdf(buffer)
 
     styles = getSampleStyleSheet()
     estilo_tabela = ParagraphStyle(
@@ -158,27 +148,12 @@ def relatorio_pdf(
         colWidths=[2.2*cm,8.5*cm,6.2*cm,2.1*cm]
     )
 
-    tabela_pdf.setStyle(TableStyle([
-
-        ("TOPPADDING", (0,0), (-1,-1), 4),      
-
-        ("BACKGROUND",(0,0),(-1,0),colors.grey),
-
-        ("TEXTCOLOR",(0,0),(-1,0),colors.white),
-
-        ("GRID",(0,0),(-1,-1),0.5,colors.black),
-
-        ("FONTNAME",(0,0),(-1,0),"Helvetica-Bold"),
-
-        ("ALIGN",(0,0),(-1,-1),"LEFT"),
-
-        ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
-
-        ("WORDWRAP", (0,0), (-1,-1), "CJK"),
-
-        ("BOTTOMPADDING", (0,0), (-1,-1), 4),
-
-    ]))
+    aplicar_estilo_tabela(
+    tabela_pdf,
+        estilos_extras=[
+            ("WORDWRAP", (0,0), (-1,-1), "CJK"),
+        ]
+    )
 
     elementos.append(tabela_pdf)
 

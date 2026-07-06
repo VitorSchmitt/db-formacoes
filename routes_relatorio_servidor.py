@@ -25,7 +25,7 @@ from models import (
     Participacao,
     Formacao
 )
-from pdf_utils import adicionar_logos
+from pdf_utils import adicionar_cabecalho
 
 router = APIRouter()
 
@@ -230,31 +230,12 @@ def gerar_pdf(
         styles.getSampleStyleSheet()
     )
 
-    
-
-
-    # ==========================
-    # LOGOS
-    # ==========================
     elementos = []
-    adicionar_logos(elementos)
-    
 
-    # ==========================
-    # TÍTULO
-    # ==========================
-
-    elementos.append(
-
-        Paragraph(
-            "Relatório de Formações",
-            estilos["Title"]
-        )
-
-    )
-
-    elementos.append(
-        Spacer(1,15)
+    adicionar_cabecalho(
+        elementos,
+        styles,
+        "RELATÓRIO DE FORMAÇÕES"
     )
 
     elementos.append(

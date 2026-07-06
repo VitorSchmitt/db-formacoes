@@ -7,7 +7,7 @@ from models import PlanoAnual
 
 from tempfile import NamedTemporaryFile
 from datetime import date
-
+from pdf_utils import adicionar_logos
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,

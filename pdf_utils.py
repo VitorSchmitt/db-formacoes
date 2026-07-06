@@ -1,6 +1,7 @@
 import os
 from reportlab.lib.units import cm
 from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
 
 from reportlab.platypus import (
     SimpleDocTemplate,

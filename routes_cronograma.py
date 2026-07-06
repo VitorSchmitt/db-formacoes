@@ -8,12 +8,10 @@ from models import PlanoAnual
 from tempfile import NamedTemporaryFile
 from datetime import date
 from pdf_utils import adicionar_cabecalho
-from reportlab.platypus import (
-    SimpleDocTemplate,
+from reportlab.platypus import (    
     Paragraph,
     Spacer,
-    Table,
-    TableStyle
+    Table
 )
 
 from reportlab.lib import colors
@@ -209,15 +207,11 @@ def cronograma_pdf(
         suffix=".pdf"
     ) as temp:
 
-        caminho = temp.name
+    caminho = temp.name
 
-    doc = SimpleDocTemplate(
+    doc = criar_documento_pdf(
         caminho,
-        pagesize=landscape(A4),
-        rightMargin=20,
-        leftMargin=20,
-        topMargin=20,
-        bottomMargin=20
+        pagesize=landscape(A4)
     )
 
     styles = getSampleStyleSheet()
@@ -313,35 +307,12 @@ def cronograma_pdf(
 
     )
 
-    tabela.setStyle(TableStyle([
-
-        ("BACKGROUND", (0, 0), (-1, 0), colors.black),
-
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-
-        ("GRID", (0, 0), (-1, -1), 1, colors.grey),
-
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
-
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
-
-        ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
-
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-
-        ("ALIGN", (2, 0), (3, -1), "CENTER"),
-
-        ("LEFTPADDING", (0, 0), (-1, -1), 6),
-
-        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4)
-
-    ]))
+    aplicar_estilo_tabela(
+        tabela,
+        estilos_extras=[
+            ("ALIGN", (2, 0), (3, -1), "CENTER")
+        ]
+    )
 
     elementos.append(tabela)
 

@@ -126,15 +126,25 @@ def aplicar_estilo_tabela(tabela, estilos_extras=None):
 
 
 def criar_documento_pdf(
-        arquivo,       
+        arquivo,
+        orientacao="portrait"
     ):
+        """
+        Cria um documento PDF com margens padrão e orientação configurável.
+        """
+    
+        paginas = A4
+    
+        if orientacao == "landscape":
+            paginas = landscape(A4)
+    
         return SimpleDocTemplate(
             arquivo,
+            pagesize=paginas,
             rightMargin=1.5 * cm,
             leftMargin=1.5 * cm,
             topMargin=1.5 * cm,
-            bottomMargin=1 * cm,
-            pagesize=landscape(A4)
+            bottomMargin=1 * cm
         )
 
 

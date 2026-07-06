@@ -1,6 +1,12 @@
 import os
 
-from reportlab.platypus import Image, Table, TableStyle, Spacer
+from reportlab.platypus import (
+    Image,
+    Table,
+    TableStyle,
+    Spacer,
+    Paragraph
+)
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 

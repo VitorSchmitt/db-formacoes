@@ -5,7 +5,7 @@ from database import SessionLocal
 from models import Participacao, Servidor, Formacao, Lotacao
 from io import BytesIO
 from fastapi.responses import StreamingResponse
-from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import (    
     Table,    

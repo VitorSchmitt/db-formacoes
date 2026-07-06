@@ -11,7 +11,7 @@ from reportlab.platypus import (
     Paragraph
 )
 
-
+from datetime import datetime
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.styles import getSampleStyleSheet
 
@@ -128,9 +128,58 @@ def criar_documento_pdf(arquivo):
 
     return SimpleDocTemplate(
         arquivo,
-        rightMargin=1 * cm,
-        leftMargin=1 * cm,
-        topMargin=1 * cm,
+        rightMargin=1,5 * cm,
+        leftMargin=1,5 * cm,
+        topMargin=1,5 * cm,
         bottomMargin=1 * cm
     )
-    
+
+
+
+
+def adicionar_data_emissao(elementos, estilo_direita):
+    """
+    Adiciona a data de emissão do relatório.
+    """
+
+    meses = {
+        1: "janeiro",
+        2: "fevereiro",
+        3: "março",
+        4: "abril",
+        5: "maio",
+        6: "junho",
+        7: "julho",
+        8: "agosto",
+        9: "setembro",
+        10: "outubro",
+        11: "novembro",
+        12: "dezembro"
+    }
+
+    hoje = datetime.now()
+
+    data_emissao = (
+        f"{hoje.day} de "
+        f"{meses[hoje.month]} de "
+        f"{hoje.year}"
+    )
+
+    tabela = Table(
+        [[
+            Paragraph(
+                f"Porto Alegre, {data_emissao}",
+                estilo_direita
+            )
+        ]],
+        colWidths=[17 * cm]
+    )
+
+    tabela.setStyle(
+        TableStyle([
+            ("ALIGN", (0, 0), (0, 0), "RIGHT")
+        ])
+    )
+
+    elementos.append(Spacer(1, 30))
+    elementos.append(tabela)

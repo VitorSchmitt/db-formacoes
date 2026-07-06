@@ -214,7 +214,7 @@ def cronograma_pdf(
 
         caminho = temp.name
 
-    doc = criar_documento_pdf(caminho)
+    criar_documento_pdf(caminho, orientacao="landscape")
 
     styles = getSampleStyleSheet()
 

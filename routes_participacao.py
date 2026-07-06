@@ -17,7 +17,8 @@ from pdf_utils import (
     adicionar_cabecalho,
     criar_documento_pdf,
     aplicar_estilo_tabela,
-    adicionar_data_emissao
+    adicionar_data_emissao,
+    obter_estilo_tabela
 )
 
 

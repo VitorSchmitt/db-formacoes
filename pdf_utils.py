@@ -128,9 +128,9 @@ def criar_documento_pdf(arquivo):
 
     return SimpleDocTemplate(
         arquivo,
-        rightMargin=1,5 * cm,
-        leftMargin=1,5 * cm,
-        topMargin=1,5 * cm,
+        rightMargin=1.5 * cm,
+        leftMargin=1.5 * cm,
+        topMargin=1.5 * cm,
         bottomMargin=1 * cm
     )
 

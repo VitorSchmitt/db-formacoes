@@ -13,7 +13,6 @@ from reportlab.platypus import (
 )
 
 from reportlab.lib import colors
-from reportlab.lib import styles
 from reportlab.lib.units import cm
 
 from datetime import datetime

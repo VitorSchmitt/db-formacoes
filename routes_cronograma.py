@@ -7,7 +7,7 @@ from models import PlanoAnual
 
 from tempfile import NamedTemporaryFile
 from datetime import date
-from pdf_utils import adicionar_logos
+from pdf_utils import adicionar_cabecalho
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
@@ -222,24 +222,15 @@ def cronograma_pdf(
 
     styles = getSampleStyleSheet()
 
-    # ==========================
-    # LOGOS
-    # ==========================
     elementos = []
-    adicionar_logos(elementos)
+
+    adicionar_cabecalho(
+        elementos,
+        styles,
+        "CRONOGRAMA ANUAL"
+    )
+
     
-
-    titulo = Paragraph(
-        f"<b>Cronograma Anual {ano}</b>",
-        styles["Title"]
-    )
-
-    elementos.append(titulo)
-
-    elementos.append(
-        Spacer(1, 20)
-    )
-
     tabela_dados = [[
 
         "Período",

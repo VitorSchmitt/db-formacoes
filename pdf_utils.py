@@ -10,14 +10,11 @@ from reportlab.platypus import (
 
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.styles import (
-    getSampleStyleSheet,
-    ParagraphStyle
-)
+from reportlab.lib.styles import getSampleStyleSheet
 
 LOGO = "static/img/logo.png"
 FASE = "static/img/fase.png"
-
+NOME_SETOR = "CFP / NTEV"
 
 def adicionar_logos(elementos):
     """
@@ -87,7 +84,7 @@ def adicionar_cabecalho(elementos, titulo):
 
     elementos.append(
         Paragraph(
-            "CFP / NTEV",
+            NOME_SETOR,
             estilo_subtitulo
         )
     )

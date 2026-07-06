@@ -141,8 +141,8 @@ def gerar_pdf_certificado(
     # ==========================
     # LOGOS
     # ==========================
-     elementos = []
-     adicionar_logos(elementos)
+    elementos = []
+    adicionar_logos(elementos)
     
     
     # =========================

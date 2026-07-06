@@ -225,8 +225,7 @@ def cronograma_pdf(
     elementos = []
 
     adicionar_cabecalho(
-        elementos,
-        styles,
+        elementos,        
         "CRONOGRAMA ANUAL"
     )
 

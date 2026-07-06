@@ -9,6 +9,7 @@ from models import Participacao, Formacao, Servidor
 
 from tempfile import NamedTemporaryFile
 from datetime import datetime
+from pdf_utils import adicionar_logos
 
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -44,8 +45,7 @@ import os
 
 ASSINANTE = "Jamille de Freitas Serres"
 
-LOGO = "static/img/logo.png"
-FASE = "static/img/fase.png"
+
 
 ASSINATURA_IMG = "static/img/assinatura.png"
 
@@ -136,53 +136,13 @@ def gerar_pdf_certificado(
         leftMargin=40,
         topMargin=40,
         bottomMargin=40
-    )
-
-    elementos = []
+    )    
 
     # =========================
-    # LOGOS LADO A LADO
+    # LOGOS 
     # =========================
 
-    logo_esquerda = ""
-    logo_direita = ""
-
-    if os.path.exists(LOGO):
-
-        logo_esquerda = Image(
-            LOGO,
-            width=5 * cm,
-            height=2.5 * cm
-        )
-
-    if os.path.exists(FASE):
-
-        logo_direita = Image(
-            FASE,
-            width=2.5 * cm,
-            height=2.5 * cm
-        )
-
-    tabela_logos = Table(
-        [[logo_esquerda, logo_direita]],
-        colWidths=[9 * cm, 9 * cm]
-    )
-
-    tabela_logos.setStyle(
-        TableStyle([
-            ("ALIGN", (0, 0), (0, 0), "LEFT"),
-            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-        ])
-    )
-
-    elementos.append(tabela_logos)
-
-    elementos.append(
-        Spacer(1, 12)
-    )
-
+    
     # =========================
     # TÍTULO
     # =========================

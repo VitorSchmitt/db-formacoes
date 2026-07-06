@@ -13,7 +13,10 @@ from reportlab.platypus import (
 
 from datetime import datetime
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import (
+    getSampleStyleSheet,
+    ParagraphStyle
+)
 
 LOGO = "static/img/logo.png"
 FASE = "static/img/fase.png"

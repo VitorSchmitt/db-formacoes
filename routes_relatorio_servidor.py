@@ -11,12 +11,15 @@ from reportlab.platypus import (
     TableStyle,
     Image
 )
-
+from reportlab.lib.styles import (
+    getSampleStyleSheet,
+    ParagraphStyle
+)
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 
 from datetime import datetime
-import os
+
 
 from database import SessionLocal
 from models import (

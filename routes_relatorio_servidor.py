@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from reportlab.lib.units import cm
 
 from reportlab.platypus import (
     Paragraph,

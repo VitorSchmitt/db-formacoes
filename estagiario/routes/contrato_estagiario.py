@@ -26,6 +26,8 @@ def listar_contratos(db: Session = Depends(get_db)):
             "data_fim": c.data_fim.strftime("%Y-%m-%d"),
             "carga_horaria_diaria": c.carga_horaria_diaria,
             "horario": c.horario,
+            "vale_alimentacao": c.vale_alimentacao,
+            "quantidade_vale_transporte": c.quantidade_vale_transporte,
             "data_assinatura": c.data_assinatura.strftime("%Y-%m-%d"),
             "observacoes": c.observacoes,
             "data_desligamento": c.data_desligamento.strftime("%Y-%m-%d") if c.data_desligamento else None,

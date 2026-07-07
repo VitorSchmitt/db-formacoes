@@ -4,22 +4,20 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from reportlab.platypus import (
-    SimpleDocTemplate,
     Paragraph,
     Spacer,
-    Table,
-    TableStyle,
-    Image
+    Table
 )
-from reportlab.lib.styles import (
-    getSampleStyleSheet,
-    ParagraphStyle
+
+from reportlab.lib.styles import getSampleStyleSheet
+
+from pdf_utils import (
+    adicionar_cabecalho,
+    criar_documento_pdf,
+    aplicar_estilo_tabela,
+    adicionar_data_emissao,
+    obter_estilo_tabela
 )
-from reportlab.lib import colors
-from reportlab.lib.units import cm
-
-from datetime import datetime
-
 
 from database import SessionLocal
 from models import (
@@ -217,16 +215,7 @@ def gerar_pdf(
 
     arquivo = "relatorio.pdf"
 
-    doc = SimpleDocTemplate(
-
-        arquivo,
-
-        rightMargin=1*cm,
-        leftMargin=1*cm,
-        topMargin=1*cm,
-        bottomMargin=1*cm
-
-    )
+    doc = criar_documento_pdf(arquivo)
 
     estilos = getSampleStyleSheet()
 
@@ -364,55 +353,14 @@ def gerar_pdf(
     
     )
     
-    tabela_pdf.setStyle(
-    
-        TableStyle([
-    
-            (
-                "BACKGROUND",
-                (0,0),
-                (-1,0),
-                colors.lightgrey
-            ),
-    
-            (
-                "GRID",
-                (0,0),
-                (-1,-1),
-                1,
-                colors.black
-            ),
-    
-            (
-                "VALIGN",
-                (0,0),
-                (-1,-1),
-                "MIDDLE"
-            ),
-    
-            (
-                "LEADING",
-                (0,0),
-                (-1,-1),
-                14
-            ),
-    
-            (
-                "FONTNAME",
-                (0,-1),
-                (-1,-1),
-                "Helvetica-Bold"
-            ),
-    
-            (
-                "BACKGROUND",
-                (0,-1),
-                (-1,-1),
-                colors.lightgrey
-            )
-    
-        ])
-    
+    aplicar_estilo_tabela(
+    tabela_pdf,
+        estilos_extras=[
+            ("ALIGN", (1, 0), (2, -1), "RIGHT"),
+            ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+            ("BACKGROUND", (0, -1), (-1, -1), colors.lightgrey),
+            ("LEADING", (0, 0), (-1, -1), 14),
+        ]
     )
 
     elementos.append(
@@ -426,63 +374,10 @@ def gerar_pdf(
     # DATA DE EMISSÃO
     # ==========================
     
-    meses = {
-    
-        1:"janeiro",
-        2:"fevereiro",
-        3:"março",
-        4:"abril",
-        5:"maio",
-        6:"junho",
-        7:"julho",
-        8:"agosto",
-        9:"setembro",
-        10:"outubro",
-        11:"novembro",
-        12:"dezembro"
-    
-    }
-    
-    hoje = datetime.now()
-    
-    data_emissao = (
-        f"{hoje.day} de "
-        f"{meses[hoje.month]} de "
-        f"{hoje.year}"
+    adicionar_data_emissao(
+        elementos,
+        estilo_direita
     )
-    
-    elementos.append(
-        Spacer(1,30)
-    )
-    
-    
-    tabela_data = Table(
-
-        [[
-            Paragraph(
-                f"Porto Alegre, {data_emissao}",
-                estilo_direita
-            )
-        ]],
-    
-        colWidths=[17*cm]
-    
-    )
-    
-    tabela_data.setStyle(
-        
-        TableStyle([
-        
-            (
-                "ALIGN",
-                (0,0),
-                (0,0),
-                "RIGHT"
-            )
-        
-        ])
-        
-    )       
     
     elementos.append(
         tabela_data

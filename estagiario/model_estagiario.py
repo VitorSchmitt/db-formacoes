@@ -258,6 +258,19 @@ class ContratoEstagio(Base):
         String(100),
         nullable=False
     )
+    
+    # Benefícios
+    vale_alimentacao = Column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+    
+    quantidade_vale_transporte = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
 
 
     # Encerramento

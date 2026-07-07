@@ -63,6 +63,31 @@
                     <textarea class="form-control" id="observacoes" rows="1"></textarea>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <hr>
+                    <h6 class="text-primary">Benefícios</h6>
+                </div>
+            
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Vale Alimentação</label>
+                    <select class="form-control" id="vale_alimentacao">
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+            
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Quantidade de Vale Transporte</label>
+                    <select class="form-control" id="quantidade_vale_transporte">
+                        <option value="0">0</option>
+                        <option value="2">2</option>
+                        <option value="4">2 (ida e volta)</option>                        
+                    </select>
+                </div>
+            </div>
+            
             <div class="mt-2">
                 <button class="btn btn-success" onclick="salvar()">Salvar Contrato</button>
                 <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
@@ -96,15 +121,34 @@
 const urlContratos = "/api/contrato_estagio";
 
 document.addEventListener("DOMContentLoaded", () => {
+
     carregarSelects();
     carregarContratos();
+
+    document
+        .getElementById("classificacao_id")
+        .addEventListener("change", atualizarBeneficios);
+
 });
 
 function carregarSelects() {
     fetch("/api/estagiarios").then(r => r.json()).then(d => preencherSelect("estagiario_id", d, 'id', 'nome'));
     fetch("/api/lotacoes").then(r => r.json()).then(d => preencherSelect("lotacao_id", d, 'id', 'descricao'));
     fetch("/api/servidores").then(r => r.json()).then(d => preencherSelect("supervisor_matricula", d, 'matricula', 'nome'));
-    fetch("/api/classificacoes_estagio").then(r => r.json()).then(d => preencherSelect("classificacao_id", d.filter(c => c.ativo), 'id', 'descricao'));   
+    fetch("/api/classificacoes_estagio")
+    .then(r => r.json())
+    .then(d => {
+
+        preencherSelect(
+            "classificacao_id",
+            d.filter(c => c.ativo),
+            "id",
+            "descricao"
+        );
+
+        atualizarBeneficios();
+
+    });
     
 }
 
@@ -145,7 +189,8 @@ function cancelar() { limpar(); document.getElementById("formCard").style.displa
 
 function limpar() {
     document.getElementById("id").value = "";
-    ["numero_contrato", "estagiario_id", "lotacao_id", "supervisor_matricula", "classificacao_id", "carga_horaria_diaria", "horario", "data_assinatura", "data_inicio", "data_fim", "observacoes"].forEach(id => {
+    ["numero_contrato", "estagiario_id", "lotacao_id", "supervisor_matricula", "classificacao_id", "carga_horaria_diaria", "horario", "data_assinatura", "data_inicio", "data_fim","vale_alimentacao",
+"quantidade_vale_transporte", "observacoes"].forEach(id => {
         document.getElementById(id).value = "";
     });
 }
@@ -153,9 +198,11 @@ function limpar() {
 function editar(c) {
     document.getElementById("formCard").style.display = "block";
     document.getElementById("id").value = c.id;
-    ["numero_contrato", "estagiario_id", "lotacao_id", "supervisor_matricula", "classificacao_id", "carga_horaria_diaria", "horario", "data_assinatura", "data_inicio", "data_fim", "observacoes"].forEach(id => {
+    ["numero_contrato", "estagiario_id", "lotacao_id", "supervisor_matricula", "classificacao_id", "carga_horaria_diaria", "horario", "data_assinatura", "data_inicio", "data_fim","vale_alimentacao",
+"quantidade_vale_transporte", "observacoes"].forEach(id => {
         document.getElementById(id).value = c[id] || "";
     });
+    atualizarBeneficios();
 }
 
 function salvar() {
@@ -168,6 +215,8 @@ function salvar() {
         classificacao_id: parseInt(document.getElementById("classificacao_id").value),       
         carga_horaria_diaria: parseInt(document.getElementById("carga_horaria_diaria").value),
         horario: document.getElementById("horario").value,
+        vale_alimentacao:document.getElementById("vale_alimentacao").value === "true",
+        quantidade_vale_transporte:parseInt(document.getElementById("quantidade_vale_transporte").value),
         data_assinatura: document.getElementById("data_assinatura").value,
         data_inicio: document.getElementById("data_inicio").value,
         data_fim: document.getElementById("data_fim").value,
@@ -189,6 +238,41 @@ function salvar() {
         if(!r.ok) { const e = await r.json(); throw new Error(e.detail || "Erro ao salvar contrato."); }
         cancelar(); carregarContratos();
     }).catch(err => alert(err.message));
+}
+    
+    function atualizarBeneficios() {
+
+        const classificacao = document
+            .getElementById("classificacao_id");
+    
+        const texto =
+            classificacao.options[classificacao.selectedIndex]?.text || "";
+    
+        const curricular = texto
+            .toLowerCase()
+            .includes("curricular");
+    
+        const valeAlimentacao =
+            document.getElementById("vale_alimentacao");
+    
+        const valeTransporte =
+            document.getElementById("quantidade_vale_transporte");
+    
+        if (curricular) {
+    
+            valeAlimentacao.value = "false";
+            valeTransporte.value = "0";
+    
+            valeAlimentacao.disabled = true;
+            valeTransporte.disabled = true;
+    
+        } else {
+    
+            valeAlimentacao.disabled = false;
+            valeTransporte.disabled = false;
+    
+        }
+    
 }
 
 function solicitarDesligamento(id) {

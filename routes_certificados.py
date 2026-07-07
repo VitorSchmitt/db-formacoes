@@ -9,10 +9,13 @@ from models import Participacao, Formacao, Servidor
 
 from tempfile import NamedTemporaryFile
 from datetime import datetime
-from pdf_utils import adicionar_cabecalho,criar_documento_pdf
+from pdf_utils import (
+    adicionar_cabecalho,
+    criar_documento_pdf,
+    adicionar_data_emissao
+)
 
-from reportlab.platypus import (
-    SimpleDocTemplate,
+from reportlab.platypus import (    
     Paragraph,
     Spacer,
     ListFlowable,
@@ -27,7 +30,7 @@ from reportlab.lib.styles import (
     ParagraphStyle
 )
 
-from reportlab.lib.pagesizes import A4
+
 
 from reportlab.lib.enums import (
     TA_CENTER,
@@ -129,15 +132,7 @@ def gerar_pdf_certificado(
     # DOCUMENTO
     # =========================
 
-    doc = SimpleDocTemplate(
-        caminho_pdf,
-        pagesize=A4,
-        rightMargin=40,
-        leftMargin=40,
-        topMargin=40,
-        bottomMargin=40
-    )    
-
+    doc = criar_documento_pdf(caminho_pdf)
     elementos = []
 
     adicionar_cabecalho(
@@ -253,13 +248,7 @@ def gerar_pdf_certificado(
     # DATA
     # =========================
 
-    elementos.append(
-        Paragraph(
-            f"Porto Alegre, "
-            f"{dados['data_emissao']}",
-            estilo_texto
-        )
-    )
+    adicionar_data_emissao()
 
     elementos.append(
         Spacer(1, 30)

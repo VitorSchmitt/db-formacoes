@@ -9,7 +9,7 @@ from models import Participacao, Formacao, Servidor
 
 from tempfile import NamedTemporaryFile
 from datetime import datetime
-from pdf_utils import adicionar_cabecalho
+from pdf_utils import adicionar_cabecalho,criar_documento_pdf
 
 from reportlab.platypus import (
     SimpleDocTemplate,

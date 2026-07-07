@@ -207,6 +207,6 @@ def obter_estilo_tabela():
         "Tabela",
         parent=styles["BodyText"],
         fontName="Helvetica",
-        fontSize=8,
+        fontSize=10,
         leading=10,
     )

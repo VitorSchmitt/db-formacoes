@@ -248,7 +248,10 @@ def gerar_pdf_certificado(
     # DATA
     # =========================
 
-    adicionar_data_emissao()
+    adicionar_data_emissao(
+        elementos,
+        estilo_direita
+    )  
 
     elementos.append(
         Spacer(1, 30)

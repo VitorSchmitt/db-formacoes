@@ -12,7 +12,8 @@ from datetime import datetime
 from pdf_utils import (
     adicionar_cabecalho,
     criar_documento_pdf,
-    adicionar_data_emissao
+    adicionar_data_emissao,
+    obter_estilo_tabela
 )
 
 from reportlab.platypus import (    
@@ -246,8 +247,9 @@ def gerar_pdf_certificado(
 
     # =========================
     # DATA
-    # =========================
-
+    # =========================    
+    estilo_direita = obter_estilo_tabela()
+    estilo_direita.alignment = 2
     adicionar_data_emissao(
         elementos,
         estilo_direita

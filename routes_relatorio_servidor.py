@@ -252,14 +252,10 @@ def gerar_pdf(
     # ESTILOS
     # ==========================
     
-    estilo_esquerda = estilos["Normal"]
-    
-    estilo_direita = ParagraphStyle(
-        "direita",
-        parent=estilos["Normal"],
-        alignment=2   # RIGHT
-    ) 
-    
+    estilo_esquerda = obter_estilo_tabela()    
+    estilo_direita = obter_estilo_tabela()
+    estilo_direita.alignment = 2
+        
     
     
     # ==========================
@@ -377,11 +373,7 @@ def gerar_pdf(
     adicionar_data_emissao(
         elementos,
         estilo_direita
-    )
-    
-    elementos.append(
-        tabela_data
-    )
+    )  
     
     doc.build(elementos)
     

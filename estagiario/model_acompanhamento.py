@@ -72,6 +72,12 @@ class FrequenciaEstagio(Base):
         nullable=False
     )
 
+    dias = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+
     horas_realizadas = Column(
         Numeric(4, 2),
         nullable=False

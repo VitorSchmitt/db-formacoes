@@ -67,7 +67,7 @@ class FrequenciaEstagio(Base):
         nullable=False
     )
 
-    data = Column(
+    competencia = Column(
         Date,
         nullable=False
     )

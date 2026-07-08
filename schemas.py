@@ -253,8 +253,8 @@ class ContratoEstagioUpdate(BaseModel):
     data_fim: Optional[date] = None
     carga_horaria_diaria: Optional[int] = None
     horario: Optional[str] = None
-    vale_alimentacao: [bool]= None
-    quantidade_vale_transporte:[int] = None
+    vale_alimentacao:Optional[bool]= None
+    quantidade_vale_transporte:Optional[int] = None
     observacoes: Optional[str] = None
 
 # Usado especificamente na rota de desligamento

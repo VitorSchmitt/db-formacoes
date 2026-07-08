@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,ConfigDict
 from datetime import date
 from decimal import Decimal
 from typing import Optional
@@ -262,6 +262,37 @@ class DesligamentoContratoInput(BaseModel):
     data_desligamento: date
     motivo_desligamento: MotivoDesligamentoEnum
     observacao_desligamento: Optional[str] = None
+
+
+
+
+class FrequenciaEstagioBase(BaseModel):
+
+    contrato_id: int
+    competencia: date
+    dias: int
+    horas_realizadas: Decimal
+    observacao: Optional[str] = None
+
+
+class FrequenciaEstagioCreate(FrequenciaEstagioBase):
+    pass
+
+
+class FrequenciaEstagioUpdate(BaseModel):
+
+    contrato_id: Optional[int] = None
+    competencia: Optional[date] = None
+    dias: Optional[int] = None
+    horas_realizadas: Optional[Decimal] = None
+    observacao: Optional[str] = None
+
+
+class FrequenciaEstagioResponse(FrequenciaEstagioBase):
+
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
     

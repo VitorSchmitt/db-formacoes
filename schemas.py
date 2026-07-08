@@ -237,6 +237,8 @@ class ContratoEstagioCreate(BaseModel):
     data_fim: date
     carga_horaria_diaria: int
     horario: str
+    vale_alimentacao: bool
+    quantidade_vale_transporte: int
     observacoes: Optional[str] = None
 
 # Usado no PUT de edição
@@ -251,6 +253,8 @@ class ContratoEstagioUpdate(BaseModel):
     data_fim: Optional[date] = None
     carga_horaria_diaria: Optional[int] = None
     horario: Optional[str] = None
+    vale_alimentacao: [bool]= None
+    quantidade_vale_transporte:[int] = None
     observacoes: Optional[str] = None
 
 # Usado especificamente na rota de desligamento

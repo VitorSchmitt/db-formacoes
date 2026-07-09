@@ -53,7 +53,7 @@ class FrequenciaEstagio(Base):
     __table_args__ = (
         UniqueConstraint(
             "contrato_id",
-            "data",
+            "competencia",
             name="uq_frequencia_contrato_data"
         ),
     )

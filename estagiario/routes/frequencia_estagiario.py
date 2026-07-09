@@ -16,7 +16,7 @@ def listar_frequencias(db: Session = Depends(get_db)):
             "id": f.id,
             "contrato_id": f.contrato_id,
             "numero_contrato": f.contrato.numero_contrato if f.contrato else "Não informado",
-            "competencia": f.competencia.strftime("%m-%Y"),
+            "competencia": f.competencia.strftime("%Y-%m"),
             "dias": f.dias,
             "horas_realizadas": float(f.horas_realizadas), # Convertido para float para o JSON
             "observacao": f.observacao

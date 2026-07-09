@@ -88,5 +88,5 @@ db.refresh(frequencia)
 
 return {"mensagem": "Frequência atualizada com sucesso"}
         
-    db.commit()
-    return {"mensagem": "Frequência atualizada com sucesso"}
+db.commit()
+return {"mensagem": "Frequência atualizada com sucesso"}

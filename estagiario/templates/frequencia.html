@@ -169,19 +169,29 @@ function editar(item) {
     document.getElementById("observacao").value = item.observacao || "";
 }
 
+
 // 5. SALVAR (POST ou PUT)
 function salvar() {
     const id = document.getElementById("id").value;
     const contratoId = document.getElementById("contrato_id").value;
-    const compInput = document.getElementById("competencia").value; // Retorna "YYYY-MM"
+    const compInput = document.getElementById("competencia").value; // Pode vir "YYYY-MM" ou "MM/YYYY"
 
     if (!contratoId || !compInput || !document.getElementById("dias").value || !document.getElementById("horas_realizadas").value) {
         alert("Por favor, preencha todos os campos obrigatórios (*).");
         return;
     }
 
-    // Adapta o "YYYY-MM" do input month para "YYYY-MM-01" aceito pela tipagem de data da API
-    const dataFormatada = `${compInput}-01`;
+    // Adaptação segura: Trata se vier invertido (MM/YYYY) ou normal (YYYY-MM)
+    let dataFormatada = compInput;
+    if (compInput.includes('/')) {
+        const partes = compInput.split('/');
+        dataFormatada = `${partes[1]}-${partes[0]}-01`; // Converte "06/2026" -> "2026-06-01"
+    } else if (compInput.includes('-') && compInput.split('-')[0].length === 2) {
+        const partes = compInput.split('-');
+        dataFormatada = `${partes[1]}-${partes[0]}-01`; // Converte "06-2026" -> "2026-06-01"
+    } else {
+        dataFormatada = `${compInput}-01`; // Padrão original para "YYYY-MM" -> "YYYY-MM-01"
+    }
 
     const dados = {
         contrato_id: parseInt(contratoId),

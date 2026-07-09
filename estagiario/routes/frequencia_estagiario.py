@@ -83,10 +83,10 @@ def atualizar_frequencia(id: int, dados: FrequenciaEstagioUpdate, db: Session = 
     if dados.observacao is not None:
         frequencia.observacao = dados.observacao
 
-db.commit()
-db.refresh(frequencia)
-
-return {"mensagem": "Frequência atualizada com sucesso"}
-        
-db.commit()
-return {"mensagem": "Frequência atualizada com sucesso"}
+    db.commit()
+    db.refresh(frequencia)
+    
+    return {"mensagem": "Frequência atualizada com sucesso"}
+            
+    db.commit()
+    return {"mensagem": "Frequência atualizada com sucesso"}

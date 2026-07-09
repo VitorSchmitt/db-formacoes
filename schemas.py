@@ -1,5 +1,5 @@
-from pydantic import BaseModel, EmailStr,ConfigDict
-from datetime import date
+from pydantic import BaseModel, EmailStr,ConfigDict, field_validator, field_serializer
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 from estagiario.enums import SexoEnum
@@ -267,12 +267,32 @@ class DesligamentoContratoInput(BaseModel):
 
 
 class FrequenciaEstagioBase(BaseModel):
-
     contrato_id: int
     competencia: date
     dias: int
     horas_realizadas: Decimal
     observacao: Optional[str] = None
+
+    # 1. Transforma "MM/YYYY" recebido do Frontend em um date (ex: "07/2026" -> 2026-07-01)
+    @field_validator("competencia", mode="before")
+    @classmethod
+    def transformar_string_em_data(cls, v):
+        if isinstance(v, str):
+            try:
+                # Tenta converter o formato MM/YYYY definindo o dia automaticamente como 01
+                return datetime.strptime(v, "%m/%Y").date()
+            except ValueError:
+                try:
+                    # Mantém o suporte caso mandem o formato completo YYYY-MM-DD
+                    return datetime.strptime(v, "%Y-%m-%d").date()
+                except ValueError:
+                    raise ValueError("A competência deve estar no formato MM/YYYY ou YYYY-MM-DD")
+        return v
+
+    # 2. Transforma o date do banco em "MM/YYYY" ao enviar para o Frontend
+    @field_serializer("competencia")
+    def formatar_data_para_frontend(self, v: date) -> str:
+        return v.strftime("%m/%Y")
 
 
 class FrequenciaEstagioCreate(FrequenciaEstagioBase):
@@ -280,21 +300,27 @@ class FrequenciaEstagioCreate(FrequenciaEstagioBase):
 
 
 class FrequenciaEstagioUpdate(BaseModel):
-
     contrato_id: Optional[int] = None
     competencia: Optional[date] = None
     dias: Optional[int] = None
     horas_realizadas: Optional[Decimal] = None
     observacao: Optional[str] = None
 
+    # Aplica a mesma lógica de entrada no Update, se a competência for enviada
+    @field_validator("competencia", mode="before")
+    @classmethod
+    def transformar_string_em_data(cls, v):
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, "%m/%Y").date()
+            except ValueError:
+                return datetime.strptime(v, "%Y-%m-%d").date()
+        return v
+
 
 class FrequenciaEstagioResponse(FrequenciaEstagioBase):
-
     id: int
-
     model_config = ConfigDict(from_attributes=True)
-
-
     
     
 

@@ -37,7 +37,13 @@ def criar_frequencia(dados: FrequenciaEstagioCreate, db: Session = Depends(get_d
             detail="Já existe um registro de frequência para este contrato nesta competência."
         )
     
-    nova = FrequenciaEstagio(**dados.model_dump())
+    nova = FrequenciaEstagio(
+        contrato_id=dados.contrato_id,
+        competencia=dados.competencia,
+        dias=dados.dias,
+        horas_realizadas=dados.horas_realizadas,
+        observacao=dados.observacao,
+    )
     db.add(nova)
     db.commit()
     return {"mensagem": "Frequência cadastrada com sucesso"}
@@ -62,9 +68,25 @@ def atualizar_frequencia(id: int, dados: FrequenciaEstagioUpdate, db: Session = 
             )
 
     # Atualiza apenas os campos enviados
-    dados_atualizados = dados.model_dump(exclude_unset=True)
-    for key, value in dados_atualizados.items():
-        setattr(frequencia, key, value)
+    if dados.contrato_id is not None:
+        frequencia.contrato_id = dados.contrato_id
+    
+    if dados.competencia is not None:
+        frequencia.competencia = dados.competencia
+    
+    if dados.dias is not None:
+        frequencia.dias = dados.dias
+    
+    if dados.horas_realizadas is not None:
+        frequencia.horas_realizadas = dados.horas_realizadas
+    
+    if dados.observacao is not None:
+        frequencia.observacao = dados.observacao
+
+db.commit()
+db.refresh(frequencia)
+
+return {"mensagem": "Frequência atualizada com sucesso"}
         
     db.commit()
     return {"mensagem": "Frequência atualizada com sucesso"}

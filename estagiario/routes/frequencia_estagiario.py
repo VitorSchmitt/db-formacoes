@@ -48,45 +48,56 @@ def criar_frequencia(dados: FrequenciaEstagioCreate, db: Session = Depends(get_d
     db.commit()
     return {"mensagem": "Frequência cadastrada com sucesso"}
 
+
 @router.put("/{id}")
-def atualizar_frequencia(id: int, dados: FrequenciaEstagioUpdate, db: Session = Depends(get_db)):
-    frequencia = db.query(FrequenciaEstagio).filter(FrequenciaEstagio.id == id).first()
+def atualizar_frequencia(
+    id: int,
+    dados: FrequenciaEstagioUpdate,
+    db: Session = Depends(get_db)
+):
+    frequencia = db.query(FrequenciaEstagio).filter(
+        FrequenciaEstagio.id == id
+    ).first()
+
     if not frequencia:
-        raise HTTPException(status_code=404, detail="Frequência não encontrada")
-    
-    # Se estiver alterando a competência, verifica se não vai gerar duplicidade
-    if dados.competencia:
+        raise HTTPException(
+            status_code=404,
+            detail="Frequência não encontrada"
+        )
+
+    # Verifica duplicidade da competência
+    if dados.competencia is not None:
         conflito = db.query(FrequenciaEstagio).filter(
             FrequenciaEstagio.contrato_id == frequencia.contrato_id,
             FrequenciaEstagio.competencia == dados.competencia,
             FrequenciaEstagio.id != id
         ).first()
+
         if conflito:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail="O contrato já possui uma frequência registrada para esta competência."
             )
 
-    # Atualiza apenas os campos enviados
+    # Atualiza somente os campos informados
     if dados.contrato_id is not None:
         frequencia.contrato_id = dados.contrato_id
-    
+
     if dados.competencia is not None:
         frequencia.competencia = dados.competencia
-    
+
     if dados.dias is not None:
         frequencia.dias = dados.dias
-    
+
     if dados.horas_realizadas is not None:
         frequencia.horas_realizadas = dados.horas_realizadas
-    
+
     if dados.observacao is not None:
         frequencia.observacao = dados.observacao
 
     db.commit()
     db.refresh(frequencia)
-    
-    return {"mensagem": "Frequência atualizada com sucesso"}
-            
-    db.commit()
-    return {"mensagem": "Frequência atualizada com sucesso"}
+
+    return {
+        "mensagem": "Frequência atualizada com sucesso"
+    }

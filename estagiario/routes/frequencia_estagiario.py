@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 # Certifique-se de ajustar o caminho correto da importação do seu modelo
-from estagiario.model_acompanhamneto import FrequenciaEstagio 
+from estagiario.model_acompanhamento import FrequenciaEstagio 
 from schemas import FrequenciaEstagioCreate, FrequenciaEstagioUpdate
 
 router = APIRouter(prefix="/api/frequencia_estagio", tags=["Frequências de Estágio"])

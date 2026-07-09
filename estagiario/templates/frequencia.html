@@ -159,8 +159,7 @@ function editar(item) {
     document.getElementById("contrato_id").value = item.contrato_id;
     document.getElementById("contrato_id").disabled = true;
 
-    const [mes, ano] = item.competencia.split("/");
-    document.getElementById("competencia").value = `${mes}-${ano}`;
+    document.getElementById("competencia").value = item.competencia;
 
     document.getElementById("dias").value = item.dias;
     document.getElementById("horas_realizadas").value = item.horas_realizadas;

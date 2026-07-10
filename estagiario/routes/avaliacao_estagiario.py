@@ -33,8 +33,9 @@ def listar(db: Session = Depends(get_db), limit: int = 100, offset: int = 0):
     # Monta a resposta exatamente no formato esperado pelo front-end
     lista_formatada = []
     for av in resultados:
-        # Verifica se o relacionamento contrato existe no modelo
         contrato = getattr(av, 'contrato', None)
+        # Busca o objeto estagiario de dentro do contrato
+        estagiario = getattr(contrato, 'estagiario', None) if contrato else None
         
         lista_formatada.append({
             "id": av.id,
@@ -42,9 +43,12 @@ def listar(db: Session = Depends(get_db), limit: int = 100, offset: int = 0):
             "data_avaliacao": av.data_avaliacao.isoformat() if hasattr(av.data_avaliacao, 'isoformat') else str(av.data_avaliacao),
             "avaliacao": av.avaliacao,
             "parecer": av.parecer,
-            # Injeta os campos que o JS precisa para renderizar a tabela
+            
+            # Buscando o número do contrato
             "numero_contrato": contrato.numero_contrato if contrato else f"Contrato #{av.contrato_id}",
-            "estagiario_nome": contrato.estagiario_nome if contrato else "Não informado"
+            
+            # CORRIGIDO: Agora busca corretamente o nome de dentro da classe Estagiario
+            "estagiario_nome": estagiario.nome if estagiario else "Não informado"
         })
         
     return lista_formatada

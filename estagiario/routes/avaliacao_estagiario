@@ -19,11 +19,31 @@ router = APIRouter(
 # ==========================
 @router.get("/")
 def listar(db: Session = Depends(get_db)):
-    return (
+    # Certifique-se de importar o modelo do Contrato (ex: ContratoEstagio) se for usar join explícito
+    # Aqui fazemos um JOIN para trazer os dados do contrato e estagiário junto com a avaliação
+    
+    resultados = (
         db.query(AvaliacaoSupervisor)
         .order_by(AvaliacaoSupervisor.data_avaliacao.desc())
         .all()
     )
+    
+    # Monta a resposta no formato que o JavaScript espera
+    lista_formatada = []
+    for av in resultados:
+        lista_formatada.append({
+            "id": av.id,
+            "contrato_id": av.contrato_id,
+            "data_avaliacao": av.data_avaliacao.isoformat() if hasattr(av.data_avaliacao, 'isoformat') else str(av.data_avaliacao),
+            "avaliacao": av.avaliacao,
+            "parecer": av.parecer,
+            # Abaixo injetamos os campos que o front-end pede. 
+            # (Supondo que você tenha configurado 'contrato' como relacionamento no model)
+            "numero_contrato": av.contrato.numero_contrato if hasattr(av, 'contrato') else f"Contrato #{av.contrato_id}",
+            "estagiario_nome": av.contrato.estagiario_nome if hasattr(av, 'contrato') else "Não informado"
+        })
+        
+    return lista_formatada
 
 
 # ==========================

@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
 from estagiario.model_acompanhamento import AvaliacaoSupervisor
@@ -19,29 +19,32 @@ router = APIRouter(
 # ==========================
 @router.get("/")
 def listar(db: Session = Depends(get_db), limit: int = 100, offset: int = 0):
-    return db.query(AvaliacaoSupervisor).offset(offset).limit(limit).all()
-    # Certifique-se de importar o modelo do Contrato (ex: ContratoEstagio) se for usar join explícito
-    # Aqui fazemos um JOIN para trazer os dados do contrato e estagiário junto com a avaliação
-    
+    # CORRIGIDO: Removido o return precoce.
+    # O joinedload carrega o relacionamento 'contrato' de uma só vez (evita o problema N+1)
     resultados = (
         db.query(AvaliacaoSupervisor)
+        .options(joinedload(AvaliacaoSupervisor.contrato))  # Garante performance no join
         .order_by(AvaliacaoSupervisor.data_avaliacao.desc())
+        .offset(offset)
+        .limit(limit)
         .all()
     )
     
-    # Monta a resposta no formato que o JavaScript espera
+    # Monta a resposta exatamente no formato esperado pelo front-end
     lista_formatada = []
     for av in resultados:
+        # Verifica se o relacionamento contrato existe no modelo
+        contrato = getattr(av, 'contrato', None)
+        
         lista_formatada.append({
             "id": av.id,
             "contrato_id": av.contrato_id,
             "data_avaliacao": av.data_avaliacao.isoformat() if hasattr(av.data_avaliacao, 'isoformat') else str(av.data_avaliacao),
             "avaliacao": av.avaliacao,
             "parecer": av.parecer,
-            # Abaixo injetamos os campos que o front-end pede. 
-            # (Supondo que você tenha configurado 'contrato' como relacionamento no model)
-            "numero_contrato": av.contrato.numero_contrato if hasattr(av, 'contrato') else f"Contrato #{av.contrato_id}",
-            "estagiario_nome": av.contrato.estagiario_nome if hasattr(av, 'contrato') else "Não informado"
+            # Injeta os campos que o JS precisa para renderizar a tabela
+            "numero_contrato": contrato.numero_contrato if contrato else f"Contrato #{av.contrato_id}",
+            "estagiario_nome": contrato.estagiario_nome if contrato else "Não informado"
         })
         
     return lista_formatada
@@ -61,7 +64,7 @@ def buscar(id: int, db: Session = Depends(get_db)):
 
     if not avaliacao:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Avaliação não encontrada."
         )
 
@@ -71,7 +74,7 @@ def buscar(id: int, db: Session = Depends(get_db)):
 # ==========================
 # INSERIR
 # ==========================
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def inserir(
     dados: AvaliacaoSupervisorCreate,
     db: Session = Depends(get_db)
@@ -109,21 +112,16 @@ def alterar(
 
     if not avaliacao:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Avaliação não encontrada."
         )
 
-    if dados.contrato_id is not None:
-        avaliacao.contrato_id = dados.contrato_id
-
-    if dados.data_avaliacao is not None:
-        avaliacao.data_avaliacao = dados.data_avaliacao
-
-    if dados.avaliacao is not None:
-        avaliacao.avaliacao = dados.avaliacao
-
-    if dados.parecer is not None:
-        avaliacao.parecer = dados.parecer
+    # Refatorado: Atualização dinâmica usando setattr (evita uma pilha de IFs)
+    # Exclui campos não enviados na requisição (útil se o schema aceitar campos opcionais)
+    dados_atualizar = dados.model_dump(exclude_unset=True) if hasattr(dados, 'model_dump') else dados.dict(exclude_unset=True)
+    
+    for chave, valor in dados_atualizar.items():
+        setattr(avaliacao, chave, valor)
 
     db.commit()
     db.refresh(avaliacao)
@@ -148,7 +146,7 @@ def excluir(
 
     if not avaliacao:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Avaliação não encontrada."
         )
 

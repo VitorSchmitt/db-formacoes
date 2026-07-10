@@ -1,9 +1,19 @@
-from pydantic import BaseModel, EmailStr,ConfigDict, field_validator, field_serializer
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    ConfigDict,
+    field_validator,
+    field_serializer
+)
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
-from estagiario.enums import SexoEnum
-from estagiario.enums import MotivoDesligamentoEnum
+from estagiario.enums import (
+    SexoEnum,
+    MotivoDesligamentoEnum,
+    AvaliacaoSupervisorEnum
+)
+
 
 # ===============================
 # FORMAÇÃO
@@ -321,6 +331,26 @@ class FrequenciaEstagioUpdate(BaseModel):
 
 class FrequenciaEstagioResponse(FrequenciaEstagioBase):
     id: int
+
+
+# ===============================
+# AVALIAÇÃO DO SUPERVISOR
+# ===============================
+
+# Usado no POST de criação
+class AvaliacaoSupervisorCreate(BaseModel):
+    contrato_id: int
+    data_avaliacao: date
+    avaliacao: AvaliacaoSupervisorEnum
+    parecer: Optional[str] = None
+
+
+# Usado no PUT de edição
+class AvaliacaoSupervisorUpdate(BaseModel):
+    contrato_id: Optional[int] = None
+    data_avaliacao: Optional[date] = None
+    avaliacao: Optional[AvaliacaoSupervisorEnum] = None
+    parecer: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
     

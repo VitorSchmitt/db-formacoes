@@ -1,0 +1,139 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from database import get_db
+from model_estagiario import AvaliacaoSupervisor
+from schema_estagiario import (
+    AvaliacaoSupervisorCreate,
+    AvaliacaoSupervisorUpdate
+)
+
+router = APIRouter(
+    prefix="/api/avaliadores_estagiario",
+    tags=["Avaliação do Supervisor"]
+)
+
+
+# ==========================
+# LISTAR
+# ==========================
+@router.get("/")
+def listar(db: Session = Depends(get_db)):
+    return (
+        db.query(AvaliacaoSupervisor)
+        .order_by(AvaliacaoSupervisor.data_avaliacao.desc())
+        .all()
+    )
+
+
+# ==========================
+# BUSCAR POR ID
+# ==========================
+@router.get("/{id}")
+def buscar(id: int, db: Session = Depends(get_db)): 
+
+    avaliacao = (
+        db.query(AvaliacaoSupervisor)
+        .filter(AvaliacaoSupervisor.id == id)
+        .first()
+    )
+
+    if not avaliacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Avaliação não encontrada."
+        )
+
+    return avaliacao
+
+
+# ==========================
+# INSERIR
+# ==========================
+@router.post("/")
+def inserir(
+    dados: AvaliacaoSupervisorCreate,
+    db: Session = Depends(get_db)
+):
+
+    avaliacao = AvaliacaoSupervisor(
+        contrato_id=dados.contrato_id,
+        data_avaliacao=dados.data_avaliacao,
+        avaliacao=dados.avaliacao,
+        parecer=dados.parecer
+    )
+
+    db.add(avaliacao)
+    db.commit()
+    db.refresh(avaliacao)
+
+    return avaliacao
+
+
+# ==========================
+# ALTERAR
+# ==========================
+@router.put("/{id}")
+def alterar(
+    id: int,
+    dados: AvaliacaoSupervisorUpdate,
+    db: Session = Depends(get_db)
+):
+
+    avaliacao = (
+        db.query(AvaliacaoSupervisor)
+        .filter(AvaliacaoSupervisor.id == id)
+        .first()
+    )
+
+    if not avaliacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Avaliação não encontrada."
+        )
+
+    if dados.contrato_id is not None:
+        avaliacao.contrato_id = dados.contrato_id
+
+    if dados.data_avaliacao is not None:
+        avaliacao.data_avaliacao = dados.data_avaliacao
+
+    if dados.avaliacao is not None:
+        avaliacao.avaliacao = dados.avaliacao
+
+    if dados.parecer is not None:
+        avaliacao.parecer = dados.parecer
+
+    db.commit()
+    db.refresh(avaliacao)
+
+    return avaliacao
+
+
+# ==========================
+# EXCLUIR
+# ==========================
+@router.delete("/{id}")
+def excluir(
+    id: int,
+    db: Session = Depends(get_db)
+):
+
+    avaliacao = (
+        db.query(AvaliacaoSupervisor)
+        .filter(AvaliacaoSupervisor.id == id)
+        .first()
+    )
+
+    if not avaliacao:
+        raise HTTPException(
+            status_code=404,
+            detail="Avaliação não encontrada."
+        )
+
+    db.delete(avaliacao)
+    db.commit()
+
+    return {
+        "mensagem": "Avaliação excluída com sucesso."
+    }

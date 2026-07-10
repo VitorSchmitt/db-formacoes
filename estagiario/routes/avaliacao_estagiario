@@ -18,7 +18,8 @@ router = APIRouter(
 # LISTAR
 # ==========================
 @router.get("/")
-def listar(db: Session = Depends(get_db)):
+def listar(db: Session = Depends(get_db), limit: int = 100, offset: int = 0):
+    return db.query(AvaliacaoSupervisor).offset(offset).limit(limit).all()
     # Certifique-se de importar o modelo do Contrato (ex: ContratoEstagio) se for usar join explícito
     # Aqui fazemos um JOIN para trazer os dados do contrato e estagiário junto com a avaliação
     

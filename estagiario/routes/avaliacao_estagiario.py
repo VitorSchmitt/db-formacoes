@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from estagiario.model_acompanhamento import AvaliacaoSupervisor
-from schema_estagiario import (
+from schemas import (
     AvaliacaoSupervisorCreate,
     AvaliacaoSupervisorUpdate
 )

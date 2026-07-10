@@ -1,0 +1,466 @@
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- CABEÇALHO -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Avaliações do Supervisor</h3>
+            <small class="text-muted">
+                Registro das avaliações dos contratos de estágio
+            </small>
+        </div>
+
+        <button class="btn btn-primary" onclick="novo()">
+            + Nova Avaliação
+        </button>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <div class="card mb-4" id="formCard" style="display:none;">
+
+        <div class="card-header">
+            Nova Avaliação
+        </div>
+
+        <div class="card-body">
+
+            <input type="hidden" id="id">
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Contrato</label>
+
+                    <select
+                        class="form-control"
+                        id="contrato_id">
+
+                        <option value="">
+                            Carregando...
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">
+                        Data da Avaliação
+                    </label>
+
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="data_avaliacao">
+                </div>
+
+                <div class="col-md-5 mb-3">
+
+                    <label class="form-label">
+                        Avaliação
+                    </label>
+
+                    <select
+                        class="form-control"
+                        id="avaliacao">
+
+                        <option value="">
+                            Selecione...
+                        </option>
+
+                        <option value="INSUFICIENTE">
+                            Insuficiente
+                        </option>
+
+                        <option value="SATISFATORIO">
+                            Satisfatório
+                        </option>
+
+                        <option value="BOM">
+                            Bom
+                        </option>
+
+                        <option value="PLENAMENTE_SATISFATORIO">
+                            Plenamente Satisfatório
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-12 mb-3">
+
+                    <label class="form-label">
+                        Parecer
+                    </label>
+
+                    <textarea
+                        class="form-control"
+                        id="parecer"
+                        rows="5"></textarea>
+
+                </div>
+
+            </div>
+
+            <div class="mt-2">
+
+                <button
+                    class="btn btn-success"
+                    onclick="salvar()">
+
+                    Salvar Avaliação
+
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="cancelar()">
+
+                    Cancelar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABELA -->
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Contrato</th>
+
+                            <th>Estagiário</th>
+
+                            <th>Data</th>
+
+                            <th>Avaliação</th>
+
+                            <th width="170">
+                                Ações
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="lista"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const urlAvaliacoes = "/api/avaliadores_estagiario";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    carregarContratos();
+
+    carregarAvaliacoes();
+
+});
+
+function preencherSelect(
+    idElemento,
+    dados,
+    campoId,
+    campoTexto
+){
+
+    let s = document.getElementById(idElemento);
+
+    s.innerHTML =
+        '<option value="">Selecione...</option>' +
+
+        dados.map(item =>
+
+            `<option value="${item[campoId]}">
+
+                ${item[campoTexto]}
+
+            </option>`
+
+        ).join("");
+
+}
+
+function carregarContratos(){
+
+    fetch("/api/contrato_estagio")
+
+        .then(r => r.json())
+
+        .then(dados => {
+
+            const lista = dados.map(c => ({
+
+                id: c.id,
+
+                descricao:
+                    c.numero_contrato +
+                    " - " +
+                    c.estagiario_nome
+
+            }));
+
+            preencherSelect(
+                "contrato_id",
+                lista,
+                "id",
+                "descricao"
+            );
+
+        });
+
+}
+```javascript
+function carregarAvaliacoes() {
+
+    fetch(urlAvaliacoes)
+
+        .then(r => r.json())
+
+        .then(dados => {
+
+            let html = "";
+
+            dados.forEach(a => {
+
+                const data = a.data_avaliacao
+                    .split("-")
+                    .reverse()
+                    .join("/");
+
+                html += `
+
+                <tr>
+
+                    <td>${a.numero_contrato}</td>
+
+                    <td>${a.estagiario_nome}</td>
+
+                    <td>${data}</td>
+
+                    <td>${a.avaliacao.replaceAll("_"," ")}</td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-sm btn-warning"
+                            onclick='editar(${JSON.stringify(a)})'>
+
+                            Editar
+
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-danger"
+                            onclick="excluir(${a.id})">
+
+                            Excluir
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                `;
+
+            });
+
+            document.getElementById("lista").innerHTML = html;
+
+        });
+
+}
+
+function novo() {
+
+    limpar();
+
+    document.getElementById("formCard").style.display = "block";
+
+}
+
+function cancelar() {
+
+    limpar();
+
+    document.getElementById("formCard").style.display = "none";
+
+}
+
+function limpar() {
+
+    document.getElementById("id").value = "";
+
+    document.getElementById("contrato_id").value = "";
+
+    document.getElementById("data_avaliacao").value = "";
+
+    document.getElementById("avaliacao").value = "";
+
+    document.getElementById("parecer").value = "";
+
+}
+
+function editar(a) {
+
+    document.getElementById("formCard").style.display = "block";
+
+    document.getElementById("id").value = a.id;
+
+    document.getElementById("contrato_id").value =
+        a.contrato_id;
+
+    document.getElementById("data_avaliacao").value =
+        a.data_avaliacao;
+
+    document.getElementById("avaliacao").value =
+        a.avaliacao;
+
+    document.getElementById("parecer").value =
+        a.parecer || "";
+
+}
+```javascript id="bkax3v"
+function salvar() {
+
+    const id = document.getElementById("id").value;
+
+    const dados = {
+
+        contrato_id: parseInt(
+            document.getElementById("contrato_id").value
+        ),
+
+        data_avaliacao:
+            document.getElementById("data_avaliacao").value,
+
+        avaliacao:
+            document.getElementById("avaliacao").value,
+
+        parecer:
+            document.getElementById("parecer").value
+
+    };
+
+    if (
+        !dados.contrato_id ||
+        !dados.data_avaliacao ||
+        !dados.avaliacao
+    ) {
+
+        alert("Preencha todos os campos obrigatórios.");
+
+        return;
+
+    }
+
+    const metodo = id ? "PUT" : "POST";
+
+    const destino = id
+        ? `${urlAvaliacoes}/${id}`
+        : urlAvaliacoes;
+
+    fetch(destino, {
+
+        method: metodo,
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(dados)
+
+    })
+
+    .then(async r => {
+
+        if (!r.ok) {
+
+            const erro = await r.json();
+
+            throw new Error(
+                erro.detail ||
+                "Erro ao salvar avaliação."
+            );
+
+        }
+
+        cancelar();
+
+        carregarAvaliacoes();
+
+    })
+
+    .catch(err => alert(err.message));
+
+}
+
+function excluir(id) {
+
+    if (!confirm("Deseja excluir esta avaliação?"))
+        return;
+
+    fetch(`${urlAvaliacoes}/${id}`, {
+
+        method: "DELETE"
+
+    })
+
+    .then(async r => {
+
+        if (!r.ok) {
+
+            const erro = await r.json();
+
+            throw new Error(
+                erro.detail ||
+                "Erro ao excluir avaliação."
+            );
+
+        }
+
+        carregarAvaliacoes();
+
+    })
+
+    .catch(err => alert(err.message));
+
+}
+
+</script>
+
+{% endblock %}
+
+
+

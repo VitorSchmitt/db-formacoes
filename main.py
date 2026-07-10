@@ -30,6 +30,7 @@ from estagiario.routes.estagiario import router as estagiario_router
 from estagiario.routes.beneficio_estagiario import router as beneficio_router
 from estagiario.routes.contrato_estagiario import router as contrato_router
 from estagiario.routes.frequencia_estagiario import router as frequencia_router
+from estagiario.routes.avaliacao_estagiario import router as avaliacao_router
 
 
 
@@ -83,6 +84,7 @@ app.include_router(estagiario_router)
 app.include_router(beneficio_router)
 app.include_router(contrato_router)
 app.include_router(frequencia_router)
+app.include_router(avaliacao_router)
 
 # ===============================
 # WEB
@@ -228,6 +230,13 @@ def tela_contratos(request: Request):
 def tela_frequencias(request: Request):
     return templates.TemplateResponse(
         "frequencia.html",  
+        {"request": request}
+    )
+
+@app.get("/web/estagiario/avaliacoes")
+def tela_avaliacoes(request: Request):
+    return templates.TemplateResponse(
+        "avaliacoes.html",  
         {"request": request}
     )
     

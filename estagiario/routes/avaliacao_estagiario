@@ -9,7 +9,7 @@ from schema_estagiario import (
 )
 
 router = APIRouter(
-    prefix="/api/avaliadores_estagiario",
+    prefix="/api/avaliacoes",
     tags=["Avaliação do Supervisor"]
 )
 

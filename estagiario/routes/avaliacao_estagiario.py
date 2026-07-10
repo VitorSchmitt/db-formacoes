@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database import get_db
-from model_acompanhamento import AvaliacaoSupervisor
+from estagiario.model_acompanhamento import AvaliacaoSupervisor
 from schema_estagiario import (
     AvaliacaoSupervisorCreate,
     AvaliacaoSupervisorUpdate

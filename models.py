@@ -266,7 +266,16 @@ class Usuario(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False, index=True)
-    matricula = Column(String(20), ForeignKey("servidor.matricula"),unique=True,nullable=False,index=True)
+    matricula = Column(
+        String(20),
+        ForeignKey(
+            "servidor.matricula",
+            name="fk_usuario_servidor"
+        ),
+        nullable=False,
+        index=True
+    )
+
     senha = Column(String(255), nullable=False)
     perfil = Column(String(50), nullable=False, default="custom")
     email = Column(String(255), unique=True)

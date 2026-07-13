@@ -78,6 +78,7 @@ class Servidor(Base):
     cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
     participacoes = relationship("Participacao", back_populates="servidor")
     facilitacoes = relationship("Facilitador", back_populates="servidor")
+    usuario = relationship("Usuario",back_populates="servidor",uselist=False)
     
 # ===============================
 # PLANO ANUAL
@@ -258,9 +259,16 @@ class Usuario(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False, index=True)
+    matricula = Column(String(20), ForeignKey("servidor.matricula"),unique=True,nullable=False,index=True)
     senha = Column(String(255), nullable=False)
     perfil = Column(String(50), nullable=False, default="custom")
     email = Column(String(255), unique=True)
     ativo = Column(Boolean, default=True)
     criado_em = Column(DateTime, default=datetime.utcnow)
     ultimo_login = Column(DateTime)
+
+    # RELACIONAMENTO    
+        servidor = relationship(
+            "Servidor",
+            back_populates="usuario"
+        )

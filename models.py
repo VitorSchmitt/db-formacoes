@@ -257,6 +257,13 @@ class Usuario(Base):
 
     __tablename__ = "usuario"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "matricula",
+            name="uq_usuario_matricula"
+        ),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, nullable=False, index=True)
     matricula = Column(String(20), ForeignKey("servidor.matricula"),unique=True,nullable=False,index=True)

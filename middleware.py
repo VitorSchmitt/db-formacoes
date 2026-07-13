@@ -24,6 +24,8 @@ PUBLIC_PATHS = [
     "/web/facilitadores",
     "/web/relatorio_facilitador"
     
+    
+    
 ]
 
 PUBLIC_PREFIX = [
@@ -32,31 +34,25 @@ PUBLIC_PREFIX = [
 
 PERMISSOES = {
     "admin": ["*"],
-
+    
+    #---Supervisor estágio
     "operadorIV": [
 
         # ===========================
         # TELAS WEB
         # ===========================
-        "/web/estagiario/beneficios",
-        "/web/estagiario/classificacoes"
-        
+        "/web/estagiario/avaliacoes",    
+        "/web/estagiario/frequencia"       
     
         # ===========================
         # APIS
         # ===========================
-        "/api/beneficio_estagiario",
-        "/api/classificacoes_estagio",
+        "/api/frequencia_estagio",
         "/api/contrato_estagio",
-        "/api/estagiarios",
-        "/api/valores_bolsa_estagio",
-    
-        # Dados auxiliares
-        "/api/servidores",
-        "/api/lotacoes",
+        "/api/avaliacao_estagiario"
     ],
 
-
+    #---Gerente do estágio
     "operadorIII": [
 
         # ===========================

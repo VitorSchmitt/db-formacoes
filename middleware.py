@@ -10,22 +10,7 @@ PUBLIC_PATHS = [
     "/",
     "/login",
     "/docs",
-    "/openapi.json",
-    "/web/dashboard",   
-    "/web/servidores",
-    "/web/formacoes",
-    "/web/participacoes",
-    "/web/usuarios",
-    "/web/lotacoes",
-    "/web/certificados",
-    "/web/plano_anual",
-    "/web/cronograma",
-    "/web/relatorio_servidor",
-    "/web/facilitadores",
-    "/web/relatorio_facilitador"
-    
-    
-    
+    "/openapi.json"   
 ]
 
 PUBLIC_PREFIX = [

@@ -33,6 +33,29 @@ PUBLIC_PREFIX = [
 PERMISSOES = {
     "admin": ["*"],
 
+    "operadorIV": [
+
+        # ===========================
+        # TELAS WEB
+        # ===========================
+        "/web/estagiario/beneficios",
+        "/web/estagiario/classificacoes"
+        
+    
+        # ===========================
+        # APIS
+        # ===========================
+        "/api/beneficio_estagiario",
+        "/api/classificacoes_estagio",
+        "/api/contrato_estagio",
+        "/api/estagiarios",
+        "/api/valores_bolsa_estagio",
+    
+        # Dados auxiliares
+        "/api/servidores",
+        "/api/lotacoes",
+    ],
+
 
     "operadorIII": [
 

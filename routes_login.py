@@ -110,6 +110,9 @@ async def login(
     if perfil == "operadorIII":
         destino = "/web/estagiario/estagiarios"
 
+    elif perfil == "operadorIV":
+        destino = "/web/estagiario/frequencia"
+
     elif perfil == "operadorII":
         destino = "/web/dashboard"
 

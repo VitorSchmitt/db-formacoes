@@ -120,18 +120,30 @@ class ParticipacaoUpdate(BaseModel):
 # ===============================
 
 class UsuarioCreate(BaseModel):
+    matricula: str
     username: str
     senha: str
-    perfil: str
+    perfil: str = "custom"
     email: Optional[str] = None
 
 
 class UsuarioUpdate(BaseModel):
+    matricula: Optional[str] = None
     username: Optional[str] = None
     senha: Optional[str] = None
     perfil: Optional[str] = None
     email: Optional[str] = None
     ativo: Optional[bool] = None
+
+class UsuarioResponse(BaseModel):
+    id: int
+    matricula: str
+    username: str
+    perfil: str
+    email: Optional[str] = None
+    ativo: bool
+    class Config:
+        from_attributes = True
 
 
 # ===============================

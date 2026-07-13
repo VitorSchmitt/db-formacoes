@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from passlib.context import CryptContext
 
 from database import SessionLocal
-from models import Usuario
+from models import Usuario, Servidor
 from schemas import UsuarioCreate
 
 router = APIRouter()
@@ -38,17 +38,18 @@ def listar_usuarios(db: Session = Depends(get_db)):
     )
 
     return [
-        {
-            "id": u.id,
-            "username": u.username,
-            "perfil": u.perfil,
-            "ativo": u.ativo,
-            "email": u.email,
-            "criado_em": u.criado_em,
-            "ultimo_login": u.ultimo_login
-        }
-        for u in dados
-    ]
+    {
+        "id": u.id,
+        "matricula": u.matricula,
+        "username": u.username,
+        "perfil": u.perfil,
+        "ativo": u.ativo,
+        "email": u.email,
+        "criado_em": u.criado_em,
+        "ultimo_login": u.ultimo_login
+    }
+    for u in dados
+]
 
 
 # ===============================
@@ -62,6 +63,20 @@ def criar_usuario(
 
     try:
 
+        servidor = (
+            db.query(Servidor)
+            .filter(
+                Servidor.matricula == dados.matricula
+            )
+            .first()
+        )
+
+        if not servidor:
+            return {
+                "erro": "Servidor não encontrado"
+            }
+
+
         existe = (
             db.query(Usuario)
             .filter(
@@ -71,13 +86,18 @@ def criar_usuario(
         )
 
         if existe:
-            return {"erro":"Usuário já existe"}
+            return {
+                "erro": "Usuário já existe"
+            }
+
 
         senha_hash = pwd_context.hash(
             dados.senha
         )
 
+
         novo = Usuario(
+            matricula=dados.matricula,
             username=dados.username,
             senha=senha_hash,
             perfil=dados.perfil,
@@ -85,27 +105,32 @@ def criar_usuario(
             ativo=True
         )
 
+
         db.add(novo)
         db.commit()
 
-        return {"ok":True}
+
+        return {
+            "ok": True
+        }
+
 
     except IntegrityError:
 
         db.rollback()
 
         return {
-            "erro":"Registro duplicado"
+            "erro": "Registro duplicado"
         }
+
 
     except Exception as e:
 
         db.rollback()
 
         return {
-            "erro":str(e)
+            "erro": str(e)
         }
-
 
 # ===============================
 # ATUALIZAR
@@ -132,6 +157,7 @@ def atualizar_usuario(
 
     try:
 
+        usuario.matricula = dados.matricula
         usuario.username = dados.username
         usuario.perfil = dados.perfil
         usuario.email = dados.email

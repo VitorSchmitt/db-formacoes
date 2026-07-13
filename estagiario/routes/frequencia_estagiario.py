@@ -1,16 +1,52 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
+
+
 # Certifique-se de ajustar o caminho correto da importação do seu modelo
-from estagiario.model_acompanhamento import FrequenciaEstagio 
+from estagiario.model_acompanhamento import FrequenciaEstagio
+from estagiario.model_estagiario import contrato_estagiario
 from schemas import FrequenciaEstagioCreate, FrequenciaEstagioUpdate
 
 router = APIRouter(prefix="/api/frequencia_estagio", tags=["Frequências de Estágio"])
 
 @router.get("/", response_model=List[dict])
-def listar_frequencias(db: Session = Depends(get_db)):
-    frequencias = db.query(FrequenciaEstagio).all()
+def listar_frequencias(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    # 1. Recupera os dados do usuário guardados na sessão (Cookie)
+    usuario_logado = request.session.get("user")
+    
+    if not usuario_logado:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuário não autenticado no sistema."
+        )
+    
+    perfil = usuario_logado.get("perfil")
+    username_logado = usuario_logado.get("username")
+
+    # 2. Monta a Query base de busca
+    query = db.query(FrequenciaEstagio).join(
+        ContratoEstagio, 
+        FrequenciaEstagio.contrato_id == ContratoEstagio.id
+    )
+    # 3. Aplica a regra de negócio baseada no perfil
+    # Se for um supervisor (no seu caso, mapeado pelo perfil correspondente, ex: operadorIV)
+    
+    if perfil == "operadorIV":
+        # Filtra onde a matrícula do supervisor no contrato é igual ao username de quem logou
+        query = query.filter(ContratoEstagio.supervisor_matricula == username_logado)
+    
+    # Se for outro perfil restrito que você queira limitar, adicione mais condições aqui.
+    # Se for 'admin' ou perfis masters, ele pula os filtros e traz .all()
+
+    # Executa a consulta filtrada no banco
+    frequencias = query.all()
+
+    # 4. Retorna a lista formatada para o JSON
     return [
         {
             "id": f.id,
@@ -18,7 +54,7 @@ def listar_frequencias(db: Session = Depends(get_db)):
             "numero_contrato": f.contrato.numero_contrato if f.contrato else "Não informado",
             "competencia": f.competencia.strftime("%Y-%m"),
             "dias": f.dias,
-            "horas_realizadas": float(f.horas_realizadas), # Convertido para float para o JSON
+            "horas_realizadas": float(f.horas_realizadas),
             "observacao": f.observacao
         } for f in frequencias
     ]

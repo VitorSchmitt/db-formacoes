@@ -27,7 +27,7 @@ PERMISSOES = {
         # TELAS WEB
         # ===========================
         "/web/estagiario/avaliacoes",    
-        "/web/estagiario/frequencia"       
+        "/web/estagiario/frequencia",       
     
         # ===========================
         # APIS
@@ -35,6 +35,7 @@ PERMISSOES = {
         "/api/frequencia_estagio",
         "/api/contrato_estagio",
         "/api/avaliacao_estagiario"
+        
     ],
 
     #---Gerente do estágio
@@ -60,7 +61,7 @@ PERMISSOES = {
     
         # Dados auxiliares
         "/api/servidores",
-        "/api/lotacoes",
+        "/api/lotacoes"
     ],
     
     "operador": [ 

@@ -8,6 +8,16 @@
     
     <div class="row mb-3">
 
+        <div class="col-md-2">
+            <input 
+                type="text" 
+                id="matricula" 
+                class="form-control" 
+                placeholder="Matrícula"
+                required
+            >
+        </div>
+
         <div class="col-md-3">
             <input 
                 type="text" 
@@ -124,6 +134,7 @@ async function carregarTabela() {
             <thead class="table-dark">
 
                 <tr>
+                    <th>Matrícula</th>
                     <th>Usuário</th>
                     <th>Perfil</th>
                     <th>E-mail</th>
@@ -171,7 +182,7 @@ async function carregarTabela() {
             html += `
 
             <tr>
-
+                <td>${u.matricula}</td>
                 <td>${u.username}</td>
 
                 <td>
@@ -231,6 +242,7 @@ async function salvar(e) {
     e.preventDefault();
 
     let dados = {
+        matricula: document.getElementById("matricula").value,
         username: document.getElementById("username").value,
         senha: document.getElementById("senha").value,
         perfil: document.getElementById("perfil").value,
@@ -291,13 +303,10 @@ async function salvar(e) {
 function editar(u) {
 
     editando = u.id;
-
+    document.getElementById("matricula").value = u.matricula;
     document.getElementById("username").value = u.username;
-
     document.getElementById("perfil").value = u.perfil;
-
     document.getElementById("email").value = u.email || "";
-
     document.getElementById("senha").value = "";
 }
 

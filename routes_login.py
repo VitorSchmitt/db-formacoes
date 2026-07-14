@@ -99,6 +99,7 @@ async def login(
     request.session["user"] = {
         "id": user.id,
         "username": user.username,
+        "matricula": user.matricula,
         "perfil": user.perfil
     }
 

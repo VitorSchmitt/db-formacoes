@@ -27,26 +27,21 @@ def listar_frequencias(
     
     perfil = usuario_logado.get("perfil")
     username_logado = usuario_logado.get("username")
-
-    # 2. Monta a Query base de busca
     query = db.query(FrequenciaEstagio).join(
-        ContratoEstagio, 
+        ContratoEstagio,
         FrequenciaEstagio.contrato_id == ContratoEstagio.id
     )
-    # 3. Aplica a regra de negócio baseada no perfil
-    # Se for um supervisor (no seu caso, mapeado pelo perfil correspondente, ex: operadorIV)
     
     if perfil == "operadorIV":
-        # Filtra onde a matrícula do supervisor no contrato é igual ao username de quem logou
-        query = query.filter(ContratoEstagio.supervisor_matricula == username_logado)
+        query = query.join(
+            Usuario,
+            Usuario.matricula == ContratoEstagio.supervisor_matricula
+        ).filter(
+            Usuario.username == username_logado
+        )
     
-    # Se for outro perfil restrito que você queira limitar, adicione mais condições aqui.
-    # Se for 'admin' ou perfis masters, ele pula os filtros e traz .all()
-
-    # Executa a consulta filtrada no banco
     frequencias = query.all()
-
-    # 4. Retorna a lista formatada para o JSON
+    
     return [
         {
             "id": f.id,
@@ -56,7 +51,8 @@ def listar_frequencias(
             "dias": f.dias,
             "horas_realizadas": float(f.horas_realizadas),
             "observacao": f.observacao
-        } for f in frequencias
+        }
+        for f in frequencias
     ]
 
 @router.post("/", status_code=status.HTTP_201_CREATED)

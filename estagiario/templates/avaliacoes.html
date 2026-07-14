@@ -84,6 +84,7 @@
 
 <script>
 const urlAvaliacoes = "/api/avaliacao_estagiario";
+const urlContratos = "/api/contrato_estagio/meus";
 let avaliacoesCarregadas = []; // Cache local para evitar problemas com strings/JSON no HTML
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -98,7 +99,7 @@ function preencherSelect(idElemento, dados, campoId, campoTexto) {
 }
 
 function carregarContratos() {
-    fetch("/api/contrato_estagio")
+    fetch(urlContratos)
         .then(r => r.json())
         .then(dados => {
             const lista = dados.map(c => ({

@@ -25,21 +25,19 @@ def listar_frequencias(
             detail="Usuário não autenticado no sistema."
         )
     
+    usuario_logado = request.session.get("user")    
     perfil = usuario_logado.get("perfil")
-    username_logado = usuario_logado.get("username")
+    matricula = usuario_logado.get("matricula")
+    
     query = db.query(FrequenciaEstagio).join(
         ContratoEstagio,
         FrequenciaEstagio.contrato_id == ContratoEstagio.id
     )
     
     if perfil == "operadorIV":
-        query = query.join(
-            Usuario,
-            Usuario.matricula == ContratoEstagio.supervisor_matricula
-        ).filter(
-            Usuario.username == username_logado
+        query = query.filter(
+            ContratoEstagio.supervisor_matricula == matricula
         )
-    
     frequencias = query.all()
     
     return [
@@ -56,29 +54,73 @@ def listar_frequencias(
     ]
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def criar_frequencia(dados: FrequenciaEstagioCreate, db: Session = Depends(get_db)):
-    # Validação baseada na UniqueConstraint (Contrato + Competência)
+def criar_frequencia(
+    dados: FrequenciaEstagioCreate,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    # ==============================
+    # Usuário logado
+    # ==============================
+    usuario_logado = request.session.get("user")
+
+    if not usuario_logado:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuário não autenticado."
+        )
+
+    perfil = usuario_logado.get("perfil")
+    matricula = usuario_logado.get("matricula")
+
+    # ==============================
+    # Permissão do supervisor
+    # ==============================
+    if perfil == "operadorIV":
+
+        contrato = db.query(ContratoEstagio).filter(
+            ContratoEstagio.id == dados.contrato_id,
+            ContratoEstagio.supervisor_matricula == matricula
+        ).first()
+
+        if not contrato:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não possui permissão para registrar frequência neste contrato."
+            )
+
+    # ==============================
+    # Verifica duplicidade
+    # ==============================
     existe = db.query(FrequenciaEstagio).filter(
         FrequenciaEstagio.contrato_id == dados.contrato_id,
         FrequenciaEstagio.competencia == dados.competencia
     ).first()
-    
+
     if existe:
         raise HTTPException(
-            status_code=400, 
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Já existe um registro de frequência para este contrato nesta competência."
         )
-    
+
+    # ==============================
+    # Grava
+    # ==============================
     nova = FrequenciaEstagio(
         contrato_id=dados.contrato_id,
         competencia=dados.competencia,
         dias=dados.dias,
         horas_realizadas=dados.horas_realizadas,
-        observacao=dados.observacao,
+        observacao=dados.observacao
     )
+
     db.add(nova)
     db.commit()
-    return {"mensagem": "Frequência cadastrada com sucesso"}
+    db.refresh(nova)
+
+    return {
+        "mensagem": "Frequência cadastrada com sucesso"
+    }
 
 
 @router.put("/{id}")

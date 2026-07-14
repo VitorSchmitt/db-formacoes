@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 
 from database import SessionLocal
 from models import Usuario, Servidor
-from schemas import UsuarioCreate
+from schemas import UsuarioCreate,UsuarioUpdate
 
 router = APIRouter()
 

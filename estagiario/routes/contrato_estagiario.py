@@ -81,3 +81,36 @@ def desligar_contrato(id: int, dados: DesligamentoContratoInput, db: Session = D
     
     db.commit()
     return {"mensagem": "Contrato encerrado com sucesso"}
+
+
+@router.get("/meus", response_model=List[dict])
+def listar_meus_contratos(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    usuario_logado = request.session.get("user")
+
+    if not usuario_logado:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuário não autenticado."
+        )
+
+    matricula = usuario_logado.get("matricula")
+
+    contratos = (
+        db.query(ContratoEstagio)
+        .filter(
+            ContratoEstagio.supervisor_matricula == matricula
+        )
+        .all()
+    )
+
+    return [
+        {
+            "id": c.id,
+            "numero_contrato": c.numero_contrato,
+            "estagiario_nome": c.estagiario.nome if c.estagiario else "Não informado"
+        }
+        for c in contratos
+    ]

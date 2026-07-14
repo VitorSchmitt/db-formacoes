@@ -6,7 +6,7 @@ from database import get_db
 
 # Certifique-se de ajustar o caminho correto da importação do seu modelo
 from estagiario.model_acompanhamento import FrequenciaEstagio
-from estagiario.model_estagiario import contrato_estagiario
+from estagiario.model_estagiario import ContratoEstagio
 from schemas import FrequenciaEstagioCreate, FrequenciaEstagioUpdate
 
 router = APIRouter(prefix="/api/frequencia_estagio", tags=["Frequências de Estágio"])

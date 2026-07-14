@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
 from estagiario.model_acompanhamento import AvaliacaoSupervisor
+from estagiario.model_estagiario import ContratoEstagio
 from schemas import (
     AvaliacaoSupervisorCreate,
     AvaliacaoSupervisorUpdate

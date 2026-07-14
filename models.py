@@ -284,7 +284,7 @@ class Usuario(Base):
     ultimo_login = Column(DateTime)
 
     # RELACIONAMENTO    
-        servidor = relationship(
-            "Servidor",
-            back_populates="usuario"
-        )
+    servidor = relationship(
+        "Servidor",
+        back_populates="usuario"
+    )

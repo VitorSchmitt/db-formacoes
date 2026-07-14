@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
@@ -18,39 +18,76 @@ router = APIRouter(
 # LISTAR
 # ==========================
 @router.get("/")
-def listar(db: Session = Depends(get_db), limit: int = 100, offset: int = 0):
-    # CORRIGIDO: Removido o return precoce.
-    # O joinedload carrega o relacionamento 'contrato' de uma só vez (evita o problema N+1)
-    resultados = (
+def listar(
+    request: Request,
+    db: Session = Depends(get_db),
+    limit: int = 100,
+    offset: int = 0
+):
+    # ==============================
+    # Usuário logado
+    # ==============================
+    usuario_logado = request.session.get("user")
+
+    if not usuario_logado:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuário não autenticado."
+        )
+
+    perfil = usuario_logado.get("perfil")
+    matricula = usuario_logado.get("matricula")
+
+    # ==============================
+    # Consulta base
+    # ==============================
+    query = (
         db.query(AvaliacaoSupervisor)
-        .options(joinedload(AvaliacaoSupervisor.contrato))  # Garante performance no join
+        .join(
+            ContratoEstagio,
+            AvaliacaoSupervisor.contrato_id == ContratoEstagio.id
+        )
+        .options(
+            joinedload(AvaliacaoSupervisor.contrato)
+            .joinedload(ContratoEstagio.estagiario)
+        )
+    )
+
+    # ==============================
+    # Restrição do supervisor
+    # ==============================
+    if perfil == "operadorIV":
+        query = query.filter(
+            ContratoEstagio.supervisor_matricula == matricula
+        )
+
+    resultados = (
+        query
         .order_by(AvaliacaoSupervisor.data_avaliacao.desc())
         .offset(offset)
         .limit(limit)
         .all()
     )
-    
-    # Monta a resposta exatamente no formato esperado pelo front-end
+
+    # ==============================
+    # Monta retorno
+    # ==============================
     lista_formatada = []
+
     for av in resultados:
-        contrato = getattr(av, 'contrato', None)
-        # Busca o objeto estagiario de dentro do contrato
-        estagiario = getattr(contrato, 'estagiario', None) if contrato else None
-        
+        contrato = av.contrato
+        estagiario = contrato.estagiario if contrato else None
+
         lista_formatada.append({
             "id": av.id,
             "contrato_id": av.contrato_id,
-            "data_avaliacao": av.data_avaliacao.isoformat() if hasattr(av.data_avaliacao, 'isoformat') else str(av.data_avaliacao),
+            "data_avaliacao": av.data_avaliacao.isoformat(),
             "avaliacao": av.avaliacao,
             "parecer": av.parecer,
-            
-            # Buscando o número do contrato
             "numero_contrato": contrato.numero_contrato if contrato else f"Contrato #{av.contrato_id}",
-            
-            # CORRIGIDO: Agora busca corretamente o nome de dentro da classe Estagiario
             "estagiario_nome": estagiario.nome if estagiario else "Não informado"
         })
-        
+
     return lista_formatada
 
 
@@ -81,9 +118,42 @@ def buscar(id: int, db: Session = Depends(get_db)):
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def inserir(
     dados: AvaliacaoSupervisorCreate,
+    request: Request,
     db: Session = Depends(get_db)
 ):
+    # ==============================
+    # Usuário logado
+    # ==============================
+    usuario_logado = request.session.get("user")
 
+    if not usuario_logado:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuário não autenticado."
+        )
+
+    perfil = usuario_logado.get("perfil")
+    matricula = usuario_logado.get("matricula")
+
+    # ==============================
+    # Permissão do supervisor
+    # ==============================
+    if perfil == "operadorIV":
+
+        contrato = db.query(ContratoEstagio).filter(
+            ContratoEstagio.id == dados.contrato_id,
+            ContratoEstagio.supervisor_matricula == matricula
+        ).first()
+
+        if not contrato:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não possui permissão para avaliar este estagiário."
+            )
+
+    # ==============================
+    # Grava a avaliação
+    # ==============================
     avaliacao = AvaliacaoSupervisor(
         contrato_id=dados.contrato_id,
         data_avaliacao=dados.data_avaliacao,

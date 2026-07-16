@@ -19,7 +19,21 @@ from sqlalchemy import Enum as SqlEnum
 class AvaliacaoSupervisor(Base):
     __tablename__ = "avaliacoes_supervisor"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True
+    )
+
+    frequencia_id = Column(
+        Integer,
+        ForeignKey(
+            "frequencias_estagio.id",
+            ondelete="CASCADE"
+        ),
+        nullable=False,
+        unique=True
+    )
+
     data_avaliacao = Column(
         Date,
         nullable=False
@@ -31,9 +45,11 @@ class AvaliacaoSupervisor(Base):
             native_enum=False
         ),
         nullable=False
-    )    
+    )
 
-    parecer = Column(Text)
+    parecer = Column(
+        Text
+    )
 
     frequencia = relationship(
         "FrequenciaEstagio",

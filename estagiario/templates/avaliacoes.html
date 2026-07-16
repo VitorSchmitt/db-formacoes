@@ -3,587 +3,285 @@
 {% block content %}
 
 <div class="container mt-4">
-
-
     <div class="d-flex justify-content-between align-items-center mb-4">
-
         <div>
             <h3>📝 Avaliação do Supervisor</h3>
-
             <small class="text-muted">
                 Avaliação referente à frequência mensal do estagiário.
             </small>
         </div>
-
-
         <button
             class="btn btn-secondary"
             onclick="voltar()">
             ← Voltar
         </button>
-
     </div>
-
-
-
     <div class="card shadow-sm">
-
-
         <div class="card-header bg-primary text-white">
-
             Dados da Frequência
-
         </div>
-
-
-
         <div class="card-body">
-
-
             <input type="hidden" id="frequencia_id">
-
-
-
             <div class="row">
-
-
                 <div class="col-md-4 mb-3">
-
                     <label class="form-label fw-bold">
                         Contrato
                     </label>
-
                     <input
                         type="text"
                         id="numero_contrato"
                         class="form-control"
                         readonly>
-
                 </div>
-
-
-
-
                 <div class="col-md-4 mb-3">
-
-
                     <label class="form-label fw-bold">
                         Estagiário
                     </label>
-
-
                     <input
                         type="text"
                         id="estagiario_nome"
                         class="form-control"
                         readonly>
-
-
                 </div>
-
-
-
-
                 <div class="col-md-4 mb-3">
-
-
                     <label class="form-label fw-bold">
                         Competência
                     </label>
-
-
                     <input
                         type="text"
                         id="competencia"
                         class="form-control"
                         readonly>
-
-
                 </div>
-
-
             </div>
-
-
-
-
             <div class="row">
-
-
                 <div class="col-md-4 mb-3">
-
-
                     <label class="form-label fw-bold">
                         Dias Trabalhados
                     </label>
-
-
                     <input
                         type="text"
                         id="dias"
                         class="form-control"
                         readonly>
-
-
                 </div>
-
-
-
                 <div class="col-md-4 mb-3">
-
-
                     <label class="form-label fw-bold">
                         Horas Realizadas
                     </label>
-
-
                     <input
                         type="text"
                         id="horas_realizadas"
                         class="form-control"
                         readonly>
-
-
                 </div>
-
-
             </div>
-
-
-
             <hr>
-
-
-
             <h5 class="text-primary mb-3">
-
                 Resultado da Avaliação
-
             </h5>
-
-
-
             <div class="row">
-
-
                 <div class="col-md-4 mb-3">
-
-
                     <label class="form-label">
                         Data da Avaliação
                     </label>
-
-
                     <input
                         type="date"
                         id="data_avaliacao"
                         class="form-control">
-
-
                 </div>
-
-
-
-
                 <div class="col-md-8 mb-3">
-
-
                     <label class="form-label">
                         Resultado
                     </label>
-
-
                     <select
                         id="avaliacao"
                         class="form-select">
-
-
                         <option value="">
                             Selecione...
                         </option>
-
-
                         <option value="INSUFICIENTE">
                             Insuficiente
                         </option>
-
-
                         <option value="SATISFATORIO">
                             Satisfatório
                         </option>
-
-
                         <option value="BOM">
                             Bom
                         </option>
-
-
                         <option value="PLENAMENTE_SATISFATORIO">
                             Plenamente Satisfatório
                         </option>
-
-
                     </select>
-
-
                 </div>
-
-
             </div>
-
-
-
-
             <div class="mb-3">
-
-
                 <label class="form-label">
-
                     Parecer do Supervisor
-
                 </label>
-
-
                 <textarea
-
                     id="parecer"
-
                     rows="6"
-
                     class="form-control"
-
                     placeholder="Informe o parecer da avaliação..."
-
                 ></textarea>
-
-
             </div>
-
-
-
         </div>
-
-
-
-
         <div class="card-footer text-end">
-
-
             <button
                 class="btn btn-success"
                 onclick="salvar()">
-
                 Salvar Avaliação
-
             </button>
-
-
-
             <button
                 class="btn btn-secondary"
                 onclick="voltar()">
-
                 Cancelar
-
             </button>
-
-
         </div>
-
-
     </div>
-
-
 </div>
-
-
-
-
-
 <script>
-
-
 const urlFrequencia =
     "/api/frequencia_estagio";
-
-
 const urlAvaliacao =
     "/api/avaliacao_estagiario";
-
-
-
-
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-
         carregarFrequencia();
-
         document.getElementById(
             "data_avaliacao"
         ).value =
             new Date()
             .toISOString()
             .substring(0,10);
-
     }
 );
-
-
-
-
-
 function carregarFrequencia(){
-
-
     const params =
         new URLSearchParams(
             window.location.search
         );
-
-
     const id =
         params.get("id");
-
-
-
     if(!id){
-
         alert(
             "Frequência não informada."
         );
-
         voltar();
-
         return;
-
     }
-
-
-
     document.getElementById(
         "frequencia_id"
     ).value = id;
-
-
-
-
     fetch(
         `${urlFrequencia}/${id}`
     )
-
     .then(r=>{
-
         if(!r.ok){
-
             throw new Error(
-                "Erro ao buscar frequência."
-            );
-
+                "Erro ao buscar frequência." );
         }
-
         return r.json();
-
     })
-
-
     .then(dados=>{
-
-
         document.getElementById(
             "numero_contrato"
         ).value =
             dados.numero_contrato;
-
-
-
         document.getElementById(
             "competencia"
         ).value =
             dados.competencia;
-
-
-
         document.getElementById(
             "dias"
         ).value =
             dados.dias;
-
-
-
         document.getElementById(
             "horas_realizadas"
         ).value =
             dados.horas_realizadas;
-
-
-
         document.getElementById(
             "estagiario_nome"
         ).value =
             dados.estagiario_nome || "";
-
-
-
     })
-
-
     .catch(err=>{
-
         alert(err.message);
-
     });
-
-
 }
 
-
-
-
-
-
 function salvar(){
-
-
-
     const dados = {
-
-
         frequencia_id:
-
             parseInt(
                 document.getElementById(
                     "frequencia_id"
                 ).value
             ),
-
-
-
         data_avaliacao:
-
             document.getElementById(
                 "data_avaliacao"
             ).value,
-
-
-
         avaliacao:
-
             document.getElementById(
                 "avaliacao"
             ).value,
-
-
-
         parecer:
-
             document.getElementById(
                 "parecer"
             ).value
-
-
-
     };
-
-
-
-
-
     if(
-
         !dados.frequencia_id ||
-
         !dados.data_avaliacao ||
-
         !dados.avaliacao
-
     ){
-
         alert(
             "Preencha os campos obrigatórios."
         );
-
         return;
-
     }
-
-
-
-
     fetch(
         urlAvaliacao,
         {
-
             method:"POST",
-
             headers:{
                 "Content-Type":
                 "application/json"
             },
-
-
             body:
                 JSON.stringify(dados)
-
         }
 
     )
-
-
     .then(async r=>{
-
-
         const retorno =
             await r.json();
-
-
-
         if(!r.ok){
-
             throw new Error(
                 retorno.detail ||
                 "Erro ao salvar avaliação."
             );
-
         }
-
-
         alert(
             retorno.mensagem
         );
-
-
         voltar();
-
-
     })
-
-
     .catch(err=>{
 
         alert(
             err.message
         );
-
     });
-
-
 }
-
-
-
-
 
 function voltar(){
-
-
     window.location.href =
         "/frequencias_estagio";
-
-
 }
-
-
 </script>
 
 

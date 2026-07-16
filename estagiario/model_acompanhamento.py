@@ -110,25 +110,12 @@ class FrequenciaEstagio(Base):
 class PagamentoEstagio(Base):
     __tablename__ = "pagamentos_estagio"
 
-    __table_args__ = (
-        UniqueConstraint(
-            "contrato_id",
-            "competencia",
-            name="uq_pagamento_competencia"
-        ),
-    )
-
     id = Column(Integer, primary_key=True)
-
-    contrato_id = Column(
+    frequencia_id = Column(
         Integer,
-        ForeignKey("contratos_estagio.id"),
-        nullable=False
-    )
-
-    competencia = Column(
-        String(7),
-        nullable=False
+        ForeignKey("frequencias_estagio.id"),
+        nullable=False,
+        unique=True
     )
 
     data_fechamento = Column(
@@ -136,36 +123,29 @@ class PagamentoEstagio(Base):
         nullable=False
     )
 
-    horas_apuradas = Column(
-        Numeric(6, 2),
-        nullable=False
-    )
-
     valor_hora_aplicado = Column(
-        Numeric(10, 2),
+        Numeric(10,2),
         nullable=False
     )
 
     valor_vale_alimentacao = Column(
-        Numeric(10, 2),
+        Numeric(10,2),
         nullable=False,
         default=0
     )
 
     valor_vale_transporte = Column(
-        Numeric(10, 2),
+        Numeric(10,2),
         nullable=False,
         default=0
     )
 
     valor_total = Column(
-        Numeric(10, 2),
+        Numeric(10,2),
         nullable=False
     )
 
-    
-
     frequencia = relationship(
         "FrequenciaEstagio",
-        back_populates="avaliacao"
+        back_populates="pagamento"
     )

@@ -293,12 +293,6 @@ class ContratoEstagio(Base):
         "Estagiario",
         back_populates="contratos"
     )
-
-    avaliacoes = relationship(
-        "AvaliacaoSupervisor",
-        back_populates="contrato",
-        cascade="all, delete-orphan"
-    )
     
     frequencias = relationship(
         "FrequenciaEstagio",

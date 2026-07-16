@@ -374,13 +374,8 @@ class FrequenciaEstagioResponse(FrequenciaEstagioBase):
 # AVALIAÇÃO DO SUPERVISOR
 # ===============================
 
-# =====================================================
-# AVALIAÇÃO
-# =====================================================
-
-class AvaliacaoSupervisorBase(CompetenciaBase):
-    contrato_id: int
-    competencia: date
+class AvaliacaoSupervisorBase(BaseModel):
+    frequencia_id: int
     data_avaliacao: date
     avaliacao: AvaliacaoSupervisorEnum
     parecer: Optional[str] = None
@@ -390,9 +385,8 @@ class AvaliacaoSupervisorCreate(AvaliacaoSupervisorBase):
     pass
 
 
-class AvaliacaoSupervisorUpdate(CompetenciaBase):
-    contrato_id: Optional[int] = None
-    competencia: Optional[date] = None
+class AvaliacaoSupervisorUpdate(BaseModel):
+    frequencia_id: Optional[int] = None
     data_avaliacao: Optional[date] = None
     avaliacao: Optional[AvaliacaoSupervisorEnum] = None
     parecer: Optional[str] = None

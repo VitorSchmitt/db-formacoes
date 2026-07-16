@@ -399,4 +399,30 @@ class AvaliacaoSupervisorResponse(AvaliacaoSupervisorBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+# =====================================================
+# PAGAMENTO
+# =====================================================
+
+class PagamentoEstagioBase(BaseModel):
+    frequencia_id: int
+    data_fechamento: date
+    valor_hora_aplicado: Decimal
+    valor_vale_alimentacao: Decimal = Decimal("0.00")
+    valor_vale_transporte: Decimal = Decimal("0.00")
+    valor_total: Decimal
+
+class PagamentoEstagioCreate(PagamentoEstagioBase):
+    pass
+
+class PagamentoEstagioUpdate(BaseModel):    
+    data_fechamento: Optional[date] = None
+    valor_hora_aplicado: Optional[Decimal] = None
+    valor_vale_alimentacao: Optional[Decimal] = None
+    valor_vale_transporte: Optional[Decimal] = None
+    valor_total: Optional[Decimal] = None
+
+class PagamentoEstagioResponse(PagamentoEstagioBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
     

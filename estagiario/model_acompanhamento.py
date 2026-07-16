@@ -15,7 +15,6 @@ from estagiario.enums import AvaliacaoSupervisorEnum
 from sqlalchemy import Enum as SqlEnum
 
 
-
 class AvaliacaoSupervisor(Base):
     __tablename__ = "avaliacoes_supervisor"
 
@@ -107,15 +106,27 @@ class FrequenciaEstagio(Base):
     )
 
 
+
 class PagamentoEstagio(Base):
     __tablename__ = "pagamentos_estagio"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "frequencia_id",
+            name="uq_pagamento_frequencia"
+        ),
+    )
+
     id = Column(Integer, primary_key=True)
+
     frequencia_id = Column(
         Integer,
-        ForeignKey("frequencias_estagio.id"),
-        nullable=False,
-        unique=True
+        ForeignKey(
+            "frequencias_estagio.id",
+            name="fk_pagamento_frequencia",
+            ondelete="CASCADE"
+        ),
+        nullable=False
     )
 
     data_fechamento = Column(
@@ -124,24 +135,24 @@ class PagamentoEstagio(Base):
     )
 
     valor_hora_aplicado = Column(
-        Numeric(10,2),
+        Numeric(10, 2),
         nullable=False
     )
 
     valor_vale_alimentacao = Column(
-        Numeric(10,2),
+        Numeric(10, 2),
         nullable=False,
         default=0
     )
 
     valor_vale_transporte = Column(
-        Numeric(10,2),
+        Numeric(10, 2),
         nullable=False,
         default=0
     )
 
     valor_total = Column(
-        Numeric(10,2),
+        Numeric(10, 2),
         nullable=False
     )
 

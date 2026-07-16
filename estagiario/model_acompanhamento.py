@@ -19,10 +19,14 @@ from sqlalchemy import Enum as SqlEnum
 class AvaliacaoSupervisor(Base):
     __tablename__ = "avaliacoes_supervisor"
 
-    id = Column(
-        Integer,
-        primary_key=True
+    __table_args__ = (
+        UniqueConstraint(
+            "frequencia_id",
+            name="uq_avaliacao_frequencia"
+        ),
     )
+
+    id = Column(Integer, primary_key=True)
 
     frequencia_id = Column(
         Integer,
@@ -30,8 +34,7 @@ class AvaliacaoSupervisor(Base):
             "frequencias_estagio.id",
             ondelete="CASCADE"
         ),
-        nullable=False,
-        unique=True
+        nullable=False
     )
 
     data_avaliacao = Column(
@@ -47,15 +50,12 @@ class AvaliacaoSupervisor(Base):
         nullable=False
     )
 
-    parecer = Column(
-        Text
-    )
+    parecer = Column(Text)
 
     frequencia = relationship(
         "FrequenciaEstagio",
         back_populates="avaliacao"
     )
-
 class FrequenciaEstagio(Base):
     __tablename__ = "frequencias_estagio"
 

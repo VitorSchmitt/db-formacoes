@@ -82,6 +82,7 @@ def listar(
         lista_formatada.append({
             "id": av.id,
             "contrato_id": av.contrato_id,
+            "competencia": av.competencia.strftime("%m/%Y"),
             "data_avaliacao": av.data_avaliacao.isoformat(),
             "avaliacao": av.avaliacao,
             "parecer": av.parecer,
@@ -116,6 +117,9 @@ def buscar(id: int, db: Session = Depends(get_db)):
 # ==========================
 # INSERIR
 # ==========================
+# ==========================
+# INSERIR
+# ==========================
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def inserir(
     dados: AvaliacaoSupervisorCreate,
@@ -141,10 +145,14 @@ def inserir(
     # ==============================
     if perfil == "operadorIV":
 
-        contrato = db.query(ContratoEstagio).filter(
-            ContratoEstagio.id == dados.contrato_id,
-            ContratoEstagio.supervisor_matricula == matricula
-        ).first()
+        contrato = (
+            db.query(ContratoEstagio)
+            .filter(
+                ContratoEstagio.id == dados.contrato_id,
+                ContratoEstagio.supervisor_matricula == matricula
+            )
+            .first()
+        )
 
         if not contrato:
             raise HTTPException(
@@ -153,10 +161,47 @@ def inserir(
             )
 
     # ==============================
-    # Grava a avaliação
+    # Verifica se existe frequência
+    # ==============================
+    frequencia = (
+        db.query(FrequenciaEstagio)
+        .filter(
+            FrequenciaEstagio.contrato_id == dados.contrato_id,
+            FrequenciaEstagio.competencia == dados.competencia
+        )
+        .first()
+    )
+
+    if not frequencia:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Não existe frequência lançada para esta competência."
+        )
+
+    # ==============================
+    # Verifica duplicidade
+    # ==============================
+    existe = (
+        db.query(AvaliacaoSupervisor)
+        .filter(
+            AvaliacaoSupervisor.contrato_id == dados.contrato_id,
+            AvaliacaoSupervisor.competencia == dados.competencia
+        )
+        .first()
+    )
+
+    if existe:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Já existe uma avaliação para esta competência."
+        )
+
+    # ==============================
+    # Grava
     # ==============================
     avaliacao = AvaliacaoSupervisor(
         contrato_id=dados.contrato_id,
+        competencia=dados.competencia,
         data_avaliacao=dados.data_avaliacao,
         avaliacao=dados.avaliacao,
         parecer=dados.parecer
@@ -166,7 +211,9 @@ def inserir(
     db.commit()
     db.refresh(avaliacao)
 
-    return avaliacao
+    return {
+        "mensagem": "Avaliação registrada com sucesso."
+    }
 
 
 # ==========================
@@ -191,18 +238,72 @@ def alterar(
             detail="Avaliação não encontrada."
         )
 
-    # Refatorado: Atualização dinâmica usando setattr (evita uma pilha de IFs)
-    # Exclui campos não enviados na requisição (útil se o schema aceitar campos opcionais)
-    dados_atualizar = dados.model_dump(exclude_unset=True) if hasattr(dados, 'model_dump') else dados.dict(exclude_unset=True)
-    
+    # =====================================
+    # Valores finais após a alteração
+    # =====================================
+    contrato_id = (
+        dados.contrato_id
+        if dados.contrato_id is not None
+        else avaliacao.contrato_id
+    )
+
+    competencia = (
+        dados.competencia
+        if dados.competencia is not None
+        else avaliacao.competencia
+    )
+
+    # =====================================
+    # Verifica se existe frequência
+    # =====================================
+    frequencia = (
+        db.query(FrequenciaEstagio)
+        .filter(
+            FrequenciaEstagio.contrato_id == contrato_id,
+            FrequenciaEstagio.competencia == competencia
+        )
+        .first()
+    )
+
+    if not frequencia:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Não existe frequência para esta competência."
+        )
+
+    # =====================================
+    # Verifica duplicidade
+    # =====================================
+    conflito = (
+        db.query(AvaliacaoSupervisor)
+        .filter(
+            AvaliacaoSupervisor.contrato_id == contrato_id,
+            AvaliacaoSupervisor.competencia == competencia,
+            AvaliacaoSupervisor.id != id
+        )
+        .first()
+    )
+
+    if conflito:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Já existe uma avaliação para esta competência."
+        )
+
+    # =====================================
+    # Atualiza os campos enviados
+    # =====================================
+    dados_atualizar = dados.model_dump(exclude_unset=True)
+
     for chave, valor in dados_atualizar.items():
         setattr(avaliacao, chave, valor)
 
     db.commit()
     db.refresh(avaliacao)
 
-    return avaliacao
-
+    return {
+        "mensagem": "Avaliação atualizada com sucesso."
+    }
 
 # ==========================
 # EXCLUIR

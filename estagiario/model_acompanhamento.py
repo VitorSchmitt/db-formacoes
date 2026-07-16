@@ -40,6 +40,11 @@ class AvaliacaoSupervisor(Base):
         nullable=False
     )
 
+    competencia = Column(
+        Date,
+        nullable=False
+    )
+
     parecer = Column(Text)
 
     contrato = relationship(

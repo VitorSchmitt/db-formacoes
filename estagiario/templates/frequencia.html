@@ -71,6 +71,7 @@
                         <th>Dias Trabalhados</th>
                         <th>Horas Realizadas</th>
                         <th>Observação</th>
+                        <th>Avaliação</th>
                         <th class="text-center">Ações</th>
                     </tr>
                 </thead>
@@ -101,21 +102,55 @@ function carregar() {
     .then(dados => {
         let html = "";
         if (dados.length === 0) {
-            html = `<tr><td colspan="6" class="text-center text-muted py-4">Nenhuma frequência registrada.</td></tr>`;
+            html = `<tr><td colspan="7" class="text-center text-muted py-4">Nenhuma frequência registrada.</td></tr>`;
         } else {
             dados.forEach(item => {
+
+                let statusAvaliacao = item.avaliada
+                    ? '<span class="badge bg-success">✔ Avaliada</span>'
+                    : '<span class="badge bg-warning text-dark">⏳ Pendente</span>';
+            
+                let botaoAvaliacao = item.avaliada
+                    ? `<button class="btn btn-sm btn-info"
+                        onclick="abrirAvaliacao(${item.avaliacao_id})">
+                        Editar Avaliação
+                       </button>`
+                    : `<button class="btn btn-sm btn-success"
+                        onclick="novaAvaliacao(${item.contrato_id}, '${item.competencia}')">
+                        Avaliar
+                       </button>`;
+            
                 html += `
                 <tr>
-                    <td class="px-4 text-primary"><strong>${item.numero_contrato}</strong></td>
-                    <td>${item.competencia}</td>
-                    <td>${item.dias} dias</td>
-                    <td>${parseFloat(item.horas_realizadas).toFixed(2)}h</td>
-                    <td class="text-muted fst-italic">${item.observacao || '-'}</td>
-                    <td class="text-center">
-                        <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(item)})'>
-                            Editar
-                        </button>                     
+            
+                    <td class="px-4">
+                        <strong class="text-primary">
+                            ${item.numero_contrato}
+                        </strong>
                     </td>
+            
+                    <td>${item.competencia}</td>
+            
+                    <td>${item.dias} dias</td>
+            
+                    <td>${parseFloat(item.horas_realizadas).toFixed(2)} h</td>
+            
+                    <td>${item.observacao || "-"}</td>
+            
+                    <td>${statusAvaliacao}</td>
+            
+                    <td class="text-center">
+            
+                        <button
+                            class="btn btn-sm btn-warning"
+                            onclick="editar(${item.id})"
+                            Editar
+                        </button>
+            
+                        ${botaoAvaliacao}
+            
+                    </td>
+            
                 </tr>
                 `;
             });
@@ -157,7 +192,7 @@ function editar(item) {
 
     document.getElementById("id").value = item.id;
     document.getElementById("contrato_id").value = item.contrato_id;
-    document.getElementById("contrato_id").disabled = true;
+    document.getElementById("contrato_id").disabled = false;
 
     document.getElementById("competencia").value = item.competencia;
 
@@ -191,8 +226,7 @@ function salvar() {
 
     const metodo = id ? "PUT" : "POST";
     const destino = id ? `${url}/${id}` : url;
-
-    console.log(dados);
+   
 
     fetch(destino, {
         method: metodo,
@@ -221,10 +255,26 @@ function salvar() {
 
 }
 
+function novaAvaliacao(contratoId, competencia){
+
+    window.location.href =
+        `/avaliacoes_estagiario?contrato=${contratoId}&competencia=${competencia}`;
+
+}
+
+function abrirAvaliacao(id){
+
+    window.location.href =
+        `/avaliacoes_estagiario?id=${id}`;
+
+}
+    
+
 // 6. CANCELAR
 function cancelar() {
     limpar();
-    document.getElementById("formCard").style.display = "none";
+    document.getElementById("contrato_id").disabled = false;
+    document.getElementById("formCard").style.display="none";
 }
 
 // 7. LIMPAR

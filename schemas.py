@@ -352,19 +352,48 @@ class FrequenciaEstagioResponse(FrequenciaEstagioBase):
 # Usado no POST de criação
 class AvaliacaoSupervisorCreate(BaseModel):
     contrato_id: int
+    competencia: date
     data_avaliacao: date
     avaliacao: AvaliacaoSupervisorEnum
     parecer: Optional[str] = None
+
+    @field_validator("competencia", mode="before")
+        @classmethod
+        def converter_competencia(cls, v):
+            if v is None:
+                return v
+    
+            if isinstance(v, str):
+                if len(v) == 7:
+                    return datetime.strptime(v + "-01", "%Y-%m-%d").date()
+    
+                return datetime.strptime(v, "%Y-%m-%d").date()
+    
+            return v
 
 
 # Usado no PUT de edição
 class AvaliacaoSupervisorUpdate(BaseModel):
     contrato_id: Optional[int] = None
+    competencia: Optional[date] = None
     data_avaliacao: Optional[date] = None
     avaliacao: Optional[AvaliacaoSupervisorEnum] = None
     parecer: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
     
+    @field_validator("competencia", mode="before")
+    @classmethod
+    def converter_competencia(cls, v):
+        if v is None:
+            return v
+
+        if isinstance(v, str):
+            if len(v) == 7:
+                return datetime.strptime(v + "-01", "%Y-%m-%d").date()
+
+            return datetime.strptime(v, "%Y-%m-%d").date()
+
+        return v
 
     

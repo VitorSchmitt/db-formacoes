@@ -2,12 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
-from estagiario.model_acompanhamento import AvaliacaoSupervisor
+
+from estagiario.model_acompanhamento import (
+    AvaliacaoSupervisor,
+    FrequenciaEstagio
+)
+
 from estagiario.model_estagiario import ContratoEstagio
+
 from schemas import (
     AvaliacaoSupervisorCreate,
     AvaliacaoSupervisorUpdate
 )
+
 
 router = APIRouter(
     prefix="/api/avaliacao_estagiario",
@@ -15,210 +22,281 @@ router = APIRouter(
 )
 
 
-# ==========================
+# =====================================================
 # LISTAR
-# ==========================
+# =====================================================
+
 @router.get("/")
 def listar(
     request: Request,
-    db: Session = Depends(get_db),
-    limit: int = 100,
-    offset: int = 0
+    db: Session = Depends(get_db)
 ):
-    # ==============================
-    # Usuário logado
-    # ==============================
-    usuario_logado = request.session.get("user")
 
-    if not usuario_logado:
+    usuario = request.session.get("user")
+
+    if not usuario:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail="Usuário não autenticado."
         )
 
-    perfil = usuario_logado.get("perfil")
-    matricula = usuario_logado.get("matricula")
 
-    # ==============================
-    # Consulta base
-    # ==============================
+    perfil = usuario.get("perfil")
+    matricula = usuario.get("matricula")
+
+
     query = (
         db.query(AvaliacaoSupervisor)
         .join(
+            FrequenciaEstagio,
+            AvaliacaoSupervisor.frequencia_id ==
+            FrequenciaEstagio.id
+        )
+        .join(
             ContratoEstagio,
-            AvaliacaoSupervisor.contrato_id == ContratoEstagio.id
+            FrequenciaEstagio.contrato_id ==
+            ContratoEstagio.id
         )
         .options(
-            joinedload(AvaliacaoSupervisor.contrato)
-            .joinedload(ContratoEstagio.estagiario)
+            joinedload(
+                AvaliacaoSupervisor.frequencia
+            )
+            .joinedload(
+                FrequenciaEstagio.contrato
+            )
+            .joinedload(
+                ContratoEstagio.estagiario
+            )
         )
     )
 
-    # ==============================
-    # Restrição do supervisor
-    # ==============================
+
     if perfil == "operadorIV":
+
         query = query.filter(
             ContratoEstagio.supervisor_matricula == matricula
         )
 
-    resultados = (
+
+    avaliacoes = (
         query
-        .order_by(AvaliacaoSupervisor.data_avaliacao.desc())
-        .offset(offset)
-        .limit(limit)
+        .order_by(
+            FrequenciaEstagio.competencia.desc()
+        )
         .all()
     )
 
-    # ==============================
-    # Monta retorno
-    # ==============================
-    lista_formatada = []
 
-    for av in resultados:
-        contrato = av.contrato
-        estagiario = contrato.estagiario if contrato else None
+    retorno = []
 
-        lista_formatada.append({
+
+    for av in avaliacoes:
+
+        frequencia = av.frequencia
+        contrato = frequencia.contrato
+        estagiario = contrato.estagiario
+
+
+        retorno.append({
+
             "id": av.id,
-            "contrato_id": av.contrato_id,
-            "competencia": av.competencia.strftime("%m/%Y"),
-            "data_avaliacao": av.data_avaliacao.isoformat(),
-            "avaliacao": av.avaliacao,
-            "parecer": av.parecer,
-            "numero_contrato": contrato.numero_contrato if contrato else f"Contrato #{av.contrato_id}",
-            "estagiario_nome": estagiario.nome if estagiario else "Não informado"
+
+            "frequencia_id":
+                av.frequencia_id,
+
+            "contrato_id":
+                contrato.id,
+
+            "numero_contrato":
+                contrato.numero_contrato,
+
+            "estagiario_nome":
+                estagiario.nome,
+
+            "competencia":
+                frequencia.competencia.strftime("%m/%Y"),
+
+            "data_avaliacao":
+                av.data_avaliacao.isoformat(),
+
+            "avaliacao":
+                av.avaliacao,
+
+            "parecer":
+                av.parecer
+
         })
 
-    return lista_formatada
+
+    return retorno
 
 
-# ==========================
+
+# =====================================================
 # BUSCAR POR ID
-# ==========================
+# =====================================================
+
 @router.get("/{id}")
-def buscar(id: int, db: Session = Depends(get_db)): 
+def buscar(
+    id: int,
+    db: Session = Depends(get_db)
+):
 
     avaliacao = (
         db.query(AvaliacaoSupervisor)
-        .filter(AvaliacaoSupervisor.id == id)
+        .options(
+            joinedload(
+                AvaliacaoSupervisor.frequencia
+            )
+        )
+        .filter(
+            AvaliacaoSupervisor.id == id
+        )
         .first()
     )
 
+
     if not avaliacao:
+
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Avaliação não encontrada."
         )
+
 
     return avaliacao
 
 
-# ==========================
+
+# =====================================================
 # INSERIR
-# ==========================
-# ==========================
-# INSERIR
-# ==========================
-@router.post("/", status_code=status.HTTP_201_CREATED)
+# =====================================================
+
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED
+)
 def inserir(
     dados: AvaliacaoSupervisorCreate,
     request: Request,
     db: Session = Depends(get_db)
 ):
-    # ==============================
-    # Usuário logado
-    # ==============================
-    usuario_logado = request.session.get("user")
 
-    if not usuario_logado:
+    usuario = request.session.get("user")
+
+
+    if not usuario:
+
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail="Usuário não autenticado."
         )
 
-    perfil = usuario_logado.get("perfil")
-    matricula = usuario_logado.get("matricula")
 
-    # ==============================
-    # Permissão do supervisor
-    # ==============================
-    if perfil == "operadorIV":
+    perfil = usuario.get("perfil")
+    matricula = usuario.get("matricula")
 
-        contrato = (
-            db.query(ContratoEstagio)
-            .filter(
-                ContratoEstagio.id == dados.contrato_id,
-                ContratoEstagio.supervisor_matricula == matricula
+
+    # -------------------------------------
+    # Busca frequência
+    # -------------------------------------
+
+    frequencia = (
+        db.query(FrequenciaEstagio)
+        .options(
+            joinedload(
+                FrequenciaEstagio.contrato
             )
-            .first()
+        )
+        .filter(
+            FrequenciaEstagio.id ==
+            dados.frequencia_id
+        )
+        .first()
+    )
+
+
+    if not frequencia:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Frequência não encontrada."
         )
 
-        if not contrato:
+
+    contrato = frequencia.contrato
+
+
+    # -------------------------------------
+    # Permissão supervisor
+    # -------------------------------------
+
+    if perfil == "operadorIV":
+
+        if contrato.supervisor_matricula != matricula:
+
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
+                status_code=403,
                 detail="Você não possui permissão para avaliar este estagiário."
             )
 
-    # ==============================
-    # Verifica se existe frequência
-    # ==============================
-    frequencia = (
-        db.query(FrequenciaEstagio)
-        .filter(
-            FrequenciaEstagio.contrato_id == dados.contrato_id,
-            FrequenciaEstagio.competencia == dados.competencia
-        )
-        .first()
-    )
 
-    if not frequencia:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Não existe frequência lançada para esta competência."
-        )
-
-    # ==============================
+    # -------------------------------------
     # Verifica duplicidade
-    # ==============================
+    # -------------------------------------
+
     existe = (
         db.query(AvaliacaoSupervisor)
         .filter(
-            AvaliacaoSupervisor.contrato_id == dados.contrato_id,
-            AvaliacaoSupervisor.competencia == dados.competencia
+            AvaliacaoSupervisor.frequencia_id ==
+            dados.frequencia_id
         )
         .first()
     )
 
+
     if existe:
+
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Já existe uma avaliação para esta competência."
+            status_code=400,
+            detail="Esta frequência já possui avaliação."
         )
 
-    # ==============================
-    # Grava
-    # ==============================
-    avaliacao = AvaliacaoSupervisor(
-        contrato_id=dados.contrato_id,
-        competencia=dados.competencia,
-        data_avaliacao=dados.data_avaliacao,
-        avaliacao=dados.avaliacao,
-        parecer=dados.parecer
+
+    nova = AvaliacaoSupervisor(
+
+        frequencia_id=
+            dados.frequencia_id,
+
+        data_avaliacao=
+            dados.data_avaliacao,
+
+        avaliacao=
+            dados.avaliacao,
+
+        parecer=
+            dados.parecer
     )
 
-    db.add(avaliacao)
+
+    db.add(nova)
+
     db.commit()
-    db.refresh(avaliacao)
+
+    db.refresh(nova)
+
 
     return {
-        "mensagem": "Avaliação registrada com sucesso."
+        "mensagem":
+        "Avaliação registrada com sucesso."
     }
 
 
-# ==========================
+
+# =====================================================
 # ALTERAR
-# ==========================
+# =====================================================
+
 @router.put("/{id}")
 def alterar(
     id: int,
@@ -228,86 +306,64 @@ def alterar(
 
     avaliacao = (
         db.query(AvaliacaoSupervisor)
-        .filter(AvaliacaoSupervisor.id == id)
+        .filter(
+            AvaliacaoSupervisor.id == id
+        )
         .first()
     )
 
+
     if not avaliacao:
+
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Avaliação não encontrada."
         )
 
-    # =====================================
-    # Valores finais após a alteração
-    # =====================================
-    contrato_id = (
-        dados.contrato_id
-        if dados.contrato_id is not None
-        else avaliacao.contrato_id
+
+    dados_atualizar = (
+        dados.model_dump(
+            exclude_unset=True
+        )
     )
 
-    competencia = (
-        dados.competencia
-        if dados.competencia is not None
-        else avaliacao.competencia
-    )
 
-    # =====================================
-    # Verifica se existe frequência
-    # =====================================
-    frequencia = (
-        db.query(FrequenciaEstagio)
-        .filter(
-            FrequenciaEstagio.contrato_id == contrato_id,
-            FrequenciaEstagio.competencia == competencia
-        )
-        .first()
-    )
+    # não permite trocar frequência
+    if "frequencia_id" in dados_atualizar:
 
-    if not frequencia:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Não existe frequência para esta competência."
-        )
+        if dados_atualizar["frequencia_id"] != avaliacao.frequencia_id:
 
-    # =====================================
-    # Verifica duplicidade
-    # =====================================
-    conflito = (
-        db.query(AvaliacaoSupervisor)
-        .filter(
-            AvaliacaoSupervisor.contrato_id == contrato_id,
-            AvaliacaoSupervisor.competencia == competencia,
-            AvaliacaoSupervisor.id != id
-        )
-        .first()
-    )
+            raise HTTPException(
+                status_code=400,
+                detail="Não é permitido alterar a frequência vinculada."
+            )
 
-    if conflito:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Já existe uma avaliação para esta competência."
-        )
-
-    # =====================================
-    # Atualiza os campos enviados
-    # =====================================
-    dados_atualizar = dados.model_dump(exclude_unset=True)
 
     for chave, valor in dados_atualizar.items():
-        setattr(avaliacao, chave, valor)
+
+        setattr(
+            avaliacao,
+            chave,
+            valor
+        )
+
 
     db.commit()
+
     db.refresh(avaliacao)
 
+
     return {
-        "mensagem": "Avaliação atualizada com sucesso."
+        "mensagem":
+        "Avaliação atualizada com sucesso."
     }
 
-# ==========================
+
+
+# =====================================================
 # EXCLUIR
-# ==========================
+# =====================================================
+
 @router.delete("/{id}")
 def excluir(
     id: int,
@@ -316,19 +372,27 @@ def excluir(
 
     avaliacao = (
         db.query(AvaliacaoSupervisor)
-        .filter(AvaliacaoSupervisor.id == id)
+        .filter(
+            AvaliacaoSupervisor.id == id
+        )
         .first()
     )
 
+
     if not avaliacao:
+
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Avaliação não encontrada."
         )
 
+
     db.delete(avaliacao)
+
     db.commit()
 
+
     return {
-        "mensagem": "Avaliação excluída com sucesso."
+        "mensagem":
+        "Avaliação excluída com sucesso."
     }

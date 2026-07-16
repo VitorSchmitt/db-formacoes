@@ -287,59 +287,84 @@ class DesligamentoContratoInput(BaseModel):
 
 
 
+from datetime import date, datetime
+from decimal import Decimal
+from typing import Optional
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    field_validator,
+    field_serializer
+)
 
 
+# =====================================================
+# BASE PARA CAMPOS DE COMPETÊNCIA
+# =====================================================
 
-class FrequenciaEstagioBase(BaseModel):
+class CompetenciaBase(BaseModel):
+
+    @field_validator("competencia", mode="before", check_fields=False)
+    @classmethod
+    def converter_competencia(cls, v):
+        if v is None:
+            return None
+
+        if isinstance(v, str):
+
+            # input type="month" -> 2026-06
+            if len(v) == 7:
+                return datetime.strptime(
+                    v + "-01",
+                    "%Y-%m-%d"
+                ).date()
+
+            # formato completo
+            return datetime.strptime(
+                v,
+                "%Y-%m-%d"
+            ).date()
+
+        return v
+
+    @field_serializer("competencia", check_fields=False)
+    def serializar_competencia(self, v):
+
+        if v is None:
+            return None
+
+        return v.strftime("%m/%Y") 
+
+
+# =====================================================
+# FREQUÊNCIA
+# =====================================================
+
+class FrequenciaEstagioBase(CompetenciaBase):
     contrato_id: int
     competencia: date
     dias: int
     horas_realizadas: Decimal
     observacao: Optional[str] = None
 
-    @field_validator("competencia", mode="before")
-    @classmethod
-    def converter_competencia(cls, v):
-        if isinstance(v, str):
-            # Recebe "2026-06" do input type="month"
-            if len(v) == 7:
-                return datetime.strptime(v + "-01", "%Y-%m-%d").date()
-
-            # Recebe "2026-06-01"
-            return datetime.strptime(v, "%Y-%m-%d").date()
-
-        return v
-
-    @field_serializer("competencia")
-    def formatar_competencia(self, v: date):
-        return v.strftime("%m/%Y")
-
 
 class FrequenciaEstagioCreate(FrequenciaEstagioBase):
     pass
 
 
-class FrequenciaEstagioUpdate(BaseModel):
+class FrequenciaEstagioUpdate(CompetenciaBase):
     contrato_id: Optional[int] = None
     competencia: Optional[date] = None
     dias: Optional[int] = None
     horas_realizadas: Optional[Decimal] = None
     observacao: Optional[str] = None
 
-    @field_validator("competencia", mode="before")
-    @classmethod
-    def converter_competencia(cls, v):
-        if v is None:
-            return v
 
-        if isinstance(v, str):
-            if len(v) == 7:
-                return datetime.strptime(v + "-01", "%Y-%m-%d").date()
+class FrequenciaEstagioResponse(FrequenciaEstagioBase):
+    id: int
 
-            return datetime.strptime(v, "%Y-%m-%d").date()
-
-        return v
-
+    model_config = ConfigDict(from_attributes=True)
 
 class FrequenciaEstagioResponse(FrequenciaEstagioBase):
     id: int
@@ -349,31 +374,23 @@ class FrequenciaEstagioResponse(FrequenciaEstagioBase):
 # AVALIAÇÃO DO SUPERVISOR
 # ===============================
 
-# Usado no POST de criação
-class AvaliacaoSupervisorCreate(BaseModel):
+# =====================================================
+# AVALIAÇÃO
+# =====================================================
+
+class AvaliacaoSupervisorBase(CompetenciaBase):
     contrato_id: int
     competencia: date
     data_avaliacao: date
     avaliacao: AvaliacaoSupervisorEnum
     parecer: Optional[str] = None
 
-    @field_validator("competencia", mode="before")
-        @classmethod
-        def converter_competencia(cls, v):
-            if v is None:
-                return v
-    
-            if isinstance(v, str):
-                if len(v) == 7:
-                    return datetime.strptime(v + "-01", "%Y-%m-%d").date()
-    
-                return datetime.strptime(v, "%Y-%m-%d").date()
-    
-            return v
+
+class AvaliacaoSupervisorCreate(AvaliacaoSupervisorBase):
+    pass
 
 
-# Usado no PUT de edição
-class AvaliacaoSupervisorUpdate(BaseModel):
+class AvaliacaoSupervisorUpdate(CompetenciaBase):
     contrato_id: Optional[int] = None
     competencia: Optional[date] = None
     data_avaliacao: Optional[date] = None
@@ -381,19 +398,11 @@ class AvaliacaoSupervisorUpdate(BaseModel):
     parecer: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
-    
-    @field_validator("competencia", mode="before")
-    @classmethod
-    def converter_competencia(cls, v):
-        if v is None:
-            return v
 
-        if isinstance(v, str):
-            if len(v) == 7:
-                return datetime.strptime(v + "-01", "%Y-%m-%d").date()
 
-            return datetime.strptime(v, "%Y-%m-%d").date()
+class AvaliacaoSupervisorResponse(AvaliacaoSupervisorBase):
+    id: int
 
-        return v
+    model_config = ConfigDict(from_attributes=True)
 
     

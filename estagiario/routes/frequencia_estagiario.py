@@ -1,58 +1,141 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from typing import List
+
 from database import get_db
 
+from estagiario.model_acompanhamento import (
+    FrequenciaEstagio,
+    AvaliacaoSupervisor
+)
 
-# Certifique-se de ajustar o caminho correto da importação do seu modelo
-from estagiario.model_acompanhamento import FrequenciaEstagio
 from estagiario.model_estagiario import ContratoEstagio
-from schemas import FrequenciaEstagioCreate, FrequenciaEstagioUpdate
+
+from schemas import (
+    FrequenciaEstagioCreate,
+    FrequenciaEstagioUpdate
+)
 
 router = APIRouter(prefix="/api/frequencia_estagio", tags=["Frequências de Estágio"])
+
+@router.get("/", response_model=List[dict])
+
 
 @router.get("/", response_model=List[dict])
 def listar_frequencias(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    # 1. Recupera os dados do usuário guardados na sessão (Cookie)
+
     usuario_logado = request.session.get("user")
-    
+
     if not usuario_logado:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário não autenticado no sistema."
+            detail="Usuário não autenticado."
         )
-    
-    usuario_logado = request.session.get("user")    
+
     perfil = usuario_logado.get("perfil")
     matricula = usuario_logado.get("matricula")
-    
-    query = db.query(FrequenciaEstagio).join(
-        ContratoEstagio,
-        FrequenciaEstagio.contrato_id == ContratoEstagio.id
+
+    query = (
+        db.query(
+            FrequenciaEstagio,
+            AvaliacaoSupervisor.id.label("avaliacao_id")
+        )
+        .join(
+            ContratoEstagio,
+            FrequenciaEstagio.contrato_id == ContratoEstagio.id
+        )
+        .outerjoin(
+            AvaliacaoSupervisor,
+            and_(
+                AvaliacaoSupervisor.contrato_id == FrequenciaEstagio.contrato_id,
+                AvaliacaoSupervisor.competencia == FrequenciaEstagio.competencia
+            )
+        )
     )
-    
+
     if perfil == "operadorIV":
         query = query.filter(
             ContratoEstagio.supervisor_matricula == matricula
         )
-    frequencias = query.all()
-    
-    return [
-        {
-            "id": f.id,
-            "contrato_id": f.contrato_id,
-            "numero_contrato": f.contrato.numero_contrato if f.contrato else "Não informado",
-            "competencia": f.competencia.strftime("%Y-%m"),
-            "dias": f.dias,
-            "horas_realizadas": float(f.horas_realizadas),
-            "observacao": f.observacao
-        }
-        for f in frequencias
-    ]
 
+    resultados = query.order_by(
+        FrequenciaEstagio.competencia.desc()
+    ).all()
+
+    return [
+
+        {
+            "id": freq.id,
+            "contrato_id": freq.contrato_id,
+            "numero_contrato": freq.contrato.numero_contrato,
+            "competencia": freq.competencia.strftime("%Y-%m"),
+            "dias": freq.dias,
+            "horas_realizadas": float(freq.horas_realizadas),
+            "observacao": freq.observacao,
+            "avaliada": avaliacao_id is not None,
+            "avaliacao_id": avaliacao_id
+        }
+
+        for freq, avaliacao_id in resultados
+
+    ]
+@router.get("/{id}")
+def buscar_frequencia(
+    id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+
+    usuario = request.session.get("user")
+
+    if not usuario:
+        raise HTTPException(
+            status_code=401,
+            detail="Usuário não autenticado."
+        )
+
+    perfil = usuario.get("perfil")
+    matricula = usuario.get("matricula")
+
+    query = (
+        db.query(FrequenciaEstagio)
+        .join(
+            ContratoEstagio,
+            FrequenciaEstagio.contrato_id == ContratoEstagio.id
+        )
+        .filter(
+            FrequenciaEstagio.id == id
+        )
+    )
+
+    if perfil == "operadorIV":
+        query = query.filter(
+            ContratoEstagio.supervisor_matricula == matricula
+        )
+
+    frequencia = query.first()
+
+    if not frequencia:
+        raise HTTPException(
+            status_code=404,
+            detail="Frequência não encontrada."
+        )
+
+    return {
+
+        "id": frequencia.id,
+        "contrato_id": frequencia.contrato_id,
+        "numero_contrato": frequencia.contrato.numero_contrato,
+        "competencia": frequencia.competencia.strftime("%Y-%m"),
+        "dias": frequencia.dias,
+        "horas_realizadas": float(frequencia.horas_realizadas),
+        "observacao": frequencia.observacao
+
+    }
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def criar_frequencia(
     dados: FrequenciaEstagioCreate,

@@ -20,13 +20,6 @@ class AvaliacaoSupervisor(Base):
     __tablename__ = "avaliacoes_supervisor"
 
     id = Column(Integer, primary_key=True)
-
-    contrato_id = Column(
-        Integer,
-        ForeignKey("contratos_estagio.id"),
-        nullable=False
-    )
-
     data_avaliacao = Column(
         Date,
         nullable=False
@@ -38,18 +31,13 @@ class AvaliacaoSupervisor(Base):
             native_enum=False
         ),
         nullable=False
-    )
-
-    competencia = Column(
-        Date,
-        nullable=False
-    )
+    )    
 
     parecer = Column(Text)
 
-    contrato = relationship(
-        "ContratoEstagio",
-        back_populates="avaliacoes"
+    frequencia = relationship(
+        "FrequenciaEstagio",
+        back_populates="avaliacao"
     )
 
 class FrequenciaEstagio(Base):
@@ -93,6 +81,13 @@ class FrequenciaEstagio(Base):
     contrato = relationship(
         "ContratoEstagio",
         back_populates="frequencias"
+    )
+    
+    avaliacao = relationship(
+        "AvaliacaoSupervisor",
+        back_populates="frequencia",
+        uselist=False,
+        cascade="all, delete-orphan"
     )
 
 
@@ -152,7 +147,9 @@ class PagamentoEstagio(Base):
         nullable=False
     )
 
-    contrato = relationship(
-        "ContratoEstagio",
-        back_populates="pagamentos"
+    
+
+    frequencia = relationship(
+        "FrequenciaEstagio",
+        back_populates="avaliacao"
     )

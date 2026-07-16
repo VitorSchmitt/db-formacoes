@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy.orm import Session, joinedload
+
 from typing import List
 
 from database import get_db
@@ -18,9 +18,6 @@ from schemas import (
 )
 
 router = APIRouter(prefix="/api/frequencia_estagio", tags=["Frequências de Estágio"])
-
-@router.get("/", response_model=List[dict])
-
 
 @router.get("/", response_model=List[dict])
 def listar_frequencias(
@@ -50,10 +47,7 @@ def listar_frequencias(
         )
         .outerjoin(
             AvaliacaoSupervisor,
-            and_(
-                AvaliacaoSupervisor.contrato_id == FrequenciaEstagio.contrato_id,
-                AvaliacaoSupervisor.competencia == FrequenciaEstagio.competencia
-            )
+            AvaliacaoSupervisor.frequencia_id == FrequenciaEstagio.id
         )
     )
 
@@ -101,8 +95,12 @@ def buscar_frequencia(
     perfil = usuario.get("perfil")
     matricula = usuario.get("matricula")
 
+
     query = (
         db.query(FrequenciaEstagio)
+        .options(
+            joinedload(FrequenciaEstagio.avaliacao)
+        )
         .join(
             ContratoEstagio,
             FrequenciaEstagio.contrato_id == ContratoEstagio.id
@@ -112,12 +110,15 @@ def buscar_frequencia(
         )
     )
 
+
     if perfil == "operadorIV":
         query = query.filter(
             ContratoEstagio.supervisor_matricula == matricula
         )
 
+
     frequencia = query.first()
+
 
     if not frequencia:
         raise HTTPException(
@@ -125,16 +126,20 @@ def buscar_frequencia(
             detail="Frequência não encontrada."
         )
 
-    return {
 
+    return {
         "id": frequencia.id,
         "contrato_id": frequencia.contrato_id,
         "numero_contrato": frequencia.contrato.numero_contrato,
         "competencia": frequencia.competencia.strftime("%Y-%m"),
         "dias": frequencia.dias,
         "horas_realizadas": float(frequencia.horas_realizadas),
-        "observacao": frequencia.observacao
-
+        "observacao": frequencia.observacao,
+        "avaliacao_id": (
+            frequencia.avaliacao.id
+            if frequencia.avaliacao
+            else None
+        )
     }
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def criar_frequencia(
@@ -223,6 +228,11 @@ def atualizar_frequencia(
         )
 
     # Verifica duplicidade da competência
+    if frequencia.avaliacao and dados.competencia:
+        raise HTTPException(
+            status_code=400,
+            detail="Não é possível alterar a competência de uma frequência já avaliada."
+        )
     if dados.competencia is not None:
         conflito = db.query(FrequenciaEstagio).filter(
             FrequenciaEstagio.contrato_id == frequencia.contrato_id,

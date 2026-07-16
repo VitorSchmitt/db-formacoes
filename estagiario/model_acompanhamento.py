@@ -55,6 +55,7 @@ class AvaliacaoSupervisor(Base):
         "FrequenciaEstagio",
         back_populates="avaliacao"
     )
+    
 class FrequenciaEstagio(Base):
     __tablename__ = "frequencias_estagio"
 
@@ -65,7 +66,6 @@ class FrequenciaEstagio(Base):
             name="uq_frequencia_contrato_data"
         ),
     )
-
 
     id = Column(Integer, primary_key=True)
 
@@ -97,7 +97,7 @@ class FrequenciaEstagio(Base):
         "ContratoEstagio",
         back_populates="frequencias"
     )
-    
+
     avaliacao = relationship(
         "AvaliacaoSupervisor",
         back_populates="frequencia",
@@ -105,6 +105,12 @@ class FrequenciaEstagio(Base):
         cascade="all, delete-orphan"
     )
 
+    pagamento = relationship(
+        "PagamentoEstagio",
+        back_populates="frequencia",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
 
 
 class PagamentoEstagio(Base):

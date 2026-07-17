@@ -41,17 +41,20 @@ def listar_frequencias(
             FrequenciaEstagio,
             AvaliacaoSupervisor.id.label("avaliacao_id")
         )
+    
         .join(
             ContratoEstagio,
             FrequenciaEstagio.contrato_id == ContratoEstagio.id
         )
+    
+        .join(
+            Estagiario,
+            ContratoEstagio.estagiario_id == Estagiario.id
+        )
+    
         .outerjoin(
             AvaliacaoSupervisor,
             AvaliacaoSupervisor.frequencia_id == FrequenciaEstagio.id
-        )
-        .options(
-            joinedload(FrequenciaEstagio.contrato)
-            .joinedload(ContratoEstagio.estagiario)
         )
     )
 
@@ -69,11 +72,7 @@ def listar_frequencias(
         {
             "id": freq.id,
             "contrato_id": freq.contrato_id,
-            "estagiario_nome": (
-                freq.contrato.estagiario.nome
-                if freq.contrato and freq.contrato.estagiario
-                else ""
-            ),
+            "estagiario_nome": estagiario.nome,
             "numero_contrato": freq.contrato.numero_contrato,
             "competencia": freq.competencia.strftime("%Y-%m"),
             "dias": freq.dias,

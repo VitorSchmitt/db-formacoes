@@ -298,13 +298,7 @@ class ContratoEstagio(Base):
         "FrequenciaEstagio",
         back_populates="contrato",
         cascade="all, delete-orphan"
-    )
-
-    pagamentos = relationship(
-        "PagamentoEstagio",
-        back_populates="contrato",
-        cascade="all, delete-orphan"
-    )
+    )    
 
     lotacao = relationship(Lotacao)
 

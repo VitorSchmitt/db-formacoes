@@ -49,6 +49,10 @@ def listar_frequencias(
             AvaliacaoSupervisor,
             AvaliacaoSupervisor.frequencia_id == FrequenciaEstagio.id
         )
+        .options(
+            joinedload(FrequenciaEstagio.contrato)
+            .joinedload(ContratoEstagio.estagiario)
+        )
     )
 
     if perfil == "operadorIV":
@@ -65,6 +69,7 @@ def listar_frequencias(
         {
             "id": freq.id,
             "contrato_id": freq.contrato_id,
+            "estagiario_nome": frequencia.contrato.estagiario.nome,
             "numero_contrato": freq.contrato.numero_contrato,
             "competencia": freq.competencia.strftime("%Y-%m"),
             "dias": freq.dias,

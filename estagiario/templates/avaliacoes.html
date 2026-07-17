@@ -262,7 +262,7 @@ function carregarAvaliacao(id) {
 
 
 // ===========================================
-// SALVAR
+// SALVAR AVALIAÇÃO
 // ===========================================
 function salvar() {
 
@@ -283,6 +283,7 @@ function salvar() {
 
     };
 
+
     if (
         !dados.frequencia_id ||
         !dados.data_avaliacao ||
@@ -294,28 +295,26 @@ function salvar() {
 
     }
 
-    const metodo = id ? "PUT" : "POST";
 
-    const destino = id
-        ? `${urlAvaliacao}/${id}`
-        : urlAvaliacao;
+    fetch(
+        "/api/avaliacao_estagiario/",
+        {
+            method: "POST",
 
-    fetch(destino, {
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        method: metodo,
+            body: JSON.stringify(dados)
+        }
+    )
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+    .then(async response => {
 
-        body: JSON.stringify(dados)
+        const retorno = await response.json();
 
-    })
-    .then(async r => {
 
-        const retorno = await r.json();
-
-        if (!r.ok) {
+        if (!response.ok) {
 
             throw new Error(
                 retorno.detail ||
@@ -324,14 +323,17 @@ function salvar() {
 
         }
 
+
         alert(retorno.mensagem);
+
 
         voltar();
 
     })
-    .catch(err => {
 
-        alert(err.message);
+    .catch(error => {
+
+        alert(error.message);
 
     });
 

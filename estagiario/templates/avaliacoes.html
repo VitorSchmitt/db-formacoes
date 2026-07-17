@@ -220,12 +220,13 @@ function carregarFrequencia(id) {
 // ===========================================
 // CARREGA UMA AVALIAÇÃO EXISTENTE
 // ===========================================
-function carregarAvaliacao(id) {
+function carregarAvaliacao(id){
 
     fetch(`${urlAvaliacao}/${id}`)
-    .then(r => {
 
-        if (!r.ok) {
+    .then(r=>{
+
+        if(!r.ok){
             throw new Error(
                 "Erro ao buscar avaliação."
             );
@@ -234,26 +235,37 @@ function carregarAvaliacao(id) {
         return r.json();
 
     })
-    .then(dados => {
+
+    .then(dados=>{
 
 
-        // guarda o id da avaliação
         document.getElementById("id").value =
             dados.id;
 
 
-        // guarda a frequência vinculada
         document.getElementById("frequencia_id").value =
             dados.frequencia_id;
 
 
-        // primeiro carrega a frequência
-        carregarFrequencia(
-            dados.frequencia_id
-        );
+        document.getElementById("numero_contrato").value =
+            dados.numero_contrato;
 
 
-        // depois carrega os dados da avaliação
+        document.getElementById("estagiario_nome").value =
+            dados.estagiario_nome;
+
+
+        document.getElementById("competencia").value =
+            dados.competencia;
+
+
+        document.getElementById("dias").value =
+            dados.dias;
+
+
+        document.getElementById("horas_realizadas").value =
+            dados.horas_realizadas;
+
 
         document.getElementById("data_avaliacao").value =
             dados.data_avaliacao;
@@ -268,14 +280,14 @@ function carregarAvaliacao(id) {
 
 
     })
-    .catch(err => {
+
+    .catch(err=>{
 
         alert(err.message);
 
     });
 
 }
-
 
 // ===========================================
 // SALVAR AVALIAÇÃO

@@ -325,10 +325,26 @@ function salvar() {
     }
 
 
+    // Verifica se é inclusão ou alteração
+    const id = document.getElementById("id").value;
+
+
+    let url = "/api/avaliacao_estagiario/";
+    let metodo = "POST";
+
+
+    if (id) {
+
+        url = `/api/avaliacao_estagiario/${id}`;
+        metodo = "PUT";
+
+    }
+
+
     fetch(
-        "/api/avaliacao_estagiario/",
+        url,
         {
-            method: "POST",
+            method: metodo,
 
             headers: {
                 "Content-Type": "application/json"

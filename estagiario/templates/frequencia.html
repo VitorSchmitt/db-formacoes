@@ -361,13 +361,13 @@ function salvar(){
 // ===============================
 // ABRIR AVALIAÇÃO
 // ===============================
-function novaAvaliacao(id){
+function novaAvaliacao(frequenciaId){
     window.location.href =
-        `/avaliacao_estagiario?id=${id}`;
+        `/web/estagiario/avaliacoes?frequencia=${frequenciaId}`;
 }
 function abrirAvaliacao(id){
     window.location.href =
-        `/avaliacao_estagiario?id=${id}`;
+        `/web/estagiario/avaliacoes?id=${id}`;
 }
 function cancelar(){
     limpar();

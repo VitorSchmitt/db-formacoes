@@ -142,145 +142,213 @@
     </div>
 </div>
 <script>
-const urlFrequencia =
-    "/api/frequencia_estagio";
-const urlAvaliacao =
-    "/api/avaliacao_estagiario";
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-        carregarFrequencia();
-        document.getElementById(
-            "data_avaliacao"
-        ).value =
-            new Date()
-            .toISOString()
-            .substring(0,10);
-    }
-);
-function carregarFrequencia(){
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-    const id =
-        params.get("id");
-    if(!id){
-        alert(
-            "Frequência não informada."
-        );
+const urlFrequencia = "/api/frequencia_estagio";
+const urlAvaliacao = "/api/avaliacao_estagiario";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.getElementById("data_avaliacao").value =
+        new Date().toISOString().substring(0, 10);
+
+    const params = new URLSearchParams(window.location.search);
+
+    const frequenciaId = params.get("frequencia");
+    const avaliacaoId = params.get("id");
+
+    if (avaliacaoId) {
+
+        carregarAvaliacao(avaliacaoId);
+
+    } else if (frequenciaId) {
+
+        carregarFrequencia(frequenciaId);
+
+    } else {
+
+        alert("Parâmetro inválido.");
         voltar();
-        return;
+
     }
-    document.getElementById(
-        "frequencia_id"
-    ).value = id;
-    fetch(
-        `${urlFrequencia}/${id}`
-    )
-    .then(r=>{
-        if(!r.ok){
-            throw new Error(
-                "Erro ao buscar frequência." );
-        }
-        return r.json();
-    })
-    .then(dados=>{
-        document.getElementById(
-            "numero_contrato"
-        ).value =
-            dados.numero_contrato;
-        document.getElementById(
-            "competencia"
-        ).value =
-            dados.competencia;
-        document.getElementById(
-            "dias"
-        ).value =
-            dados.dias;
-        document.getElementById(
-            "horas_realizadas"
-        ).value =
-            dados.horas_realizadas;
-        document.getElementById(
-            "estagiario_nome"
-        ).value =
-            dados.estagiario_nome || "";
-    })
-    .catch(err=>{
-        alert(err.message);
-    });
+
+});
+
+
+// ===========================================
+// CARREGA A FREQUÊNCIA (NOVA AVALIAÇÃO)
+// ===========================================
+function carregarFrequencia(id) {
+
+    document.getElementById("frequencia_id").value = id;
+
+    fetch(`${urlFrequencia}/${id}`)
+        .then(r => {
+
+            if (!r.ok) {
+                throw new Error("Erro ao buscar frequência.");
+            }
+
+            return r.json();
+
+        })
+        .then(dados => {
+
+            document.getElementById("numero_contrato").value =
+                dados.numero_contrato;
+
+            document.getElementById("estagiario_nome").value =
+                dados.estagiario_nome || "";
+
+            document.getElementById("competencia").value =
+                dados.competencia;
+
+            document.getElementById("dias").value =
+                dados.dias;
+
+            document.getElementById("horas_realizadas").value =
+                dados.horas_realizadas;
+
+        })
+        .catch(err => {
+
+            alert(err.message);
+
+        });
+
 }
 
-function salvar(){
+
+// ===========================================
+// CARREGA UMA AVALIAÇÃO EXISTENTE
+// ===========================================
+function carregarAvaliacao(id) {
+
+    fetch(`${urlAvaliacao}/${id}`)
+        .then(r => {
+
+            if (!r.ok) {
+                throw new Error("Erro ao buscar avaliação.");
+            }
+
+            return r.json();
+
+        })
+        .then(dados => {
+
+            document.getElementById("id").value =
+                dados.id;
+
+            document.getElementById("frequencia_id").value =
+                dados.frequencia_id;
+
+            carregarFrequencia(dados.frequencia_id);
+
+            document.getElementById("data_avaliacao").value =
+                dados.data_avaliacao;
+
+            document.getElementById("avaliacao").value =
+                dados.avaliacao;
+
+            document.getElementById("parecer").value =
+                dados.parecer || "";
+
+        })
+        .catch(err => {
+
+            alert(err.message);
+
+        });
+
+}
+
+
+// ===========================================
+// SALVAR
+// ===========================================
+function salvar() {
+
+    const id =
+        document.getElementById("id").value;
+
     const dados = {
-        frequencia_id:
-            parseInt(
-                document.getElementById(
-                    "frequencia_id"
-                ).value
-            ),
+
+        frequencia_id: parseInt(
+            document.getElementById("frequencia_id").value
+        ),
+
         data_avaliacao:
-            document.getElementById(
-                "data_avaliacao"
-            ).value,
+            document.getElementById("data_avaliacao").value,
+
         avaliacao:
-            document.getElementById(
-                "avaliacao"
-            ).value,
+            document.getElementById("avaliacao").value,
+
         parecer:
-            document.getElementById(
-                "parecer"
-            ).value
+            document.getElementById("parecer").value
+
     };
-    if(
+
+    if (
         !dados.frequencia_id ||
         !dados.data_avaliacao ||
         !dados.avaliacao
-    ){
-        alert(
-            "Preencha os campos obrigatórios."
-        );
-        return;
-    }
-    fetch(
-        urlAvaliacao,
-        {
-            method:"POST",
-            headers:{
-                "Content-Type":
-                "application/json"
-            },
-            body:
-                JSON.stringify(dados)
-        }
+    ) {
 
-    )
-    .then(async r=>{
-        const retorno =
-            await r.json();
-        if(!r.ok){
+        alert("Preencha os campos obrigatórios.");
+        return;
+
+    }
+
+    const metodo = id ? "PUT" : "POST";
+
+    const destino = id
+        ? `${urlAvaliacao}/${id}`
+        : urlAvaliacao;
+
+    fetch(destino, {
+
+        method: metodo,
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(dados)
+
+    })
+    .then(async r => {
+
+        const retorno = await r.json();
+
+        if (!r.ok) {
+
             throw new Error(
                 retorno.detail ||
                 "Erro ao salvar avaliação."
             );
-        }
-        alert(
-            retorno.mensagem
-        );
-        voltar();
-    })
-    .catch(err=>{
 
-        alert(
-            err.message
-        );
+        }
+
+        alert(retorno.mensagem);
+
+        voltar();
+
+    })
+    .catch(err => {
+
+        alert(err.message);
+
     });
+
 }
 
-function voltar(){
+
+// ===========================================
+// VOLTAR
+// ===========================================
+function voltar() {
+
     window.location.href =
-        "/frequencias_estagio";
+        "/web/estagiario/frequencia";
+
 }
 </script>
 

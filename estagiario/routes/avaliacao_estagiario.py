@@ -233,7 +233,7 @@ def inserir(
 
     if perfil == "operadorIV":
 
-        if contrato.supervisor_matricula != matricula:
+        if int(contrato.supervisor_matricula) != int(matricula):
 
             raise HTTPException(
                 status_code=403,

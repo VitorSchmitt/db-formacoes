@@ -181,11 +181,9 @@ def buscar(
         "data_avaliacao":
             avaliacao.data_avaliacao.isoformat(),
 
-        "avaliacao":
-            avaliacao.avaliacao.value
-            if hasattr(avaliacao.avaliacao, "value")
-            else avaliacao.avaliacao,
-
+        "avaliacao": 
+            avaliacao.avaliacao.value,
+        
         "parecer":
             avaliacao.parecer,
 

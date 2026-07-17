@@ -42,10 +42,7 @@ def listar(
 
 
     perfil = usuario.get("perfil")
-    matricula = usuario.get("matricula")
-    print(frequencia.id)
-    print(frequencia.contrato.id)
-    print(frequencia.contrato.supervisor_matricula)
+    matricula = usuario.get("matricula")    
 
     query = (
         db.query(AvaliacaoSupervisor)
@@ -76,7 +73,7 @@ def listar(
     if perfil == "operadorIV":
 
         query = query.filter(
-           ContratoEstagio.supervisor_matricula ==str(matricula)
+           ContratoEstagio.supervisor_matricula ==matricula
         )
 
 

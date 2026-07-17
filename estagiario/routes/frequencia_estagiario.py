@@ -69,7 +69,11 @@ def listar_frequencias(
         {
             "id": freq.id,
             "contrato_id": freq.contrato_id,
-            "estagiario_nome": frequencia.contrato.estagiario.nome,
+            "estagiario_nome": (
+                freq.contrato.estagiario.nome
+                if freq.contrato and freq.contrato.estagiario
+                else ""
+            ),
             "numero_contrato": freq.contrato.numero_contrato,
             "competencia": freq.competencia.strftime("%Y-%m"),
             "dias": freq.dias,

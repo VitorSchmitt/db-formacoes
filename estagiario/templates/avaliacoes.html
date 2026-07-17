@@ -135,6 +135,12 @@
                 Salvar Avaliação
             </button>
             <button
+                id="btnExcluir"
+                class="btn btn-danger d-none"
+                onclick="excluir()">
+                Excluir Avaliação
+            </button>
+            <button
                 class="btn btn-secondary"
                 onclick="voltar()">
                 Cancelar
@@ -278,7 +284,9 @@ function carregarAvaliacao(id){
 
         document.getElementById("parecer").value =
             dados.parecer || "";
-
+        
+        document.getElementById("btnExcluir")
+            .classList.remove("d-none");
 
     })
 
@@ -384,6 +392,57 @@ function salvar() {
 
 }
 
+    function excluir(){
+
+    const id = document.getElementById("id").value;
+
+
+    if(!id){
+        alert("Avaliação inválida.");
+        return;
+    }
+
+
+    if(!confirm("Deseja excluir esta avaliação?")){
+        return;
+    }
+
+
+    fetch(
+        `/api/avaliacao_estagiario/${id}`,
+        {
+            method: "DELETE"
+        }
+    )
+
+    .then(async response => {
+
+        const retorno = await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                retorno.detail ||
+                "Erro ao excluir avaliação."
+            );
+
+        }
+
+
+        alert(retorno.mensagem);
+
+        voltar();
+
+    })
+
+    .catch(error=>{
+
+        alert(error.message);
+
+    });
+
+}
 
 // ===========================================
 // VOLTAR

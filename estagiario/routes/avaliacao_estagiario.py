@@ -147,6 +147,12 @@ def buscar(
             joinedload(
                 AvaliacaoSupervisor.frequencia
             )
+            .joinedload(
+                FrequenciaEstagio.contrato
+            )
+            .joinedload(
+                ContratoEstagio.estagiario
+            )
         )
         .filter(
             AvaliacaoSupervisor.id == id
@@ -156,16 +162,48 @@ def buscar(
 
 
     if not avaliacao:
-
         raise HTTPException(
             status_code=404,
             detail="Avaliação não encontrada."
         )
 
 
-    return avaliacao
+    frequencia = avaliacao.frequencia
 
+    return {
 
+        "id": avaliacao.id,
+
+        "frequencia_id":
+            avaliacao.frequencia_id,
+
+        "data_avaliacao":
+            avaliacao.data_avaliacao.isoformat(),
+
+        "avaliacao":
+            avaliacao.avaliacao.value
+            if hasattr(avaliacao.avaliacao, "value")
+            else avaliacao.avaliacao,
+
+        "parecer":
+            avaliacao.parecer,
+
+        "numero_contrato":
+            frequencia.contrato.numero_contrato,
+
+        "estagiario_nome":
+            frequencia.contrato.estagiario.nome,
+
+        "competencia":
+            frequencia.competencia.strftime("%Y-%m"),
+
+        "dias":
+            frequencia.dias,
+
+        "horas_realizadas":
+            float(frequencia.horas_realizadas)
+
+    }
 
 # =====================================================
 # INSERIR

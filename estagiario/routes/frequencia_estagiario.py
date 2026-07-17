@@ -50,14 +50,18 @@ def listar_frequencias(
             FrequenciaEstagio.contrato_id == ContratoEstagio.id
         )
     
-        .join(
-            Estagiario,
-            ContratoEstagio.estagiario_id == Estagiario.id
-        )
-    
         .outerjoin(
             AvaliacaoSupervisor,
             AvaliacaoSupervisor.frequencia_id == FrequenciaEstagio.id
+        )
+    
+        .options(
+            joinedload(
+                FrequenciaEstagio.contrato
+            )
+            .joinedload(
+                ContratoEstagio.estagiario
+            )
         )
     )
 

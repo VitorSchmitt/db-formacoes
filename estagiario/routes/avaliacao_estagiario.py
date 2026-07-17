@@ -135,74 +135,7 @@ def listar(
 # BUSCAR POR ID
 # =====================================================
 
-function carregarAvaliacao(id){
 
-    fetch(`${urlAvaliacao}/${id}`)
-
-    .then(r=>{
-
-        if(!r.ok){
-            throw new Error(
-                "Erro ao buscar avaliação."
-            );
-        }
-
-        return r.json();
-
-    })
-
-    .then(dados=>{
-
-
-        document.getElementById("id").value =
-            dados.id;
-
-
-        document.getElementById("frequencia_id").value =
-            dados.frequencia_id;
-
-
-        document.getElementById("numero_contrato").value =
-            dados.numero_contrato;
-
-
-        document.getElementById("estagiario_nome").value =
-            dados.estagiario_nome;
-
-
-        document.getElementById("competencia").value =
-            dados.competencia;
-
-
-        document.getElementById("dias").value =
-            dados.dias;
-
-
-        document.getElementById("horas_realizadas").value =
-            dados.horas_realizadas;
-
-
-        document.getElementById("data_avaliacao").value =
-            dados.data_avaliacao;
-
-
-        document.getElementById("avaliacao").value =
-            dados.avaliacao;
-
-
-        document.getElementById("parecer").value =
-            dados.parecer || "";
-
-
-    })
-
-    .catch(err=>{
-
-        alert(err.message);
-
-    });
-
-}
 
 # =====================================================
 # INSERIR

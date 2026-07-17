@@ -43,7 +43,9 @@ def listar(
 
     perfil = usuario.get("perfil")
     matricula = usuario.get("matricula")
-
+    print(frequencia.id)
+    print(frequencia.contrato.id)
+    print(frequencia.contrato.supervisor_matricula)
 
     query = (
         db.query(AvaliacaoSupervisor)

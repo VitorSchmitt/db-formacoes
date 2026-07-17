@@ -74,7 +74,7 @@ def listar(
     if perfil == "operadorIV":
 
         query = query.filter(
-           int(contrato.supervisor_matricula) = int(matricula):
+           int(contrato.supervisor_matricula) == int(matricula):
         )
 
 

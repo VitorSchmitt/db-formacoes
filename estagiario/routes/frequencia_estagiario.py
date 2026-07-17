@@ -10,7 +10,10 @@ from estagiario.model_acompanhamento import (
     AvaliacaoSupervisor
 )
 
-from estagiario.model_estagiario import ContratoEstagio
+from estagiario.model_estagiario import (
+    ContratoEstagio,
+    Estagiario
+)
 
 from schemas import (
     FrequenciaEstagioCreate,

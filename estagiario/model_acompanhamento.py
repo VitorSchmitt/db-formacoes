@@ -12,7 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from database import Base
-from estagiario.enums import AvaliacaoSupervisorEnum, StatusFolhaEnum
+from estagiario.enums import AvaliacaoSupervisorEnum, StatusPagamentoEstagioEnum
 
 
 class AvaliacaoSupervisor(Base):

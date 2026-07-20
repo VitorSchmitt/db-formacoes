@@ -398,7 +398,15 @@ class PagamentoEstagioResponse(BaseModel):
 
     frequencia_id: int
 
+    numero_contrato: str
+
+    estagiario_nome: str
+
     competencia: date
+
+    dias: int
+
+    horas_realizadas: Decimal
 
     usuario_fechamento_id: Optional[int] = None
 

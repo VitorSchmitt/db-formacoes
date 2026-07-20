@@ -49,6 +49,8 @@ PERMISSOES = {
         "/web/estagiario/contratos",
         "/web/estagiario/estagiarios",
         "/web/estagiario/valores_bolsa_estagio",
+        # TELA WEB DA FOLHA DE PAGAMENTO
+        "/web/estagiario/pagamentos",
     
         # ===========================
         # APIS
@@ -58,6 +60,8 @@ PERMISSOES = {
         "/api/contrato_estagio",
         "/api/estagiarios",
         "/api/valores_bolsa_estagio",
+        # API DA FOLHA DE PAGAMENTO
+        "/api/pagamento_estagiario",
     
         # Dados auxiliares
         "/api/servidores",

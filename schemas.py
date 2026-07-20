@@ -395,11 +395,14 @@ class AvaliacaoSupervisorResponse(AvaliacaoSupervisorBase):
 class PagamentoEstagioResponse(BaseModel):
 
     id: int
+
     frequencia_id: int
 
-    usuario_fechamento_id: Optional[int]
+    competencia: date
 
-    data_fechamento: Optional[date]
+    usuario_fechamento_id: Optional[int] = None
+
+    data_fechamento: Optional[date] = None
 
     valor_hora_aplicado: Decimal
 

@@ -112,6 +112,12 @@ class FrequenciaEstagio(Base):
         cascade="all, delete-orphan"
     )
 
+    folha_fechada = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
 
 class PagamentoEstagio(Base):
     __tablename__ = "pagamentos_estagio"

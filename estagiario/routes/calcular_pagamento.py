@@ -30,7 +30,10 @@ def calcular_pagamento(
 
         valor_alimentacao = Decimal("0.00")
 
-
+    valor_alimentacao = valor_alimentacao.quantize(
+        Decimal("0.01")
+    )
+    
     valor_transporte = (
         Decimal(frequencia.dias)
         *
@@ -38,7 +41,9 @@ def calcular_pagamento(
         *
         valor_vt
     )
-
+    valor_transporte = valor_transporte.quantize(
+        Decimal("0.01")
+    )
 
     valor_total = (
         valor_bolsa
@@ -46,6 +51,9 @@ def calcular_pagamento(
         valor_alimentacao
         +
         valor_transporte
+    )
+    valor_total = valor_total.quantize(
+        Decimal("0.01")
     )
 
 

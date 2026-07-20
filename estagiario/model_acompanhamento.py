@@ -134,7 +134,16 @@ class PagamentoEstagio(Base):
         ),
         nullable=False
     )
-
+    
+    usuario_fechamento_id = Column(
+        Integer,
+        ForeignKey(
+            "usuarios.id",
+            name="fk_pagamento_usuario_fechamento"
+        ),
+        nullable=False
+    )
+    
     data_fechamento = Column(
         Date,
         nullable=False
@@ -165,4 +174,8 @@ class PagamentoEstagio(Base):
     frequencia = relationship(
         "FrequenciaEstagio",
         back_populates="pagamento"
+    )
+    
+    usuario_fechamento = relationship(
+        "Usuario"
     )

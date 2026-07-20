@@ -242,4 +242,10 @@ def tela_avaliacoes(request: Request):
         {"request": request}
     )
     
+@app.get("/web/estagiario/pagamentos")
+def tela_pagamentos(request: Request):
+    return templates.TemplateResponse(
+        "pagamentos.html",  # Ou o nome exato do seu arquivo HTML na pasta de templates
+        {"request": request}
+    )    
     

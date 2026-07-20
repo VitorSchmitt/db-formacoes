@@ -419,7 +419,7 @@ class PagamentoEstagioResponse(BaseModel):
 
     valor_total: Decimal
 
-    fechado: bool
+    status: StatusFolhaEnum
 
     model_config = ConfigDict(from_attributes=True)
 

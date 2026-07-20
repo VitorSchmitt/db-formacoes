@@ -15,6 +15,7 @@ from estagiario.enums import (
 )
 
 
+
 # ===============================
 # FORMAÇÃO
 # ===============================
@@ -287,16 +288,7 @@ class DesligamentoContratoInput(BaseModel):
 
 
 
-from datetime import date, datetime
-from decimal import Decimal
-from typing import Optional
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    field_validator,
-    field_serializer
-)
 
 
 # =====================================================
@@ -365,9 +357,6 @@ class FrequenciaEstagioResponse(FrequenciaEstagioBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
-
-class FrequenciaEstagioResponse(FrequenciaEstagioBase):
-    id: int
 
 
 # ===============================

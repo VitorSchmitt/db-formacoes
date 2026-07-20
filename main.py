@@ -21,6 +21,7 @@ from routes_relatorio_servidor import router as relatorio_router
 from routes_facilitador import router as facilitador_router
 from routes_relatorio_facilitador import router as relatorio_facilitador_router
 
+
 # ==========================================
 # NOVO IMPORT: Rota de Classificações de Estágio
 # ==========================================
@@ -31,6 +32,7 @@ from estagiario.routes.beneficio_estagiario import router as beneficio_router
 from estagiario.routes.contrato_estagiario import router as contrato_router
 from estagiario.routes.frequencia_estagiario import router as frequencia_router
 from estagiario.routes.avaliacao_estagiario import router as avaliacao_router
+from estagiario.routes.pagamento_estagio import router as pagamento_router
 
 
 
@@ -85,7 +87,7 @@ app.include_router(beneficio_router)
 app.include_router(contrato_router)
 app.include_router(frequencia_router)
 app.include_router(avaliacao_router)
-
+app.include_router(pagamento_router)
 # ===============================
 # WEB
 # ===============================

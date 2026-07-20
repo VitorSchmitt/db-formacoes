@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session, joinedload
+from estagiario.enums import StatusFolhaEnum
 
 from typing import List
 
@@ -245,11 +246,13 @@ def atualizar_frequencia(
             detail="Frequência não encontrada"
         )
 
-    # Não permite alteração após o fechamento da folha
-    if frequencia.folha_fechada:
+    # ---------------------------------------
+    # Não permite excluir folha fechada
+    # ---------------------------------------
+    if frequencia.status == StatusFolhaEnum.FECHADA:
         raise HTTPException(
             status_code=400,
-            detail="A folha já foi encerrada."
+            detail="A folha desta frequência já foi encerrada."
         )
 
     # Verifica duplicidade da competência

@@ -403,9 +403,21 @@ class AvaliacaoSupervisorResponse(AvaliacaoSupervisorBase):
 # PAGAMENTO
 # =====================================================
 
-class PagamentoEstagioResponse(BaseModel):
+class PagamentoEstagioResponse(CompetenciaBase):
+
     id: int
+
     frequencia_id: int
+
+    numero_contrato: str
+
+    estagiario_nome: str
+
+    competencia: date
+
+    dias: int
+
+    horas_realizadas: Decimal
 
     usuario_fechamento_id: Optional[int] = None
 
@@ -422,5 +434,4 @@ class PagamentoEstagioResponse(BaseModel):
     status: StatusFolhaEnum
 
     model_config = ConfigDict(from_attributes=True)
-
     

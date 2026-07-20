@@ -78,28 +78,28 @@ def listar_pagamentos(
                 pagamento.frequencia.contrato.estagiario.nome,
 
             "competencia":
-                pagamento.frequencia.competencia.strftime("%m/%Y"),
-
+                pagamento.frequencia.competencia,
+            
             "dias":
                 pagamento.frequencia.dias,
 
             "horas_realizadas":
-                float(pagamento.frequencia.horas_realizadas),
+                pagamento.frequencia.horas_realizadas,
 
             "valor_hora_aplicado":
-                float(pagamento.valor_hora_aplicado),
+                pagamento.valor_hora_aplicado,
 
             "valor_vale_alimentacao":
-                float(pagamento.valor_vale_alimentacao),
+                pagamento.valor_vale_alimentacao,
 
             "valor_vale_transporte":
-                float(pagamento.valor_vale_transporte),
+                pagamento.valor_vale_transporte,
 
             "valor_total":
-                float(pagamento.valor_total),
+                pagamento.valor_total,
 
-            "fechado":
-                pagamento.fechado,
+            "status": 
+                pagamento.frequencia.status,
 
             "data_fechamento":
                 pagamento.data_fechamento,

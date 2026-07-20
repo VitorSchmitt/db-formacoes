@@ -79,7 +79,7 @@ def fechar_folha(
         .join(ClassificacaoEstagio, ContratoEstagio.classificacao_id == ClassificacaoEstagio.id)
         .filter(
             FrequenciaEstagio.competencia == competencia,
-            FrequenciaEstagio.status == StatusFolhaEnum.ABERTA,
+            FrequenciaEstagio.status == StatusPagamentoEstagioEnum.ABERTA,
             ~ClassificacaoEstagio.descricao.ilike("%curricular%")
         )
         .options(
@@ -144,7 +144,7 @@ def fechar_folha(
         )
 
         db.add(pagamento)
-        frequencia.status = StatusFolhaEnum.FECHADA
+        frequencia.status = StatusPagamentoEstagioEnum.FECHADA
         quantidade += 1
 
     db.commit()
@@ -212,7 +212,7 @@ def previa_folha(
         .join(ClassificacaoEstagio, ContratoEstagio.classificacao_id == ClassificacaoEstagio.id)
         .filter(
             FrequenciaEstagio.competencia == competencia,
-            FrequenciaEstagio.status == StatusFolhaEnum.ABERTA,
+            FrequenciaEstagio.status == StatusPagamentoEstagioEnum.ABERTA,
             ContratoEstagio.data_inicio <= competencia,
             ContratoEstagio.data_fim >= competencia,
             ~ClassificacaoEstagio.descricao.ilike("%curricular%")
@@ -288,7 +288,7 @@ def excluir_pagamento(
             detail="Pagamento não encontrado."
         )
 
-    if pagamento.frequencia.status == StatusFolhaEnum.FECHADA:
+    if pagamento.frequencia.status == StatusPagamentoEstagioEnum.FECHADA:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="A folha já foi encerrada e não pode ser excluída."

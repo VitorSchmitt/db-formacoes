@@ -97,7 +97,7 @@ class FrequenciaEstagio(Base):
 
     status = Column(
         SqlEnum(
-            StatusFolhaEnum,
+            StatusPagamentoEstagioEnum,
             native_enum=False
         ),
         nullable=False,

@@ -11,7 +11,7 @@ from fastapi import (
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
-from enums import StatusFolhaEnum
+from enums import StatusPagamentoEstagioEnum
 from estagiario.model_acompanhamento import (
     FrequenciaEstagio,
     PagamentoEstagio

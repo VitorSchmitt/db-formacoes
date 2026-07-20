@@ -22,7 +22,7 @@ class AvaliacaoSupervisorEnum(str, Enum):
     PLENAMENTE_SATISFATORIO = "PLENAMENTE_SATISFATORIO"
 
 class StatusPagamentoEstagioEnum(str, Enum):
-    EM_ABERTO = "EM_ABERTO"
-    FECHADO = "FECHADO"
+    EM_ABERTO = "ABERTA"
+    FECHADO = "FECHADA"
 
 

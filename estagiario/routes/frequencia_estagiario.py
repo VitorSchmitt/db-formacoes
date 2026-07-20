@@ -299,3 +299,59 @@ def atualizar_frequencia(
     return {
         "mensagem": "Frequência atualizada com sucesso"
     }
+    from estagiario.enums import StatusFolhaEnum
+
+# =====================================================
+# EXCLUIR
+# =====================================================
+
+@router.delete("/{id}")
+def excluir_frequencia(
+    id: int,
+    db: Session = Depends(get_db)
+):
+
+    frequencia = (
+        db.query(FrequenciaEstagio)
+        .options(
+            joinedload(FrequenciaEstagio.avaliacao),
+            joinedload(FrequenciaEstagio.pagamento)
+        )
+        .filter(
+            FrequenciaEstagio.id == id
+        )
+        .first()
+    )
+
+    if not frequencia:
+        raise HTTPException(
+            status_code=404,
+            detail="Frequência não encontrada."
+        )
+
+    # ---------------------------------------
+    # Não permite excluir folha fechada
+    # ---------------------------------------
+    if frequencia.status == StatusFolhaEnum.FECHADA:
+        raise HTTPException(
+            status_code=400,
+            detail="A folha desta frequência já foi encerrada."
+        )
+
+    # ---------------------------------------
+    # Não permite excluir frequência avaliada
+    # ---------------------------------------
+    if frequencia.avaliacao:
+        raise HTTPException(
+            status_code=400,
+            detail="Esta frequência possui avaliação registrada."
+        )
+
+    
+
+    db.delete(frequencia)
+    db.commit()
+
+    return {
+        "mensagem": "Frequência excluída com sucesso."
+    }

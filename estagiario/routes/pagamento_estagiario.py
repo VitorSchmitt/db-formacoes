@@ -35,7 +35,10 @@ router = APIRouter(
     tags=["Pagamento do Estágio"]
 )
 
-@router.get("/")
+@router.get(
+    "/",
+    response_model=list[PagamentoEstagioResponse]
+)
 def listar_pagamentos(
     competencia: date,
     db: Session = Depends(get_db)
@@ -64,12 +67,14 @@ def listar_pagamentos(
         .all()
     )
 
+
     return [
 
         {
             "id": pagamento.id,
 
-            "frequencia_id": pagamento.frequencia_id,
+            "frequencia_id":
+                pagamento.frequencia_id,
 
             "numero_contrato":
                 pagamento.frequencia.contrato.numero_contrato,
@@ -79,7 +84,7 @@ def listar_pagamentos(
 
             "competencia":
                 pagamento.frequencia.competencia,
-            
+
             "dias":
                 pagamento.frequencia.dias,
 
@@ -98,7 +103,13 @@ def listar_pagamentos(
             "valor_total":
                 pagamento.valor_total,
 
-            "status": 
+            "dias_referencia":
+                pagamento.dias_referencia,
+
+            "valor_encargo":
+                pagamento.valor_encargo,
+
+            "status":
                 pagamento.frequencia.status,
 
             "data_fechamento":
@@ -106,13 +117,11 @@ def listar_pagamentos(
 
             "usuario_fechamento_id":
                 pagamento.usuario_fechamento_id
-
         }
 
         for pagamento in pagamentos
 
     ]
-
 @router.delete("/{frequencia_id}")
 def excluir_pagamento(
     frequencia_id: int,

@@ -6,13 +6,13 @@ from sqlalchemy import (
     Numeric,
     ForeignKey,
     Text,
-    UniqueConstraint
+    UniqueConstraint,
+    Enum as SqlEnum
 )
-
 from sqlalchemy.orm import relationship
+
 from database import Base
-from estagiario.enums import AvaliacaoSupervisorEnum
-from sqlalchemy import Enum as SqlEnum
+from estagiario.enums import AvaliacaoSupervisorEnum, StatusFolhaEnum
 
 
 class AvaliacaoSupervisor(Base):
@@ -55,7 +55,8 @@ class AvaliacaoSupervisor(Base):
         "FrequenciaEstagio",
         back_populates="avaliacao"
     )
-    
+
+
 class FrequenciaEstagio(Base):
     __tablename__ = "frequencias_estagio"
 
@@ -86,13 +87,24 @@ class FrequenciaEstagio(Base):
         default=0
     )
 
+    # Alterado para (6, 2) para permitir mais de 99.99 horas sem estourar o banco
     horas_realizadas = Column(
-        Numeric(4, 2),
+        Numeric(6, 2),
         nullable=False
     )
 
     observacao = Column(Text)
 
+    status = Column(
+        SqlEnum(
+            StatusFolhaEnum,
+            native_enum=False
+        ),
+        nullable=False,
+        default=StatusFolhaEnum.ABERTA
+    )
+
+    # Relacionamentos
     contrato = relationship(
         "ContratoEstagio",
         back_populates="frequencias"
@@ -110,15 +122,6 @@ class FrequenciaEstagio(Base):
         back_populates="frequencia",
         uselist=False,
         cascade="all, delete-orphan"
-    )
-
-        status = Column(
-        SqlEnum(
-            StatusFolhaEnum,
-            native_enum=False
-        ),
-        nullable=False,
-        default=StatusFolhaEnum.ABERTA
     )
 
 
@@ -143,7 +146,7 @@ class PagamentoEstagio(Base):
         ),
         nullable=False
     )
-    
+
     usuario_fechamento_id = Column(
         Integer,
         ForeignKey(
@@ -152,7 +155,7 @@ class PagamentoEstagio(Base):
         ),
         nullable=False
     )
-    
+
     data_fechamento = Column(
         Date,
         nullable=False
@@ -186,16 +189,17 @@ class PagamentoEstagio(Base):
     )
 
     valor_encargo = Column(
-        Numeric(10,2),
+        Numeric(10, 2),
         nullable=False,
         default=0
     )
 
+    # Relacionamentos
     frequencia = relationship(
         "FrequenciaEstagio",
         back_populates="pagamento"
     )
-    
+
     usuario_fechamento = relationship(
         "Usuario"
     )

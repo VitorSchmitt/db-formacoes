@@ -112,3 +112,38 @@ def listar_pagamentos(
         for pagamento in pagamentos
 
     ]
+
+@router.delete("/{frequencia_id}")
+def excluir_pagamento(
+    frequencia_id: int,
+    db: Session = Depends(get_db)
+):
+
+    pagamento = (
+        db.query(PagamentoEstagio)
+        .join(FrequenciaEstagio)
+        .filter(
+            PagamentoEstagio.frequencia_id == frequencia_id
+        )
+        .first()
+    )
+
+    if not pagamento:
+        raise HTTPException(
+            status_code=404,
+            detail="Pagamento não encontrado."
+        )
+
+    # Não permite excluir pagamento de folha encerrada
+    if pagamento.frequencia.status == StatusFolhaEnum.FECHADA:
+        raise HTTPException(
+            status_code=400,
+            detail="A folha já foi encerrada."
+        )
+
+    db.delete(pagamento)
+    db.commit()
+
+    return {
+        "mensagem": "Pagamento excluído."
+    }

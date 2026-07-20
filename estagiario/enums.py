@@ -21,4 +21,8 @@ class AvaliacaoSupervisorEnum(str, Enum):
     BOM = "BOM"
     PLENAMENTE_SATISFATORIO = "PLENAMENTE_SATISFATORIO"
 
+class StatusPagamentoEstagioEnum(str, Enum):
+    EM_ABERTO = "EM_ABERTO"
+    FECHADO = "FECHADO"
+
 

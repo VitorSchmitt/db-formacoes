@@ -180,6 +180,17 @@ class PagamentoEstagio(Base):
         nullable=False
     )
 
+    dias_referencia = Column(
+        Integer,
+        nullable=False
+    )
+
+    valor_encargo = Column(
+        Numeric(10,2),
+        nullable=False,
+        default=0
+    )
+
     frequencia = relationship(
         "FrequenciaEstagio",
         back_populates="pagamento"

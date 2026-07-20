@@ -437,7 +437,7 @@ class PagamentoEstagioResponse(CompetenciaBase):
     valor_total: Decimal
     dias_referencia: int
     valor_encargo: Decimal
-    status: StatusFolhaEnum
+    status: StatusPagamentoEstagioEnum
 
     model_config = ConfigDict(
         from_attributes=True,

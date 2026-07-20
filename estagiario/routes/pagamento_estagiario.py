@@ -23,18 +23,210 @@ from estagiario.model_acompanhamento import (
 from estagiario.model_estagiario import (
     ContratoEstagio,
     ClassificacaoEstagio,
-    BeneficioEstagiario
+    BeneficioEstagiario,
+    Estagiario,
+    ValorBolsaEstagio
 )
 
-from models import Usuario
-
+from enums import StatusFolhaEnum
 from schemas import PagamentoEstagioResponse
+
 
 router = APIRouter(
     prefix="/api/pagamento",
     tags=["Pagamento do Estágio"]
 )
 
+@router.post("/fechar")
+def fechar_folha(
+    competencia: date,
+    dias_referencia: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+
+    usuario = request.session.get("user")
+
+    if not usuario:
+        raise HTTPException(
+            status_code=401,
+            detail="Usuário não autenticado."
+        )
+
+
+    usuario_id = usuario.get("id")
+
+
+    # ==========================================
+    # Benefícios vigentes
+    # ==========================================
+
+    beneficio = (
+        db.query(BeneficioEstagiario)
+        .filter(
+            BeneficioEstagiario.data_inicio_vigencia <= competencia
+        )
+        .order_by(
+            BeneficioEstagiario.data_inicio_vigencia.desc()
+        )
+        .first()
+    )
+
+
+    if not beneficio:
+        raise HTTPException(
+            400,
+            "Não existe benefício vigente."
+        )
+
+
+    # ==========================================
+    # Frequências que entram na folha
+    # ==========================================
+
+    frequencias = (
+        db.query(FrequenciaEstagio)
+        .join(
+            ContratoEstagio,
+            FrequenciaEstagio.contrato_id ==
+            ContratoEstagio.id
+        )
+        .join(
+            ClassificacaoEstagio,
+            ContratoEstagio.classificacao_id ==
+            ClassificacaoEstagio.id
+        )
+        .filter(
+            FrequenciaEstagio.competencia == competencia,
+
+            FrequenciaEstagio.status ==
+            StatusFolhaEnum.ABERTA,
+
+            # Não paga estágio curricular
+            ~ClassificacaoEstagio.descricao.ilike(
+                "%curricular%"
+            )
+        )
+        .options(
+            joinedload(
+                FrequenciaEstagio.contrato
+            )
+            .joinedload(
+                ContratoEstagio.classificacao
+            )
+        )
+        .all()
+    )
+
+
+    if not frequencias:
+        raise HTTPException(
+            400,
+            "Nenhuma frequência disponível para fechamento."
+        )
+
+
+    quantidade = 0
+
+
+    for frequencia in frequencias:
+
+
+        # --------------------------------------
+        # Evita duplicidade
+        # --------------------------------------
+
+        existe = (
+            db.query(PagamentoEstagio)
+            .filter(
+                PagamentoEstagio.frequencia_id ==
+                frequencia.id
+            )
+            .first()
+        )
+
+
+        if existe:
+            continue
+
+
+
+        contrato = frequencia.contrato
+
+
+        # --------------------------------------
+        # Valor hora vigente
+        # --------------------------------------
+
+        valor_bolsa = (
+            db.query(ValorBolsaEstagio)
+            .filter(
+                ValorBolsaEstagio.classificacao_id ==
+                contrato.classificacao_id,
+
+                ValorBolsaEstagio.data_inicio_vigencia
+                <= competencia
+            )
+            .order_by(
+                ValorBolsaEstagio.data_inicio_vigencia.desc()
+            )
+            .first()
+        )
+
+
+        if not valor_bolsa:
+            raise HTTPException(
+                400,
+                f"Sem valor de bolsa para {contrato.numero_contrato}"
+            )
+
+
+        valores = calcular_pagamento(
+            frequencia,
+            contrato,
+            valor_bolsa.valor_hora,
+            beneficio.valor_vale_alimentacao,
+            beneficio.valor_vale_transporte,
+            dias_referencia,
+            Decimal("0.046")
+        )
+
+
+        pagamento = PagamentoEstagio(
+
+            frequencia_id=frequencia.id,
+
+            usuario_fechamento_id=usuario_id,
+
+            data_fechamento=date.today(),
+
+            dias_referencia=dias_referencia,
+
+            **valores
+        )
+
+
+        db.add(pagamento)
+
+
+        frequencia.status = StatusFolhaEnum.FECHADA
+
+
+        quantidade += 1
+
+
+    db.commit()
+
+
+    return {
+
+        "mensagem":
+            "Folha fechada com sucesso.",
+
+        "quantidade":
+            quantidade
+    }
+    
 @router.get(
     "/",
     response_model=list[PagamentoEstagioResponse]

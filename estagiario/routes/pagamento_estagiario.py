@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from fastapi import (
     APIRouter,
@@ -27,6 +28,7 @@ from estagiario.model_estagiario import (
     Estagiario,
     ValorBolsaEstagio
 )
+from estagiario.routes.calcular_pagamento import calcular_pagamento
 
 from enums import StatusFolhaEnum
 from schemas import PagamentoEstagioResponse

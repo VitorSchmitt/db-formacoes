@@ -112,10 +112,13 @@ class FrequenciaEstagio(Base):
         cascade="all, delete-orphan"
     )
 
-    folha_fechada = Column(
-        Boolean,
-        default=False,
-        nullable=False
+        status = Column(
+        SqlEnum(
+            StatusFolhaEnum,
+            native_enum=False
+        ),
+        nullable=False,
+        default=StatusFolhaEnum.ABERTA
     )
 
 

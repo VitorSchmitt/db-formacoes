@@ -11,7 +11,8 @@ from typing import Optional
 from estagiario.enums import (
     SexoEnum,
     MotivoDesligamentoEnum,
-    AvaliacaoSupervisorEnum
+    AvaliacaoSupervisorEnum,
+    StatusFolhaEnum
 )
 
 
@@ -392,40 +393,70 @@ class AvaliacaoSupervisorResponse(AvaliacaoSupervisorBase):
 # PAGAMENTO
 # =====================================================
 
-class PagamentoEstagioResponse(BaseModel):
+# =====================================================
+# REQUEST SCHEMAS (Entradas de dados)
+# =====================================================
 
-    id: int
+class FecharFolhaRequest(CompetenciaBase):
+    """
+    Payload usado para disparar o fechamento da folha.
+    Herda 'competencia' do CompetenciaBase.
+    """
+    dias_referencia: int = 22
 
+
+class ConsultarPagamentoFilter(CompetenciaBase):
+    """
+    Usado na validação dos parâmetros de busca por query params.
+    """
+    dias_referencia: Optional[int] = 22
+
+
+# =====================================================
+# RESPONSE SCHEMA (Saída da API)
+# =====================================================
+
+class PagamentoEstagioResponse(CompetenciaBase):
+    """
+    Representação completa do pagamento para o front-end.
+    Herda o campo 'competencia' do CompetenciaBase.
+    """
+    id: Optional[int] = None
     frequencia_id: int
-
-    numero_contrato: str
-
-    estagiario_nome: str
-
-    competencia: date
-
+    numero_contrato: Optional[str] = "-"
+    estagiario_nome: Optional[str] = "-"
     dias: int
-
     horas_realizadas: Decimal
-
+    
     usuario_fechamento_id: Optional[int] = None
-
     data_fechamento: Optional[date] = None
-
+    
     valor_hora_aplicado: Decimal
-
     valor_vale_alimentacao: Decimal
-
     valor_vale_transporte: Decimal
-
     valor_total: Decimal
-
     dias_referencia: int
-
     valor_encargo: Decimal
-
     status: StatusFolhaEnum
 
     model_config = ConfigDict(
-        from_attributes=True
+        from_attributes=True,
+        use_enum_values=True
     )
+
+    # -------------------------------------------------------------------------
+    # Extratores para pegar dados dos relacionamentos ORM (se vier um PagamentoEstagio)
+    # -------------------------------------------------------------------------
+    @field_validator("numero_contrato", mode="before")
+    @classmethod
+    def extract_numero_contrato(cls, v, info):
+        if hasattr(info.data, "frequencia") and info.data["frequencia"]:
+            return info.data["frequencia"].contrato.numero_contrato
+        return v
+
+    @field_validator("estagiario_nome", mode="before")
+    @classmethod
+    def extract_estagiario_nome(cls, v, info):
+        if hasattr(info.data, "frequencia") and info.data["frequencia"]:
+            return info.data["frequencia"].contrato.estagiario.nome
+        return v

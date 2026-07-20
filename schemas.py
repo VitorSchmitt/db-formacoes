@@ -12,7 +12,7 @@ from estagiario.enums import (
     SexoEnum,
     MotivoDesligamentoEnum,
     AvaliacaoSupervisorEnum,
-    StatusFolhaEnum
+    StatusPagamentoEstagioEnum
 )
 
 

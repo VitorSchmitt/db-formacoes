@@ -392,25 +392,14 @@ class AvaliacaoSupervisorResponse(AvaliacaoSupervisorBase):
 # PAGAMENTO
 # =====================================================
 
-class PagamentoEstagioResponse(CompetenciaBase):
+class PagamentoEstagioResponse(BaseModel):
 
     id: int
-
     frequencia_id: int
 
-    numero_contrato: str
+    usuario_fechamento_id: Optional[int]
 
-    estagiario_nome: str
-
-    competencia: date
-
-    dias: int
-
-    horas_realizadas: Decimal
-
-    usuario_fechamento_id: Optional[int] = None
-
-    data_fechamento: Optional[date] = None
+    data_fechamento: Optional[date]
 
     valor_hora_aplicado: Decimal
 
@@ -420,7 +409,12 @@ class PagamentoEstagioResponse(CompetenciaBase):
 
     valor_total: Decimal
 
+    dias_referencia: int
+
+    valor_encargo: Decimal
+
     status: StatusFolhaEnum
 
-    model_config = ConfigDict(from_attributes=True)
-    
+    model_config = ConfigDict(
+        from_attributes=True
+    )

@@ -32,7 +32,7 @@ from estagiario.routes.beneficio_estagiario import router as beneficio_router
 from estagiario.routes.contrato_estagiario import router as contrato_router
 from estagiario.routes.frequencia_estagiario import router as frequencia_router
 from estagiario.routes.avaliacao_estagiario import router as avaliacao_router
-from estagiario.routes.pagamento_estagio import router as pagamento_router
+from estagiario.routes.pagamento_estagiario import router as pagamento_router
 
 
 

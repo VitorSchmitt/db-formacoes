@@ -150,7 +150,7 @@ class PagamentoEstagio(Base):
     usuario_fechamento_id = Column(
         Integer,
         ForeignKey(
-            "usuarios.id",
+            "usuario.id",
             name="fk_pagamento_usuario_fechamento"
         ),
         nullable=False

@@ -101,7 +101,7 @@ class FrequenciaEstagio(Base):
             native_enum=False
         ),
         nullable=False,
-        default=StatusFolhaEnum.ABERTA
+        default=StatusPagamentoEstagioEnum.ABERTA
     )
 
     # Relacionamentos

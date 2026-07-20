@@ -309,4 +309,193 @@ class ContratoEstagio(Base):
         back_populates="contratos"
     )
 
+@router.post("/fechar")
+def fechar_folha(
+    competencia: date,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+
+    usuario = request.session.get("user")
+
+    if not usuario:
+        raise HTTPException(
+            status_code=401,
+            detail="Usuário não autenticado."
+        )
+
+    usuario_id = usuario.get("id")
+
+
+    # =========================================
+    # Define fim da competência
+    # =========================================
+
+    if competencia.month == 12:
+
+        fim_competencia = date(
+            competencia.year,
+            12,
+            31
+        )
+
+    else:
+
+        fim_competencia = date(
+            competencia.year,
+            competencia.month + 1,
+            1
+        ) - timedelta(days=1)
+
+
+    # =========================================
+    # Busca frequências da competência
+    # =========================================
+
+    frequencias = (
+        db.query(FrequenciaEstagio)
+        .join(
+            ContratoEstagio,
+            FrequenciaEstagio.contrato_id ==
+            ContratoEstagio.id
+        )
+        .filter(
+            FrequenciaEstagio.competencia == competencia,
+            ContratoEstagio.data_inicio <= fim_competencia,
+            ContratoEstagio.data_fim >= competencia
+        )
+        .all()
+    )
+
+
+    if not frequencias:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Nenhuma frequência encontrada para esta competência."
+        )
+
+
+    # =========================================
+    # Fecha a folha
+    # =========================================
+
+    for frequencia in frequencias:
+
+
+        # -------------------------------
+        # Evita fechar novamente
+        # -------------------------------
+
+        if frequencia.status == StatusFolhaEnum.FECHADA:
+
+            raise HTTPException(
+                status_code=400,
+                detail=f"A frequência {frequencia.id} já está fechada."
+            )
+
+
+        # -------------------------------
+        # Verifica se já existe pagamento
+        # -------------------------------
+
+        pagamento_existente = (
+            db.query(PagamentoEstagio)
+            .filter(
+                PagamentoEstagio.frequencia_id ==
+                frequencia.id
+            )
+            .first()
+        )
+
+
+        if pagamento_existente:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Já existe pagamento para esta frequência."
+            )
+
+
+        # =================================
+        # Cálculo dos valores
+        # =================================
+
+        contrato = frequencia.contrato
+
+
+        # Exemplo temporário
+        valor_hora = 10.00
+
+        vale_alimentacao = (
+            0
+            if not contrato.vale_alimentacao
+            else 100
+        )
+
+        vale_transporte = (
+            contrato.quantidade_vale_transporte * 5
+        )
+
+
+        valor_total = (
+            float(frequencia.horas_realizadas)
+            * valor_hora
+            +
+            vale_alimentacao
+            +
+            vale_transporte
+        )
+
+
+        # =================================
+        # Cria pagamento
+        # =================================
+
+        pagamento = PagamentoEstagio(
+
+            frequencia_id=frequencia.id,
+
+            usuario_fechamento_id=usuario_id,
+
+            data_fechamento=date.today(),
+
+            valor_hora_aplicado=valor_hora,
+
+            valor_vale_alimentacao=vale_alimentacao,
+
+            valor_vale_transporte=vale_transporte,
+
+            valor_total=valor_total
+
+        )
+
+
+        db.add(pagamento)
+
+
+        # =================================
+        # Fecha frequência
+        # =================================
+
+        frequencia.status = StatusFolhaEnum.FECHADA
+
+
+
+    db.commit()
+
+
+    return {
+
+        "mensagem":
+            "Folha fechada com sucesso.",
+
+        "competencia":
+            competencia.strftime("%m/%Y"),
+
+        "quantidade":
+            len(frequencias)
+
+    }
+
     

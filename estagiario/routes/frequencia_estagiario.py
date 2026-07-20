@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session, joinedload
-from estagiario.enums import StatusFolhaEnum
+from estagiario.enums import StatusPagamentoEstagioEnum
 
 from typing import List
 

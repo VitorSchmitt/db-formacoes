@@ -232,14 +232,24 @@ def atualizar_frequencia(
     dados: FrequenciaEstagioUpdate,
     db: Session = Depends(get_db)
 ):
-    frequencia = db.query(FrequenciaEstagio).filter(
-        FrequenciaEstagio.id == id
-    ).first()
+
+    frequencia = (
+        db.query(FrequenciaEstagio)
+        .filter(FrequenciaEstagio.id == id)
+        .first()
+    )
 
     if not frequencia:
         raise HTTPException(
             status_code=404,
             detail="Frequência não encontrada"
+        )
+
+    # Não permite alteração após o fechamento da folha
+    if frequencia.folha_fechada:
+        raise HTTPException(
+            status_code=400,
+            detail="A folha já foi encerrada."
         )
 
     # Verifica duplicidade da competência
@@ -248,12 +258,17 @@ def atualizar_frequencia(
             status_code=400,
             detail="Não é possível alterar a competência de uma frequência já avaliada."
         )
+
     if dados.competencia is not None:
-        conflito = db.query(FrequenciaEstagio).filter(
-            FrequenciaEstagio.contrato_id == frequencia.contrato_id,
-            FrequenciaEstagio.competencia == dados.competencia,
-            FrequenciaEstagio.id != id
-        ).first()
+        conflito = (
+            db.query(FrequenciaEstagio)
+            .filter(
+                FrequenciaEstagio.contrato_id == frequencia.contrato_id,
+                FrequenciaEstagio.competencia == dados.competencia,
+                FrequenciaEstagio.id != id
+            )
+            .first()
+        )
 
         if conflito:
             raise HTTPException(
@@ -261,6 +276,7 @@ def atualizar_frequencia(
                 detail="O contrato já possui uma frequência registrada para esta competência."
             )
 
+    # Atualiza os campos...
     # Atualiza somente os campos informados
     if dados.contrato_id is not None:
         frequencia.contrato_id = dados.contrato_id

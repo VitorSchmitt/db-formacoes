@@ -3,7 +3,7 @@ from decimal import Decimal
 from datetime import date
 from reportlab.lib.units import cm
 from fastapi.responses import StreamingResponse
-
+from reportlab.lib import colors
 
 from reportlab.platypus import (
     Table,
@@ -220,15 +220,6 @@ def montar_tabela_pagamentos(pagamentos):
 # RESUMO FINANCEIRO
 # ==========================================================
 
-def montar_resumo(resumo):
-    """
-    Monta o quadro resumo da folha.
-
-    Retorna
-    -------
-    Table# ==========================================================
-# RESUMO FINANCEIRO
-# ==========================================================
 
 def montar_resumo(resumo):
 

@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from estagiario.reports.folha_pagamento_pdf import gerar_pdf_folha
 
 from fastapi import (
     APIRouter,
@@ -166,6 +167,50 @@ def fechar_folha(
         "quantidade": quantidade
     }
 
+@router.get("/pdf")
+def imprimir_folha(
+    competencia: date,
+    db: Session = Depends(get_db)
+):
+
+    pagamentos = (
+        db.query(PagamentoEstagio)
+        .join(
+            FrequenciaEstagio,
+            PagamentoEstagio.frequencia_id == FrequenciaEstagio.id
+        )
+        .join(
+            ContratoEstagio,
+            FrequenciaEstagio.contrato_id == ContratoEstagio.id
+        )
+        .join(
+            Estagiario,
+            ContratoEstagio.estagiario_id == Estagiario.id
+        )
+        .options(
+            joinedload(PagamentoEstagio.frequencia)
+            .joinedload(FrequenciaEstagio.contrato)
+            .joinedload(ContratoEstagio.estagiario)
+        )
+        .filter(
+            FrequenciaEstagio.competencia == competencia
+        )
+        .order_by(
+            Estagiario.nome
+        )
+        .all()
+    )
+
+    if not pagamentos:
+        raise HTTPException(
+            status_code=404,
+            detail="Nenhum pagamento encontrado para esta competência."
+        )
+
+    return gerar_pdf_folha(
+        pagamentos,
+        competencia
+    )
 
 @router.get("/", response_model=list[PagamentoEstagioResponse])
 def listar_pagamentos(

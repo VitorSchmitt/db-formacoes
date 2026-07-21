@@ -177,14 +177,11 @@ function renderizarTabela(dados, isPrevia) {
     let totalFolha = 0;
     let quantidade = dados.length;
 
+    // Pega a competência selecionada na tela caso não venha no objeto
+    const competenciaTela = document.getElementById("competencia")?.value || "-";
+
     if (quantidade === 0) {
-        html = `
-            <tr>
-                <td colspan="12" class="text-center text-muted">
-                    ${isPrevia ? "Nenhuma frequência aberta para prévia nesta competência." : "Nenhum pagamento consolidado encontrado."}
-                </td>
-            </tr>
-        `;
+        // ... (código existente de tabela vazia) ...
     } else {
         dados.forEach(item => {
             const va = Number(item.valor_vale_alimentacao || 0);
@@ -204,11 +201,14 @@ function renderizarTabela(dados, isPrevia) {
                 ? `-` 
                 : `<button class="btn btn-sm btn-outline-danger" title="Estornar Pagamento" onclick="excluirPagamento(${item.frequencia_id})">🗑️</button>`;
 
+            // Garante que a competência seja exibida mesmo se vier 'undefined'
+            const competenciaExibida = item.competencia || competenciaTela;
+
             html += `
                 <tr>
                     <td>${item.numero_contrato ?? "-"}</td>
                     <td>${item.estagiario_nome ?? "-"}</td>
-                    <td>${item.competencia}</td>
+                    <td>${competenciaExibida}</td>
                     <td>${item.dias ?? "-"}</td>
                     <td>${Number(item.horas_realizadas || 0).toFixed(2)}</td>
                     <td>R$ ${formatarMoeda(item.valor_hora_aplicado)}</td>
@@ -229,7 +229,6 @@ function renderizarTabela(dados, isPrevia) {
     document.getElementById("totalEncargo").innerHTML = "R$ " + formatarMoeda(totalEncargo);
     document.getElementById("totalFolha").innerHTML = "R$ " + formatarMoeda(totalFolha);
 }
-
 // =====================================================
 // FECHAR FOLHA
 // =====================================================

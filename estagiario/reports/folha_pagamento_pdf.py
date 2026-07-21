@@ -4,8 +4,10 @@ from datetime import date
 from reportlab.lib.units import cm
 from fastapi.responses import StreamingResponse
 
-from reportlab.platypus import (
+
+)from reportlab.platypus import (
     Table,
+    TableStyle,
     Paragraph,
     Spacer
 )

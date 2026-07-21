@@ -268,7 +268,86 @@ def previa_folha(
         })
 
     return resultado
+// =====================================================
+// CARREGAR PRÉVIA DA FOLHA
+// =====================================================
+function carregarPrevia() {
+    const competencia = document.getElementById("competencia").value;
+    const dias = document.getElementById("dias_referencia").value;
 
+    if (!competencia) {
+        alert("Informe a competência.");
+        return;
+    }
+
+    fetch(`${urlPagamento}/previa?competencia=${competencia}-01&dias_referencia=${dias}`)
+        .then(r => {
+            if (!r.ok) {
+                throw new Error("Erro ao carregar prévia da folha.");
+            }
+            return r.json();
+        })
+        .then(dados => {
+            let html = "";
+            let totalBolsa = 0;
+            let totalEncargo = 0;
+            let totalFolha = 0;
+            let quantidade = dados.length;
+
+            if (quantidade === 0) {
+                html = `
+                    <tr>
+                        <td colspan="11" class="text-center text-muted">
+                            Nenhuma prévia encontrada para a competência selecionada.
+                        </td>
+                    </tr>
+                `;
+                document.getElementById("btnFechar").disabled = true;
+            } else {
+                dados.forEach(item => {
+                    const va = Number(item.valor_vale_alimentacao || 0);
+                    const vt = Number(item.valor_vale_transporte || 0);
+                    const encargo = Number(item.valor_encargo || 0);
+                    const total = Number(item.valor_total || 0);
+
+                    totalBolsa += (total - encargo - va - vt);
+                    totalEncargo += encargo;
+                    totalFolha += total;
+
+                    const badge = `<span class="badge bg-warning text-dark">PRÉVIA</span>`;
+
+                    html += `
+                        <tr>
+                            <td>${item.numero_contrato ?? "-"}</td>
+                            <td>${item.estagiario_nome ?? "-"}</td>
+                            <td>${item.competencia}</td>
+                            <td>${item.dias ?? "-"}</td>
+                            <td>${Number(item.horas_realizadas || 0).toFixed(2)}</td>
+                            <td>R$ ${formatarMoeda(item.valor_hora_aplicado)}</td>
+                            <td>R$ ${formatarMoeda(va)}</td>
+                            <td>R$ ${formatarMoeda(vt)}</td>
+                            <td>R$ ${formatarMoeda(encargo)}</td>
+                            <td><strong>R$ ${formatarMoeda(total)}</strong></td>
+                            <td>${badge}</td>
+                        </tr>
+                    `;
+                });
+
+                // Habilita o botão de fechar folha caso existam registros na prévia
+                document.getElementById("btnFechar").disabled = false;
+            }
+
+            document.getElementById("lista").innerHTML = html;
+            document.getElementById("totalEstagiarios").innerHTML = quantidade;
+            document.getElementById("totalBolsa").innerHTML = "R$ " + formatarMoeda(totalBolsa);
+            document.getElementById("totalEncargo").innerHTML = "R$ " + formatarMoeda(totalEncargo);
+            document.getElementById("totalFolha").innerHTML = "R$ " + formatarMoeda(totalFolha);
+        })
+        .catch(err => {
+            console.error(err);
+            alert(err.message);
+        });
+}
 
 @router.delete("/{frequencia_id}", status_code=status.HTTP_200_OK)
 def excluir_pagamento(

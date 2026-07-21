@@ -146,12 +146,12 @@ def fechar_folha(
         if existe:
             continue
 
+        # REMOVIDO valor_hora_aplicado explícito, pois já vem no **item["valores"]
         pagamento = PagamentoEstagio(
             frequencia_id=frequencia.id,
             usuario_fechamento_id=usuario["id"],
             data_fechamento=date.today(),
             dias_referencia=dias_referencia,
-            valor_hora_aplicado=item["valor_hora"],
             **item["valores"]
         )
 

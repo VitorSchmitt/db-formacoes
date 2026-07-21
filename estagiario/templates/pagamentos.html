@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <div class="row align-items-end">
+    <div class="row align-items-end mb-4">
         <div class="col-md-3">
             <label class="form-label" for="competencia">Competência</label>
             <input type="month" id="competencia" class="form-control">
@@ -44,7 +44,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <small>Estagiários</small>
+                    <small class="text-muted">Estagiários</small>
                     <h4 id="totalEstagiarios">0</h4>
                 </div>
             </div>
@@ -53,7 +53,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <small>Valor Bolsa</small>
+                    <small class="text-muted">Valor Bolsa</small>
                     <h4 id="totalBolsa">R$ 0,00</h4>
                 </div>
             </div>
@@ -62,7 +62,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <small>Encargos</small>
+                    <small class="text-muted">Encargos</small>
                     <h4 id="totalEncargo">R$ 0,00</h4>
                 </div>
             </div>
@@ -71,16 +71,16 @@
         <div class="col-md-3">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <small>Total Folha</small>
+                    <small class="text-muted">Total Folha</small>
                     <h4 id="totalFolha">R$ 0,00</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
                         <th>Contrato</th>
@@ -94,11 +94,12 @@
                         <th>Encargo</th>
                         <th>Total</th>
                         <th>Status</th>
+                        <th class="text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="lista">
                     <tr>
-                        <td colspan="11" class="text-center text-muted">
+                        <td colspan="12" class="text-center text-muted">
                             Nenhuma competência selecionada.
                         </td>
                     </tr>
@@ -110,11 +111,10 @@
 </div>
 
 <script>
-
 const urlPagamento = "/api/pagamento_estagiario";
 
 // =====================================================
-// CARREGAR PAGAMENTOS DA COMPETÊNCIA
+// CARREGAR PAGAMENTOS CONSOLIDADOS (FECHADOS)
 // =====================================================
 function carregar() {
     const competencia = document.getElementById("competencia").value;
@@ -124,83 +124,110 @@ function carregar() {
         return;
     }
 
+    // Ao consultar a folha fechada, desabilita o botão de Fechar
+    document.getElementById("btnFechar").disabled = true;
+
     fetch(`${urlPagamento}/?competencia=${competencia}-01`)
         .then(r => {
-            if (!r.ok) {
-                throw new Error("Erro ao buscar pagamentos.");
-            }
+            if (!r.ok) throw new Error("Erro ao buscar pagamentos.");
+            return r.json();
+        })
+        .then(dados => renderizarTabela(dados, false))
+        .catch(err => {
+            console.error(err);
+            alert(err.message);
+        });
+}
+
+// =====================================================
+// CARREGAR PRÉVIA DA FOLHA (SIMULAÇÃO)
+// =====================================================
+function carregarPrevia() {
+    const competencia = document.getElementById("competencia").value;
+    const dias = document.getElementById("dias_referencia").value;
+
+    if (!competencia) {
+        alert("Informe a competência.");
+        return;
+    }
+
+    fetch(`${urlPagamento}/previa?competencia=${competencia}-01&dias_referencia=${dias}`)
+        .then(r => {
+            if (!r.ok) throw new Error("Erro ao carregar prévia da folha.");
             return r.json();
         })
         .then(dados => {
-            let html = "";
-            let totalBolsa = 0;
-            let totalEncargo = 0;
-            let totalFolha = 0;
-            let quantidade = dados.length;
-
-            if (quantidade === 0) {
-                html = `
-                    <tr>
-                        <td colspan="11" class="text-center text-muted">
-                            Nenhum pagamento encontrado.
-                        </td>
-                    </tr>
-                `;
-                // Desabilita o botão se não houver dados
-                document.getElementById("btnFechar").disabled = true;
-            } else {
-                let podeFechar = false;
-
-                dados.forEach(item => {
-                    // Cálculo corrigido extraindo VA e VT do total
-                    const va = Number(item.valor_vale_alimentacao || 0);
-                    const vt = Number(item.valor_vale_transporte || 0);
-                    const encargo = Number(item.valor_encargo || 0);
-                    const total = Number(item.valor_total || 0);
-
-                    // Bolsa = Total - Encargo - VA - VT
-                    totalBolsa += (total - encargo - va - vt);
-                    totalEncargo += encargo;
-                    totalFolha += total;
-
-                    let badge = "";
-                    if (item.status === "FECHADA") {
-                        badge = `<span class="badge bg-secondary">FECHADA</span>`;
-                    } else {
-                        podeFechar = true;
-                        badge = `<span class="badge bg-warning text-dark">ABERTA</span>`;
-                    }
-
-                    html += `
-                        <tr>
-                            <td>${item.numero_contrato ?? "-"}</td>
-                            <td>${item.estagiario_nome ?? "-"}</td>
-                            <td>${item.competencia}</td>
-                            <td>${item.dias ?? "-"}</td>
-                            <td>${Number(item.horas_realizadas || 0).toFixed(2)}</td>
-                            <td>R$ ${formatarMoeda(item.valor_hora_aplicado)}</td>
-                            <td>R$ ${formatarMoeda(va)}</td>
-                            <td>R$ ${formatarMoeda(vt)}</td>
-                            <td>R$ ${formatarMoeda(encargo)}</td>
-                            <td><strong>R$ ${formatarMoeda(total)}</strong></td>
-                            <td>${badge}</td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById("btnFechar").disabled = !podeFechar;
-            }
-
-            document.getElementById("lista").innerHTML = html;
-            document.getElementById("totalEstagiarios").innerHTML = quantidade;
-            document.getElementById("totalBolsa").innerHTML = "R$ " + formatarMoeda(totalBolsa);
-            document.getElementById("totalEncargo").innerHTML = "R$ " + formatarMoeda(totalEncargo);
-            document.getElementById("totalFolha").innerHTML = "R$ " + formatarMoeda(totalFolha);
+            renderizarTabela(dados, true);
+            // Habilita o botão de fechar folha apenas se houverem registros na prévia
+            document.getElementById("btnFechar").disabled = (dados.length === 0);
         })
         .catch(err => {
             console.error(err);
             alert(err.message);
         });
+}
+
+// =====================================================
+// RENDERIZAR TABELA E TOTAIS
+// =====================================================
+function renderizarTabela(dados, isPrevia) {
+    let html = "";
+    let totalBolsa = 0;
+    let totalEncargo = 0;
+    let totalFolha = 0;
+    let quantidade = dados.length;
+
+    if (quantidade === 0) {
+        html = `
+            <tr>
+                <td colspan="12" class="text-center text-muted">
+                    ${isPrevia ? "Nenhuma frequência aberta para prévia nesta competência." : "Nenhum pagamento consolidado encontrado."}
+                </td>
+            </tr>
+        `;
+    } else {
+        dados.forEach(item => {
+            const va = Number(item.valor_vale_alimentacao || 0);
+            const vt = Number(item.valor_vale_transporte || 0);
+            const encargo = Number(item.valor_encargo || 0);
+            const total = Number(item.valor_total || 0);
+
+            totalBolsa += (total - encargo - va - vt);
+            totalEncargo += encargo;
+            totalFolha += total;
+
+            const badge = isPrevia 
+                ? `<span class="badge bg-warning text-dark">PRÉVIA</span>`
+                : `<span class="badge bg-success">FECHADA</span>`;
+
+            const btnAcao = isPrevia 
+                ? `-` 
+                : `<button class="btn btn-sm btn-outline-danger" title="Estornar Pagamento" onclick="excluirPagamento(${item.frequencia_id})">🗑️</button>`;
+
+            html += `
+                <tr>
+                    <td>${item.numero_contrato ?? "-"}</td>
+                    <td>${item.estagiario_nome ?? "-"}</td>
+                    <td>${item.competencia}</td>
+                    <td>${item.dias ?? "-"}</td>
+                    <td>${Number(item.horas_realizadas || 0).toFixed(2)}</td>
+                    <td>R$ ${formatarMoeda(item.valor_hora_aplicado)}</td>
+                    <td>R$ ${formatarMoeda(va)}</td>
+                    <td>R$ ${formatarMoeda(vt)}</td>
+                    <td>R$ ${formatarMoeda(encargo)}</td>
+                    <td><strong>R$ ${formatarMoeda(total)}</strong></td>
+                    <td>${badge}</td>
+                    <td class="text-center">${btnAcao}</td>
+                </tr>
+            `;
+        });
+    }
+
+    document.getElementById("lista").innerHTML = html;
+    document.getElementById("totalEstagiarios").innerHTML = quantidade;
+    document.getElementById("totalBolsa").innerHTML = "R$ " + formatarMoeda(totalBolsa);
+    document.getElementById("totalEncargo").innerHTML = "R$ " + formatarMoeda(totalEncargo);
+    document.getElementById("totalFolha").innerHTML = "R$ " + formatarMoeda(totalFolha);
 }
 
 // =====================================================
@@ -215,7 +242,7 @@ function fecharFolha() {
         return;
     }
 
-    if (!confirm("Deseja realmente fechar esta folha?")) {
+    if (!confirm("Deseja realmente fechar esta folha? Os pagamentos serão consolidados.")) {
         return;
     }
 
@@ -224,19 +251,39 @@ function fecharFolha() {
     })
         .then(r => {
             if (!r.ok) {
-                return r.json().then(e => {
-                    throw new Error(e.detail || "Erro ao fechar folha.");
-                });
+                return r.json().then(e => { throw new Error(e.detail || "Erro ao fechar folha."); });
             }
             return r.json();
         })
         .then(resp => {
             alert(resp.mensagem || "Folha fechada com sucesso!");
+            carregar(); // Recarrega os pagamentos agora consolidados
+        })
+        .catch(err => alert(err.message));
+}
+
+// =====================================================
+// EXCLUIR / ESTORNAR PAGAMENTO
+// =====================================================
+function excluirPagamento(frequenciaId) {
+    if (!confirm("Tem certeza que deseja estornar este pagamento e reabrir a frequência?")) {
+        return;
+    }
+
+    fetch(`${urlPagamento}/${frequenciaId}`, {
+        method: "DELETE"
+    })
+        .then(r => {
+            if (!r.ok) {
+                return r.json().then(e => { throw new Error(e.detail || "Erro ao estornar pagamento."); });
+            }
+            return r.json();
+        })
+        .then(resp => {
+            alert(resp.mensagem || "Pagamento estornado com sucesso!");
             carregar();
         })
-        .catch(err => {
-            alert(err.message);
-        });
+        .catch(err => alert(err.message));
 }
 
 // =====================================================
@@ -250,7 +297,7 @@ function formatarMoeda(valor) {
 }
 
 // =====================================================
-// DATA INICIAL
+// INICIALIZAÇÃO
 // =====================================================
 document.addEventListener("DOMContentLoaded", () => {
     const hoje = new Date();
@@ -259,6 +306,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("competencia").value = `${ano}-${mes}`;
 });
-
 </script>
 {% endblock %}

@@ -193,7 +193,8 @@ def listar_pagamentos(
             "frequencia_id": pagamento.frequencia_id,
             "numero_contrato": pagamento.frequencia.contrato.numero_contrato,
             "estagiario_nome": pagamento.frequencia.contrato.estagiario.nome,
-            "competencia": pagamento.frequencia.competencia,
+            # Converte a data para String (ISO Format: "YYYY-MM-DD")
+            "competencia": pagamento.frequencia.competencia.isoformat() if pagamento.frequencia.competencia else "-",
             "dias": pagamento.frequencia.dias,
             "horas_realizadas": pagamento.frequencia.horas_realizadas,
             "valor_hora_aplicado": pagamento.valor_hora_aplicado,

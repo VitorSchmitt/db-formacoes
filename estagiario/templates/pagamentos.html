@@ -38,6 +38,12 @@
                 🔒 Fechar Folha
             </button>
         </div>
+        <button
+            class="btn btn-danger"
+            onclick="imprimirFolha()">
+            <i class="bi bi-printer"></i>
+            Imprimir Folha
+        </button>
     </div>
 
     <div class="row mb-3">
@@ -228,6 +234,30 @@ function renderizarTabela(dados, isPrevia) {
     document.getElementById("totalBolsa").innerHTML = "R$ " + formatarMoeda(totalBolsa);
     document.getElementById("totalEncargo").innerHTML = "R$ " + formatarMoeda(totalEncargo);
     document.getElementById("totalFolha").innerHTML = "R$ " + formatarMoeda(totalFolha);
+}
+/ =====================================================
+// IMPRIMIR FOLHA
+// =====================================================
+function imprimirFolha() {
+
+    const competencia =
+        document.getElementById(
+            "competencia"
+        ).value;
+
+    if (!competencia) {
+
+        alert(
+            "Informe a competência."
+        );
+
+        return;
+    }
+
+    window.open(
+        `/api/pagamento_estagiario/pdf?competencia=${competencia}`,
+        "_blank"
+    );
 }
 // =====================================================
 // FECHAR FOLHA

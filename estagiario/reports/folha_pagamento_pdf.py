@@ -316,10 +316,7 @@ def montar_resumo(resumo):
     )
 
     return tabela
-    """
-
-    pass
-
+   
 
 # ==========================================================
 # PDF

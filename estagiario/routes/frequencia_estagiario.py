@@ -196,11 +196,11 @@ def atualizar_frequencia(
             detail="Frequência não encontrada ou sem permissão de alteração."
         )
 
-    # Trava se a folha desta frequência já estiver fechada
-    if frequencia.pagamento and frequencia.pagamento.status == StatusPagamentoEstagioEnum.FECHADA:
+    # 🛑 TRAVA CORRIGIDA: Verifica se o status da frequência é FECHADA ou se já possui registro de pagamento
+    if frequencia.status == StatusPagamentoEstagioEnum.FECHADA or frequencia.pagamento:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A folha desta frequência já foi encerrada."
+            detail="A folha desta frequência já foi encerrada e não pode ser alterada."
         )
 
     # Trava alteração de competência se a frequência já tiver avaliação
@@ -271,11 +271,11 @@ def excluir_frequencia(
             detail="Frequência não encontrada ou sem permissão de exclusão."
         )
 
-    # Trava se a folha desta frequência já estiver fechada
-    if frequencia.pagamento and frequencia.pagamento.status == StatusPagamentoEstagioEnum.FECHADA:
+    # 🛑 TRAVA CORRIGIDA:
+    if frequencia.status == StatusPagamentoEstagioEnum.FECHADA or frequencia.pagamento:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A folha desta frequência já foi encerrada."
+            detail="A folha desta frequência já foi encerrada e não pode ser excluída."
         )
 
     # Trava frequência avaliada

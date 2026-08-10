@@ -287,7 +287,29 @@ class DesligamentoContratoInput(BaseModel):
     motivo_desligamento: MotivoDesligamentoEnum
     observacao_desligamento: Optional[str] = None
 
+class ContratoEstagioResponse(BaseModel):
 
+    id: int
+    estagiario_id: int
+    lotacao_id: int
+    supervisor_matricula: str
+    classificacao_id: int
+    numero_contrato: str
+    data_assinatura: date
+    data_inicio: date
+    data_fim: date
+    carga_horaria_diaria: int
+    horario: str
+    vale_alimentacao: bool
+    quantidade_vale_transporte: int
+    data_desligamento: Optional[date] = None
+    motivo_desligamento: Optional[str] = None
+    observacao_desligamento: Optional[str] = None
+    observacoes: Optional[str] = None
+    arquivo_contrato: Optional[str] = None
+    model_config = {
+        "from_attributes": True
+    }
 
 
 

@@ -200,7 +200,7 @@ function carregarContratos() {
                     <td>${statusBadge}</td>
                     <td>
                         ${
-                            c.arquivo
+                            c.arquivo_contrato
                             ? `
                                 <button
                                     class="btn btn-sm btn-outline-primary"
@@ -256,12 +256,62 @@ function limpar() {
 }
 
 function editar(c) {
+
     document.getElementById("formCard").style.display = "block";
+
     document.getElementById("id").value = c.id;
-    ["numero_contrato", "estagiario_id", "lotacao_id", "supervisor_matricula", "classificacao_id", "carga_horaria_diaria", "horario", "data_assinatura", "data_inicio", "data_fim","vale_alimentacao",
-"quantidade_vale_transporte", "observacoes"].forEach(id => {
-        document.getElementById(id).value = c[id] || "";
+
+    [
+        "numero_contrato",
+        "estagiario_id",
+        "lotacao_id",
+        "supervisor_matricula",
+        "classificacao_id",
+        "carga_horaria_diaria",
+        "horario",
+        "data_assinatura",
+        "data_inicio",
+        "data_fim",
+        "vale_alimentacao",
+        "quantidade_vale_transporte",
+        "observacoes"
+    ].forEach(id => {
+
+        document.getElementById(id).value =
+            c[id] || "";
+
     });
+
+
+    // ============================================
+    // MOSTRA O PDF JÁ ANEXADO
+    // ============================================
+
+    const arquivoAtual =
+        document.getElementById("arquivo_atual");
+
+    if (c.arquivo_contrato) {
+
+        arquivoAtual.innerHTML = `
+            <span class="text-success">
+                📄 Contrato PDF já anexado.
+            </span>
+        `;
+
+        arquivoAtual.style.display = "block";
+
+    } else {
+
+        arquivoAtual.innerHTML = `
+            <span class="text-muted">
+                Nenhum contrato PDF anexado.
+            </span>
+        `;
+
+        arquivoAtual.style.display = "block";
+    }
+
+
     atualizarBeneficios();
 }
 

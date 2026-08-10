@@ -59,16 +59,27 @@
                     <input type="date" class="form-control" id="data_fim">
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label">Contrato em PDF</label>
+                    <label class="form-label">
+                        Contrato em PDF
+                    </label>
+                
                     <input
                         type="file"
                         class="form-control"
                         id="arquivo_contrato"
                         accept=".pdf,application/pdf"
                     >
+                
                     <small class="text-muted">
                         Somente arquivos PDF.
                     </small>
+                
+                    <div
+                        id="arquivo_atual"
+                        class="mt-2"
+                        style="display:none;"
+                    ></div>
+                
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Observações Gerais</label>
@@ -187,6 +198,25 @@ function carregarContratos() {
                     <td>${c.lotacao_descricao}</td>
                     <td><small>${ini} até ${fim}</small></td>
                     <td>${statusBadge}</td>
+                    <td>
+                        ${
+                            c.arquivo
+                            ? `
+                                <button
+                                    class="btn btn-sm btn-outline-primary"
+                                    onclick="visualizarContrato(${c.id})"
+                                    title="Visualizar contrato"
+                                >
+                                    📄 PDF
+                                </button>
+                              `
+                            : `
+                                <span class="badge bg-secondary">
+                                    Não anexado
+                                </span>
+                              `
+                        }
+                    </td>
                     <td>
                         <button class="btn btn-sm btn-warning" onclick='editar(${JSON.stringify(c)})'>Editar</button>
                         ${!c.data_desligamento ? `<button class="btn btn-sm btn-danger" onclick="solicitarDesligamento(${c.id})">Desligar</button>` : ''}

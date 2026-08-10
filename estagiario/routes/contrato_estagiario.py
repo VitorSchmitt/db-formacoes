@@ -1,9 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status,Request
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+    Request,
+    UploadFile,
+    File
+)
+import os
+import shutil
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from estagiario.model_estagiario import ContratoEstagio
 from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput,ContratoEstagioResponse
+
+PASTA_CONTRATOS = "G:\CFP\SISTEMA-NTEV\contratos"
+
+os.makedirs(PASTA_CONTRATOS, exist_ok=True)
 
 router = APIRouter(prefix="/api/contrato_estagio", tags=["Contratos de Estágio"])
 
@@ -32,7 +46,8 @@ def listar_contratos(db: Session = Depends(get_db)):
             "observacoes": c.observacoes,
             "data_desligamento": c.data_desligamento.strftime("%Y-%m-%d") if c.data_desligamento else None,
             "motivo_desligamento": c.motivo_desligamento,
-            "observacao_desligamento": c.observacao_desligamento
+            "observacao_desligamento": c.observacao_desligamento,
+            "arquivo_contrato": c.arquivo_contrato
         } for c in contratos
     ]
 
@@ -68,6 +83,83 @@ def atualizar_contrato(id: int, dados: ContratoEstagioUpdate, db: Session = Depe
         
     db.commit()
     return {"mensagem": "Contrato atualizado com sucesso"}
+
+
+@router.post("/{id}/arquivo")
+def anexar_contrato(
+    id: int,
+    arquivo: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    # ==============================
+    # LOCALIZA O CONTRATO
+    # ==============================
+    contrato = (
+        db.query(ContratoEstagio)
+        .filter(ContratoEstagio.id == id)
+        .first()
+    )
+
+    if not contrato:
+        raise HTTPException(
+            status_code=404,
+            detail="Contrato não encontrado"
+        )
+
+    # ==============================
+    # CRIA A PASTA DO ANO
+    # ==============================
+    ano_atual = datetime.now().year
+
+    pasta_ano = os.path.join(
+        PASTA_CONTRATOS,
+        str(ano_atual)
+    )
+
+    os.makedirs(pasta_ano, exist_ok=True)
+
+    # ==============================
+    # DEFINE O NOME DO ARQUIVO
+    # ==============================
+    extensao = os.path.splitext(arquivo.filename)[1]
+
+    nome_arquivo = (
+        f"contrato_{contrato.numero_contrato}{extensao}"
+    )
+
+    caminho_arquivo = os.path.join(
+        pasta_ano,
+        nome_arquivo
+    )
+
+    # ==============================
+    # SALVA O ARQUIVO
+    # ==============================
+    try:
+        with open(caminho_arquivo, "wb") as f:
+            conteudo = arquivo.file.read()
+            f.write(conteudo)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao salvar o arquivo: {str(e)}"
+        )
+
+    # ==============================
+    # ATUALIZA O CONTRATO
+    # ==============================
+    contrato.arquivo = caminho_arquivo
+
+    db.commit()
+    db.refresh(contrato)
+
+    return {
+        "mensagem": "Contrato anexado com sucesso",
+        "arquivo": nome_arquivo,
+        "caminho": caminho_arquivo,
+        "ano": ano_atual
+    }
 
 @router.post("/{id}/desligar")
 def desligar_contrato(id: int, dados: DesligamentoContratoInput, db: Session = Depends(get_db)):

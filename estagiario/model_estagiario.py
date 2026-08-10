@@ -146,7 +146,9 @@ class ContratoEstagio(Base):
     data_fim = Column(Date, nullable=False)
     carga_horaria_diaria = Column(Integer, nullable=False)
     horario = Column(String(100), nullable=False)
-
+    # Arquivo do Contrato
+    arquivo_contrato = Column(String(255), nullable=True)
+    
     # Benefícios
     vale_alimentacao = Column(Boolean, nullable=False, default=False)
     quantidade_vale_transporte = Column(Integer, nullable=False, default=0)

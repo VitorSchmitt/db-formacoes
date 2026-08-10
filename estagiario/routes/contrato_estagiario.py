@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from estagiario.model_estagiario import ContratoEstagio
-from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput
+from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput,ContratoEstagioResponse
 
 router = APIRouter(prefix="/api/contrato_estagio", tags=["Contratos de Estágio"])
 

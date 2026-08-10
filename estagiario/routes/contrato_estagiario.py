@@ -7,6 +7,7 @@ from fastapi import (
     UploadFile,
     File
 )
+from datetime import datetime
 import os
 import shutil
 from sqlalchemy.orm import Session
@@ -15,7 +16,7 @@ from database import get_db
 from estagiario.model_estagiario import ContratoEstagio
 from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput,ContratoEstagioResponse
 
-PASTA_CONTRATOS = "G:\CFP\SISTEMA-NTEV\contratos"
+PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
 
 os.makedirs(PASTA_CONTRATOS, exist_ok=True)
 
@@ -91,9 +92,11 @@ def anexar_contrato(
     arquivo: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
+
     # ==============================
     # LOCALIZA O CONTRATO
     # ==============================
+
     contrato = (
         db.query(ContratoEstagio)
         .filter(ContratoEstagio.id == id)
@@ -106,9 +109,22 @@ def anexar_contrato(
             detail="Contrato não encontrado"
         )
 
+
+    # ==============================
+    # VALIDA PDF
+    # ==============================
+
+    if not arquivo.filename.lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=400,
+            detail="Somente arquivos PDF são permitidos."
+        )
+
+
     # ==============================
     # CRIA A PASTA DO ANO
     # ==============================
+
     ano_atual = datetime.now().year
 
     pasta_ano = os.path.join(
@@ -116,48 +132,80 @@ def anexar_contrato(
         str(ano_atual)
     )
 
-    os.makedirs(pasta_ano, exist_ok=True)
+    os.makedirs(
+        pasta_ano,
+        exist_ok=True
+    )
+
 
     # ==============================
-    # DEFINE O NOME DO ARQUIVO
+    # NOME DO ARQUIVO
     # ==============================
-    extensao = os.path.splitext(arquivo.filename)[1]
+
+    extensao = os.path.splitext(
+        arquivo.filename
+    )[1].lower()
 
     nome_arquivo = (
         f"contrato_{contrato.numero_contrato}{extensao}"
     )
+
+
+    # ==============================
+    # CAMINHO FÍSICO
+    # ==============================
 
     caminho_arquivo = os.path.join(
         pasta_ano,
         nome_arquivo
     )
 
+
     # ==============================
-    # SALVA O ARQUIVO
+    # SALVA O ARQUIVO NA REDE
     # ==============================
+
     try:
-        with open(caminho_arquivo, "wb") as f:
-            conteudo = arquivo.file.read()
-            f.write(conteudo)
+
+        with open(
+            caminho_arquivo,
+            "wb"
+        ) as f:
+
+            shutil.copyfileobj(
+                arquivo.file,
+                f
+            )
 
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
             detail=f"Erro ao salvar o arquivo: {str(e)}"
         )
 
+
     # ==============================
-    # ATUALIZA O CONTRATO
+    # SALVA SOMENTE O CAMINHO RELATIVO
+    # NO BANCO
     # ==============================
-    contrato.arquivo = caminho_arquivo
+
+    caminho_relativo = os.path.join(
+        str(ano_atual),
+        nome_arquivo
+    ).replace("\\", "/")
+
+
+    contrato.arquivo_contrato = caminho_relativo
 
     db.commit()
     db.refresh(contrato)
 
+
     return {
         "mensagem": "Contrato anexado com sucesso",
         "arquivo": nome_arquivo,
-        "caminho": caminho_arquivo,
+        "caminho": caminho_relativo,
         "ano": ano_atual
     }
 

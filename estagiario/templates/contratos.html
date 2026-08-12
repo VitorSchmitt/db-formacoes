@@ -315,39 +315,191 @@ function editar(c) {
     atualizarBeneficios();
 }
 
-function salvar() {
+async function salvar() {
+
     const id = document.getElementById("id").value;
+
     const dados = {
         numero_contrato: document.getElementById("numero_contrato").value,
-        estagiario_id: parseInt(document.getElementById("estagiario_id").value),
-        lotacao_id: parseInt(document.getElementById("lotacao_id").value),
-        supervisor_matricula: document.getElementById("supervisor_matricula").value,
-        classificacao_id: parseInt(document.getElementById("classificacao_id").value),       
-        carga_horaria_diaria: parseInt(document.getElementById("carga_horaria_diaria").value),
+        estagiario_id: parseInt(
+            document.getElementById("estagiario_id").value
+        ),
+        lotacao_id: parseInt(
+            document.getElementById("lotacao_id").value
+        ),
+        supervisor_matricula:
+            document.getElementById("supervisor_matricula").value,
+
+        classificacao_id: parseInt(
+            document.getElementById("classificacao_id").value
+        ),
+
+        carga_horaria_diaria: parseInt(
+            document.getElementById("carga_horaria_diaria").value
+        ),
+
         horario: document.getElementById("horario").value,
-        vale_alimentacao:document.getElementById("vale_alimentacao").value === "true",
-        quantidade_vale_transporte:parseInt(document.getElementById("quantidade_vale_transporte").value),
-        data_assinatura: document.getElementById("data_assinatura").value,
-        data_inicio: document.getElementById("data_inicio").value,
-        data_fim: document.getElementById("data_fim").value,
-        observacoes: document.getElementById("observacoes").value
+
+        vale_alimentacao:
+            document.getElementById("vale_alimentacao").value === "true",
+
+        quantidade_vale_transporte: parseInt(
+            document.getElementById("quantidade_vale_transporte").value
+        ),
+
+        data_assinatura:
+            document.getElementById("data_assinatura").value,
+
+        data_inicio:
+            document.getElementById("data_inicio").value,
+
+        data_fim:
+            document.getElementById("data_fim").value,
+
+        observacoes:
+            document.getElementById("observacoes").value
     };
 
-    if(!dados.numero_contrato || !dados.estagiario_id || !dados.data_inicio || !dados.data_fim) {
-        alert("Campos obrigatórios ausentes."); return;
+
+    // ============================================
+    // VALIDAÇÃO
+    // ============================================
+
+    if (
+        !dados.numero_contrato ||
+        !dados.estagiario_id ||
+        !dados.data_inicio ||
+        !dados.data_fim
+    ) {
+        alert("Campos obrigatórios ausentes.");
+        return;
     }
 
-    const metodo = id ? "PUT" : "POST";
-    const destino = id ? `${urlContratos}/${id}` : urlContratos;
 
-    fetch(destino, {
-        method: metodo,
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(dados)
-    }).then(async r => {
-        if(!r.ok) { const e = await r.json(); throw new Error(e.detail || "Erro ao salvar contrato."); }
-        cancelar(); carregarContratos();
-    }).catch(err => alert(err.message));
+    try {
+
+        // ============================================
+        // 1. SALVA OU ATUALIZA O CONTRATO
+        // ============================================
+
+        const metodo = id ? "PUT" : "POST";
+        const destino = id
+            ? `${urlContratos}/${id}`
+            : urlContratos;
+
+
+        const resposta = await fetch(destino, {
+            method: metodo,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
+
+
+        if (!resposta.ok) {
+
+            const erro = await resposta.json();
+
+            throw new Error(
+                erro.detail || "Erro ao salvar contrato."
+            );
+        }
+
+
+        // ============================================
+        // 2. OBTÉM O ID DO CONTRATO
+        // ============================================
+
+        let contratoId = id;
+
+
+        if (!contratoId) {
+
+            const resultado = await resposta.json();
+
+            contratoId = resultado.id;
+        }
+
+
+        // ============================================
+        // 3. VERIFICA SE FOI SELECIONADO UM PDF
+        // ============================================
+
+        const inputArquivo =
+            document.getElementById("arquivo_contrato");
+
+        const arquivo = inputArquivo.files[0];
+
+
+        // ============================================
+        // 4. ENVIA O PDF
+        // ============================================
+
+        if (arquivo) {
+
+            if (
+                arquivo.type !== "application/pdf" &&
+                !arquivo.name.toLowerCase().endsWith(".pdf")
+            ) {
+                throw new Error(
+                    "Somente arquivos PDF são permitidos."
+                );
+            }
+
+
+            const formulario = new FormData();
+
+            formulario.append(
+                "arquivo",
+                arquivo
+            );
+
+
+            const respostaArquivo = await fetch(
+                `${urlContratos}/${contratoId}/arquivo`,
+                {
+                    method: "POST",
+                    body: formulario
+                }
+            );
+
+
+            if (!respostaArquivo.ok) {
+
+                const erroArquivo =
+                    await respostaArquivo.json();
+
+                throw new Error(
+                    erroArquivo.detail ||
+                    "Contrato salvo, mas ocorreu um erro ao anexar o PDF."
+                );
+            }
+        }
+
+
+        // ============================================
+        // 5. FINALIZA
+        // ============================================
+
+        alert(
+            arquivo
+                ? "Contrato salvo e PDF anexado com sucesso!"
+                : "Contrato salvo com sucesso!"
+        );
+
+
+        cancelar();
+
+        carregarContratos();
+
+
+    } catch (err) {
+
+        alert(err.message);
+
+    }
+
 }
     
     function atualizarBeneficios() {

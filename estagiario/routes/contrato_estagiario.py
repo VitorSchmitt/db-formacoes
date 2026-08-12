@@ -16,7 +16,8 @@ from database import get_db
 from estagiario.model_estagiario import ContratoEstagio
 from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput,ContratoEstagioResponse
 
-PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
+#PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
+PASTA_CONTRATOS = r"C:\Users\vitor\OneDrive\Área de Trabalho\Mala\pdf"
 
 os.makedirs(PASTA_CONTRATOS, exist_ok=True)
 
@@ -61,7 +62,10 @@ def criar_contrato(dados: ContratoEstagioCreate, db: Session = Depends(get_db)):
     novo = ContratoEstagio(**dados.model_dump())
     db.add(novo)
     db.commit()
-    return {"mensagem": "Contrato cadastrado com sucesso"}
+    return {
+        "mensagem": "Contrato cadastrado com sucesso",
+        "id": novo.id
+    }
 
 @router.put("/{id}")
 def atualizar_contrato(id: int, dados: ContratoEstagioUpdate, db: Session = Depends(get_db)):

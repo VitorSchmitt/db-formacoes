@@ -23,7 +23,7 @@ from schemas import (
     DesligamentoContratoInput,
     ContratoEstagioResponse
 )
-
+import os
 PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
 
 

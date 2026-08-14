@@ -7,14 +7,22 @@ from fastapi import (
     UploadFile,
     File
 )
-from datetime import datetime
-import os
-import shutil
+
+from utils.arquivos import salvar_arquivo_rede
+
 from sqlalchemy.orm import Session
 from typing import List
+
 from database import get_db
+
 from estagiario.model_estagiario import ContratoEstagio
-from schemas import ContratoEstagioCreate, ContratoEstagioUpdate, DesligamentoContratoInput,ContratoEstagioResponse
+
+from schemas import (
+    ContratoEstagioCreate,
+    ContratoEstagioUpdate,
+    DesligamentoContratoInput,
+    ContratoEstagioResponse
+)
 
 PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
 
@@ -97,10 +105,6 @@ def anexar_contrato(
     db: Session = Depends(get_db)
 ):
 
-    # ==============================
-    # LOCALIZA O CONTRATO
-    # ==============================
-
     contrato = (
         db.query(ContratoEstagio)
         .filter(ContratoEstagio.id == id)
@@ -113,39 +117,6 @@ def anexar_contrato(
             detail="Contrato não encontrado"
         )
 
-
-    # ==============================
-    # VALIDA PDF
-    # ==============================
-
-    if not arquivo.filename.lower().endswith(".pdf"):
-        raise HTTPException(
-            status_code=400,
-            detail="Somente arquivos PDF são permitidos."
-        )
-
-
-    # ==============================
-    # CRIA A PASTA DO ANO
-    # ==============================
-
-    ano_atual = datetime.now().year
-
-    pasta_ano = os.path.join(
-        PASTA_CONTRATOS,
-        str(ano_atual)
-    )
-
-    os.makedirs(
-        pasta_ano,
-        exist_ok=True
-    )
-
-
-    # ==============================
-    # NOME DO ARQUIVO
-    # ==============================
-
     extensao = os.path.splitext(
         arquivo.filename
     )[1].lower()
@@ -154,63 +125,21 @@ def anexar_contrato(
         f"contrato_{contrato.numero_contrato}{extensao}"
     )
 
-
-    # ==============================
-    # CAMINHO FÍSICO
-    # ==============================
-
-    caminho_arquivo = os.path.join(
-        pasta_ano,
-        nome_arquivo
+    caminho_relativo = salvar_arquivo_rede(
+        arquivo=arquivo,
+        pasta_base=PASTA_CONTRATOS,
+        nome_arquivo=nome_arquivo
     )
-
-
-    # ==============================
-    # SALVA O ARQUIVO NA REDE
-    # ==============================
-
-    try:
-
-        with open(
-            caminho_arquivo,
-            "wb"
-        ) as f:
-
-            shutil.copyfileobj(
-                arquivo.file,
-                f
-            )
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erro ao salvar o arquivo: {str(e)}"
-        )
-
-
-    # ==============================
-    # SALVA SOMENTE O CAMINHO RELATIVO
-    # NO BANCO
-    # ==============================
-
-    caminho_relativo = os.path.join(
-        str(ano_atual),
-        nome_arquivo
-    ).replace("\\", "/")
-
 
     contrato.arquivo_contrato = caminho_relativo
 
     db.commit()
     db.refresh(contrato)
 
-
     return {
         "mensagem": "Contrato anexado com sucesso",
         "arquivo": nome_arquivo,
-        "caminho": caminho_relativo,
-        "ano": ano_atual
+        "caminho": caminho_relativo
     }
 
 @router.post("/{id}/desligar")

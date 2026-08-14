@@ -24,7 +24,8 @@ from schemas import (
     ContratoEstagioResponse
 )
 import os
-PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
+#PASTA_CONTRATOS = r"G:\CFP\SISTEMA-NTEV\contratos"
+PASTA_CONTRATOS = r"C:\Users\vitor\OneDrive\Área de Trabalho\Mala\pdf"
 
 
 os.makedirs(PASTA_CONTRATOS, exist_ok=True)

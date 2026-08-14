@@ -28,6 +28,12 @@ def salvar_arquivo_rede(
         exist_ok=True
     )
 
+    print("========================================")
+    print("PASTA BASE:", pasta_base)
+    print("ANO:", ano_atual)
+    print("PASTA ANO:", pasta_ano)
+    print("========================================")
+
     caminho_arquivo = os.path.join(
         pasta_ano,
         nome_arquivo

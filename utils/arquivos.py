@@ -23,10 +23,15 @@ def salvar_arquivo_rede(
         str(ano_atual)
     )
 
-    os.makedirs(
-        pasta_ano,
-        exist_ok=True
-    )
+    print(">>> ANTES DO MAKEDIRS")
+
+    try:
+        os.makedirs(pasta_ano, exist_ok=True)
+        print(">>> DEPOIS DO MAKEDIRS")
+        print(">>> EXISTE:", os.path.exists(pasta_ano))
+    except Exception as e:
+        print(">>> ERRO NO MAKEDIRS:", repr(e))
+        raise
 
     
 

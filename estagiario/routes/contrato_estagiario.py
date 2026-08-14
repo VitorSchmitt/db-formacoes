@@ -7,7 +7,7 @@ from fastapi import (
     UploadFile,
     File
 )
-
+from fastapi.responses import FileResponse
 from utils.arquivos import salvar_arquivo_rede
 
 from sqlalchemy.orm import Session
@@ -156,7 +156,46 @@ def desligar_contrato(id: int, dados: DesligamentoContratoInput, db: Session = D
     db.commit()
     return {"mensagem": "Contrato encerrado com sucesso"}
 
+@router.get("/{id}/arquivo")
+def visualizar_contrato(
+    id: int,
+    db: Session = Depends(get_db)
+):
 
+    contrato = (
+        db.query(ContratoEstagio)
+        .filter(ContratoEstagio.id == id)
+        .first()
+    )
+
+    if not contrato:
+        raise HTTPException(
+            status_code=404,
+            detail="Contrato não encontrado"
+        )
+
+    if not contrato.arquivo_contrato:
+        raise HTTPException(
+            status_code=404,
+            detail="Contrato PDF não anexado"
+        )
+
+    caminho_arquivo = os.path.join(
+        PASTA_CONTRATOS,
+        contrato.arquivo_contrato
+    )
+
+    if not os.path.isfile(caminho_arquivo):
+        raise HTTPException(
+            status_code=404,
+            detail="Arquivo PDF não encontrado no servidor"
+        )
+
+    return FileResponse(
+        caminho_arquivo,
+        media_type="application/pdf",
+        filename=os.path.basename(caminho_arquivo)
+    )
 @router.get("/meus", response_model=List[dict])
 def listar_meus_contratos(
     request: Request,

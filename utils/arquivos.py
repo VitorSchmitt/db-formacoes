@@ -35,6 +35,10 @@ def salvar_arquivo_rede(
         nome_arquivo
     )
 
+    print("========================================")
+    print("PASTA BASE:", pasta_base)
+    print("PASTA ANO:", pasta_ano)
+
     try:
 
         with open(caminho_arquivo, "wb") as f:

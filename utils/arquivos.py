@@ -46,12 +46,20 @@ def salvar_arquivo_rede(
 
     try:
 
+        print(">>> CAMINHO DO ARQUIVO:", caminho_arquivo)
+        print(">>> ANTES DO OPEN")
+        
         with open(caminho_arquivo, "wb") as f:
-
             shutil.copyfileobj(
                 arquivo.file,
                 f
             )
+        
+        print(">>> DEPOIS DO OPEN")
+        print(">>> ARQUIVO EXISTE:", os.path.isfile(caminho_arquivo))
+        
+        if os.path.isfile(caminho_arquivo):
+            print(">>> TAMANHO:", os.path.getsize(caminho_arquivo))
 
     except Exception as e:
 

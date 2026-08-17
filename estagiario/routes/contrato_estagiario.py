@@ -24,7 +24,8 @@ from schemas import (
     ContratoEstagioResponse
 )
 import os
-PASTA_CONTRATOS = "//fasepaefs01/CFP/SISTEMA-NTEV/contratos"
+PASTA_CONTRATOS = "C:/Users/vitor-schmitt/Desktop/SISTEMA-NTEV/CONTRATOS"
+#PASTA_CONTRATOS = "//fasepaefs01/CFP/SISTEMA-NTEV/contratos"
 #PASTA_CONTRATOS = r"C:\Users\vitor\OneDrive\Área de Trabalho\Mala\pdf"
 
 

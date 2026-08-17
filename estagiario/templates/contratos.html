@@ -537,13 +537,48 @@ async function salvar() {
     
 }
 
-function visualizarContrato(id) {
+async function visualizarContrato(id) {
 
-    window.open(
-        `${urlContratos}/${id}/arquivo`,
-        "_blank"
-    );
+    try {
 
+        const resposta = await fetch(
+            `${urlContratos}/${id}/arquivo`
+        );
+
+        if (!resposta.ok) {
+
+            const erro = await resposta.json();
+
+            throw new Error(
+                erro.detail || "Erro ao localizar o contrato."
+            );
+        }
+
+        const dados = await resposta.json();
+
+        if (!dados.url) {
+            throw new Error(
+                "URL do contrato não foi encontrada."
+            );
+        }
+
+        window.open(
+            dados.url,
+            "_blank"
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao visualizar contrato:",
+            erro
+        );
+
+        alert(
+            erro.message ||
+            "Não foi possível visualizar o contrato."
+        );
+    }
 }
 
 function solicitarDesligamento(id) {

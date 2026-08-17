@@ -49,6 +49,9 @@ def salvar_arquivo_rede(
         print(">>> CAMINHO DO ARQUIVO:", caminho_arquivo)
         print(">>> ANTES DO OPEN")
         
+        # Garante que a leitura comece no início do arquivo
+        
+        arquivo.file.seek(0)
         with open(caminho_arquivo, "wb") as f:
             shutil.copyfileobj(
                 arquivo.file,

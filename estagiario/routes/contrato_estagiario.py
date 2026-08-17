@@ -7,9 +7,7 @@ from fastapi import (
     UploadFile,
     File
 )
-from fastapi.responses import FileResponse
-from utils.arquivos import salvar_arquivo_rede
-
+from utils.arquivos import salvar_arquivo_rede, supabase
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -24,12 +22,6 @@ from schemas import (
     ContratoEstagioResponse
 )
 import os
-PASTA_CONTRATOS = "C:/Users/vitor-schmitt/Desktop/SISTEMA-NTEV/CONTRATOS"
-#PASTA_CONTRATOS = "//fasepaefs01/CFP/SISTEMA-NTEV/contratos"
-#PASTA_CONTRATOS = r"C:\Users\vitor\OneDrive\Área de Trabalho\Mala\pdf"
-
-
-os.makedirs(PASTA_CONTRATOS, exist_ok=True)
 
 router = APIRouter(prefix="/api/contrato_estagio", tags=["Contratos de Estágio"])
 
@@ -129,7 +121,7 @@ def anexar_contrato(
 
     caminho_relativo = salvar_arquivo_rede(
         arquivo=arquivo,
-        pasta_base=PASTA_CONTRATOS,
+        pasta_base=None,
         nome_arquivo=nome_arquivo
     )
 
@@ -181,50 +173,30 @@ def visualizar_contrato(
             detail="Contrato PDF não anexado"
         )
 
-    caminho_arquivo = os.path.join(
-        PASTA_CONTRATOS,
-        contrato.arquivo_contrato
-    )
+    try:
 
-    if not os.path.isfile(caminho_arquivo):
-        raise HTTPException(
-            status_code=404,
-            detail="Arquivo PDF não encontrado no servidor"
+        resultado = (
+            supabase
+            .storage
+            .from_("contratos")
+            .create_signed_url(
+                contrato.arquivo_contrato,
+                300
+            )
         )
 
-    return FileResponse(
-        caminho_arquivo,
-        media_type="application/pdf",
-        filename=os.path.basename(caminho_arquivo)
-    )
-@router.get("/meus", response_model=List[dict])
-def listar_meus_contratos(
-    request: Request,
-    db: Session = Depends(get_db)
-):
-    usuario_logado = request.session.get("user")
-
-    if not usuario_logado:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário não autenticado."
-        )
-
-    matricula = usuario_logado.get("matricula")
-
-    contratos = (
-        db.query(ContratoEstagio)
-        .filter(
-            ContratoEstagio.supervisor_matricula == matricula
-        )
-        .all()
-    )
-
-    return [
-        {
-            "id": c.id,
-            "numero_contrato": c.numero_contrato,
-            "estagiario_nome": c.estagiario.nome if c.estagiario else "Não informado"
+        return {
+            "url": resultado["signedURL"]
         }
-        for c in contratos
-    ]
+
+    except Exception as e:
+
+        print(
+            ">>> ERRO AO GERAR URL DO CONTRATO:",
+            repr(e)
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Erro ao gerar acesso ao contrato"
+        )

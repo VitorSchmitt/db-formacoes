@@ -42,6 +42,60 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
+#
+import os
+from supabase import create_client
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+print("========================================")
+print("SUPABASE_URL configurada:", bool(SUPABASE_URL))
+print("SUPABASE_KEY configurada:", bool(SUPABASE_KEY))
+print("========================================")
+
+supabase = None
+
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    )
+
+
+@app.get("/teste-supabase")
+def teste_supabase():
+
+    if not supabase:
+        return {
+            "status": "erro",
+            "mensagem": "SUPABASE_URL ou SUPABASE_KEY não configurada"
+        }
+
+    try:
+
+        arquivos = (
+            supabase
+            .storage
+            .from_("contratos")
+            .list()
+        )
+
+        return {
+            "status": "ok",
+            "mensagem": "Conexão com Supabase Storage funcionando",
+            "arquivos": arquivos
+        }
+
+    except Exception as e:
+
+        return {
+            "status": "erro",
+            "mensagem": str(e)
+        }
+
+#-fim
+
 app.mount(
     "/static",
     StaticFiles(directory="static"),

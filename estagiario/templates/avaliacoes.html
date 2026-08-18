@@ -181,7 +181,9 @@ function carregarFrequencia(id) {
         .then(r => {
 
             if (!r.ok) {
-                throw new Error("Erro ao buscar frequência.");
+                throw new Error(
+                    "Erro ao buscar frequência."
+                );
             }
 
             return r.json();
@@ -189,11 +191,13 @@ function carregarFrequencia(id) {
         })
         .then(dados => {
 
-            document.getElementById("numero_contrato").value =
-                dados.numero_contrato;
+            console.log(
+                "Frequência recebida:",
+                dados
+            );
 
             document.getElementById("estagiario_nome").value =
-                dados.estagiario_nome || "";
+                dados.estagiario_nome || "Não informado";
 
             document.getElementById("competencia").value =
                 dados.competencia;
@@ -206,6 +210,8 @@ function carregarFrequencia(id) {
 
         })
         .catch(err => {
+
+            console.error(err);
 
             alert(err.message);
 

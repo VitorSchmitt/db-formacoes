@@ -289,6 +289,10 @@ function editar(item){
     document.getElementById("estagiario_nome").value =
         item.estagiario_nome || "Não informado";
 
+    // Nome do estagiário é somente informativo
+    document.getElementById("estagiario_nome").style.color =
+        "#333";
+
     document.getElementById("competencia").value =
         item.competencia;
 
@@ -301,10 +305,27 @@ function editar(item){
     document.getElementById("observacao").value =
         item.observacao || "";
 
+    // Campos que podem ser editados ficam azuis
+    document.getElementById("competencia").style.color =
+        "#0066cc";
+
+    document.getElementById("dias").style.color =
+        "#0066cc";
+
+    document.getElementById("horas_realizadas").style.color =
+        "#0066cc";
+
+    document.getElementById("observacao").style.color =
+        "#0066cc";
+
     if(item.avaliada){
 
         document.getElementById("competencia").readOnly =
             true;
+
+        // Como não pode mais editar, volta para preto
+        document.getElementById("competencia").style.color =
+            "#333";
     }
 }
 // ===============================

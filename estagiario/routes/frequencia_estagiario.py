@@ -82,39 +82,85 @@ def buscar_frequencia(
     db: Session = Depends(get_db)
 ):
     usuario = obter_usuario_logado(request)
+
     perfil = usuario.get("perfil")
     matricula = usuario.get("matricula")
 
     query = (
         db.query(FrequenciaEstagio)
-        .options(joinedload(FrequenciaEstagio.avaliacao))
-        .join(ContratoEstagio, FrequenciaEstagio.contrato_id == ContratoEstagio.id)
-        .filter(FrequenciaEstagio.id == id)
+        .options(
+            joinedload(
+                FrequenciaEstagio.avaliacao
+            ),
+            joinedload(
+                FrequenciaEstagio.contrato
+            ).joinedload(
+                ContratoEstagio.estagiario
+            )
+        )
+        .filter(
+            FrequenciaEstagio.id == id
+        )
     )
 
+    # -----------------------------------------
+    # Permissão do supervisor
+    # -----------------------------------------
     if perfil == "operadorIV":
-        query = query.filter(ContratoEstagio.supervisor_matricula == matricula)
+
+        query = query.filter(
+            ContratoEstagio.supervisor_matricula == matricula
+        )
 
     frequencia = query.first()
 
     if not frequencia:
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Frequência não encontrada."
         )
 
+    contrato = frequencia.contrato
+
+    estagiario = (
+        contrato.estagiario
+        if contrato
+        else None
+    )
+
     return {
-        "id": frequencia.id,
-        "contrato_id": frequencia.contrato_id,
-        "numero_contrato": frequencia.contrato.numero_contrato if frequencia.contrato else "-",
-        "competencia": frequencia.competencia.strftime("%Y-%m"),
-        "dias": frequencia.dias,
-        "horas_realizadas": float(frequencia.horas_realizadas),
-        "observacao": frequencia.observacao,
-        "avaliacao_id": frequencia.avaliacao.id if frequencia.avaliacao else None
+
+        "id":
+            frequencia.id,
+
+        "contrato_id":
+            frequencia.contrato_id,
+
+        "estagiario_nome":
+            estagiario.nome
+            if estagiario
+            else "Não informado",
+
+        "competencia":
+            frequencia.competencia.strftime("%Y-%m"),
+
+        "dias":
+            frequencia.dias,
+
+        "horas_realizadas":
+            float(
+                frequencia.horas_realizadas
+            ),
+
+        "observacao":
+            frequencia.observacao,
+
+        "avaliacao_id":
+            frequencia.avaliacao.id
+            if frequencia.avaliacao
+            else None
     }
-
-
 # =====================================================
 # CRIAR FREQUÊNCIA
 # =====================================================

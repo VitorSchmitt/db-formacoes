@@ -25,15 +25,16 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">
-                        Contrato de Estágio *
-                    </label>
-                    <select 
-                        class="form-control" 
-                        id="contrato_id">
-                        <option value="">
-                            Selecione o contrato...
-                        </option>
-                    </select>
+                        Estagiário *
+                    </label>                
+                    <input
+                        type="hidden"
+                        id="contrato_id">                
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="estagiario_nome"
+                        readonly>                
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">
@@ -245,49 +246,65 @@ function carregarContratos(){
 // NOVO
 // ===============================
 function novo(){
+
     limpar();
-    document.getElementById(
-        "formTitulo"
-    ).innerText =
+
+    document.getElementById("formTitulo").innerText =
         "Lançar Nova Frequência";
-    document.getElementById(
-        "formCard"
-    ).style.display="block";
+
+    document.getElementById("contrato_id").style.display =
+        "block";
+
+    document.getElementById("estagiario_nome").style.display =
+        "none";
+
+    document.getElementById("formCard").style.display =
+        "block";
 }
 // ===============================
 // EDITAR
 // ===============================
 function editar(item){
-    document.getElementById(
-        "formCard"
-    ).style.display="block";
-    document.getElementById(
-        "formTitulo"
-    ).innerText =
+
+    document.getElementById("formCard").style.display="block";
+
+    document.getElementById("formTitulo").innerText =
         "Editar Frequência";
-    document.getElementById(
-        "id"
-    ).value=item.id;
-    document.getElementById(
-        "contrato_id"
-    ).value=item.contrato_id;
-    document.getElementById(
-        "competencia"
-    ).value=item.competencia;
-    document.getElementById(
-        "dias"
-    ).value=item.dias;
-    document.getElementById(
-        "horas_realizadas"
-    ).value=item.horas_realizadas;
-    
-    document.getElementById(
-        "observacao"
-    ).value=item.observacao || "";
+
+    document.getElementById("id").value =
+        item.id;
+
+    // Mantém o contrato_id internamente
+    document.getElementById("contrato_id").value =
+        item.contrato_id;
+
+    // Esconde o select
+    document.getElementById("contrato_id").style.display =
+        "none";
+
+    // Mostra o nome do estagiário
+    document.getElementById("estagiario_nome").style.display =
+        "block";
+
+    document.getElementById("estagiario_nome").value =
+        item.estagiario_nome || "Não informado";
+
+    document.getElementById("competencia").value =
+        item.competencia;
+
+    document.getElementById("dias").value =
+        item.dias;
+
+    document.getElementById("horas_realizadas").value =
+        item.horas_realizadas;
+
+    document.getElementById("observacao").value =
+        item.observacao || "";
+
     if(item.avaliada){
-        document.getElementById(
-            "competencia"
-        ).readOnly=true;
+
+        document.getElementById("competencia").readOnly =
+            true;
     }
 }
 // ===============================
@@ -377,33 +394,27 @@ function cancelar(){
     ).style.display="none";
 }
 function limpar(){
-    document.getElementById(
-        "id"
-    ).value="";
-    document.getElementById(
-        "contrato_id"
-    ).value="";
-    
-    document.getElementById(
-        "competencia"
-    ).value="";
 
-    document.getElementById(
-        "dias"
-    ).value="";
+    document.getElementById("id").value = "";
 
-    document.getElementById(
-        "horas_realizadas"
-    ).value="";
+    document.getElementById("contrato_id").value = "";
 
-    document.getElementById(
-        "observacao"
-    ).value="";
+    document.getElementById("estagiario_nome").value = "";
 
-    document.getElementById(
-        "competencia"
-    ).readOnly=false;
+    document.getElementById("competencia").value = "";
 
+    document.getElementById("dias").value = "";
+
+    document.getElementById("horas_realizadas").value = "";
+
+    document.getElementById("observacao").value = "";
+
+    document.getElementById("competencia").readOnly = false;
+
+    // Modo NOVO
+    document.getElementById("estagiario_nome").style.display = "none";
+
+    document.getElementById("contrato_id").style.display = "block";
 }
 
 </script>

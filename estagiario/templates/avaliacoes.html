@@ -24,17 +24,7 @@
             <input type="hidden" id="id">
             <input type="hidden" id="frequencia_id">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold">
-                        Contrato
-                    </label>
-                    <input
-                        type="text"
-                        id="numero_contrato"
-                        class="form-control"
-                        readonly>
-                </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-8 mb-3">
                     <label class="form-label fw-bold">
                         Estagiário
                     </label>
@@ -43,7 +33,7 @@
                         id="estagiario_nome"
                         class="form-control"
                         readonly>
-                </div>
+                </div>            
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">
                         Competência
@@ -249,41 +239,37 @@ function carregarAvaliacao(id){
         document.getElementById("id").value =
             dados.id;
 
-
         document.getElementById("frequencia_id").value =
             dados.frequencia_id;
-
-
-        document.getElementById("numero_contrato").value =
-            dados.numero_contrato;
-
 
         document.getElementById("estagiario_nome").value =
             dados.estagiario_nome;
 
-
         document.getElementById("competencia").value =
             dados.competencia;
-
 
         document.getElementById("dias").value =
             dados.dias;
 
-
         document.getElementById("horas_realizadas").value =
             dados.horas_realizadas;
-
 
         document.getElementById("data_avaliacao").value =
             dados.data_avaliacao;
 
-
         document.getElementById("avaliacao").value =
             dados.avaliacao;
 
-
         document.getElementById("parecer").value =
             dados.parecer || "";
+        
+        // Campos editáveis em azul
+        document.getElementById("data_avaliacao").style.color =
+            "#0066cc";    
+        document.getElementById("avaliacao").style.color =
+            "#0066cc";    
+        document.getElementById("parecer").style.color =
+            "#0066cc";        
         
         document.getElementById("btnExcluir")
             .classList.remove("d-none");

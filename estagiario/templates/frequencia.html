@@ -95,10 +95,10 @@
                 <thead>
                     <tr>
                         <th class="px-4">
-                            Estagiário
-                        </th>
-                        <th>
                             Competência
+                        </th>
+                        <th>                            
+                            Estagiário
                         </th>
                         <th>
                             Dias
@@ -178,14 +178,15 @@ function carregar(){
                 </button> `;
                 html += `
                 <tr>
+                    <td>
+                        ${item.competencia}
+                    </td>
                     <td class="px-4">
                         <strong class="text-primary">
                             ${item.estagiario_nome || "-"}
                         </strong>
                     </td>
-                    <td>
-                        ${item.competencia}
-                    </td>
+                    
                     <td>
                         ${item.dias} dias
                     </td>

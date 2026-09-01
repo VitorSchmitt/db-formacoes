@@ -286,6 +286,7 @@ async function carregarTabela() {
         let html = `
         <table class="table table-striped">
             <tr>
+                <th>Nº</th>
                 <th>Matrícula</th>
                 <th>Nome</th>
                 <th>Lotação</th>
@@ -299,22 +300,30 @@ async function carregarTabela() {
             (p.nome || "").toLowerCase().includes(busca) ||
             (p.matricula || "").includes(busca)
         )
-        .forEach(p => {
-            html += `
+        .forEach((p, indice) => {
+
+    html += `
             <tr>
+                <td>${indice + 1}</td>
                 <td>${p.matricula}</td>
                 <td>${p.nome}</td>
                 <td>${p.lotacao || ""}</td>
                 <td>${p.aproveitamento}</td>
                 <td>
-                    <button class="btn btn-danger btn-sm" onclick="deletar(${p.id})">🗑</button>
+                    <button
+                        class="btn btn-danger btn-sm"
+                        onclick="deletar(${p.id})">
+                        🗑
+                    </button>
                 </td>
             </tr>
             `;
         });
-
-        html += "</table>";
-
+        
+        html += `
+            </tbody>
+        </table>
+        `;
         const tabela = document.getElementById("tabela");
         if (tabela) tabela.innerHTML = html;
 

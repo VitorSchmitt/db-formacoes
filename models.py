@@ -39,16 +39,6 @@ tipo_eixo = ENUM(
     create_type=False
 )
 
-tipo_status_formacao = ENUM(
-    "Planejada",    
-    "Finalizada",
-    "Cancelada",
-    "Em construção",
-    "Em andamento",
-    name="tipo_status_formacao",
-    create_type=False
-)
-
 # ===============================
 # CARGO
 # ===============================
@@ -102,7 +92,6 @@ class PlanoAnual(Base):
 # ===============================
 # FORMAÇÃO
 # ===============================
-
 class Formacao(Base):
 
     __tablename__ = "formacao"
@@ -110,25 +99,52 @@ class Formacao(Base):
     id = Column(Integer, primary_key=True, index=True)
     descricao = Column(String(255), nullable=False, index=True)
     data_inicio = Column(Date)
-    data_termino = Column(Date, index=True)    
+    data_termino = Column(Date, index=True)
     carga_horaria = Column(Integer)
-    modalidade = Column(tipo_modalidade)    
+    modalidade = Column(tipo_modalidade)
     publico_alvo = Column(String(300))
-    investimento = Column(Numeric(12,2))
+    investimento = Column(Numeric(12, 2))
     meta_participantes = Column(Integer, nullable=False, default=0)
+
     status = Column(
-        tipo_status_formacao,
+        String(50),
         nullable=False,
         default="Planejada",
         index=True
     )
-    plano_id = Column(Integer, ForeignKey("plano_anual.id"), index=True)
-    plano = relationship("PlanoAnual", back_populates="formacoes")
-    criado_em = Column(DateTime, default=datetime.utcnow)
-    ativo = Column(Boolean, default=True, index=True)
-    participacoes = relationship("Participacao", back_populates="formacao")
-    facilitadores = relationship("Facilitador", back_populates="formacao")
-    
+
+    plano_id = Column(
+        Integer,
+        ForeignKey("plano_anual.id"),
+        index=True
+    )
+
+    plano = relationship(
+        "PlanoAnual",
+        back_populates="formacoes"
+    )
+
+    criado_em = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    ativo = Column(
+        Boolean,
+        default=True,
+        index=True
+    )
+
+    participacoes = relationship(
+        "Participacao",
+        back_populates="formacao"
+    )
+
+    facilitadores = relationship(
+        "Facilitador",
+        back_populates="formacao"
+    )
+
     __table_args__ = (
 
         UniqueConstraint(

@@ -44,7 +44,7 @@ tipo_status_formacao = ENUM(
     "Finalizada",
     "Cancelada",
     "Em construção",
-    "Em Andamento",
+    "Em andamento",
     name="tipo_status_formacao",
     create_type=False
 )

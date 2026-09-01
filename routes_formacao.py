@@ -399,7 +399,8 @@ def enums():
             "Planejada",            
             "Finalizada",
             "Cancelada",
-            "Em construção"
+            "Em construção",
+            "Em Andamento"
 
         ]
 

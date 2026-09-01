@@ -62,7 +62,7 @@
         </div>
 
         <div class="col-md-3">
-            <select id="plano_anual_id"
+            <select id="plano_id"
                     class="form-select"
                     required>
             </select>
@@ -268,7 +268,7 @@ await res.json();
 
 let select=
 document.getElementById(
-"plano_anual_id"
+"plano_id"
 );
 
 select.innerHTML=`
@@ -450,7 +450,7 @@ document.getElementById("publico_alvo").value=f.publico_alvo||"";
 document.getElementById("investimento").value =f.investimento ?? "";
 document.getElementById("meta_participantes").value =f.meta_participantes ?? "";
 document.getElementById("status").value=f.status||"";
-document.getElementById("plano_anual_id").value=f.plano_id||"";
+document.getElementById("plano_id").value=f.plano_id||"";
 
 document.querySelector(
 ".btn-primary"
@@ -494,7 +494,7 @@ status:
 document.getElementById("status").value,
 
 plano_id:
-document.getElementById("plano_anual_id").value||null
+document.getElementById("plano_id").value||null
 
 };
 

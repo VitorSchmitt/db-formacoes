@@ -77,7 +77,7 @@
 
     </div>
 
-    <button class="btn btn-primary">Adicionar</button>
+    <button id="btnSalvar" class="btn btn-primary">Adicionar</button>
 </form>
 
 <div id="msg" class="mt-2"></div>
@@ -104,6 +104,7 @@
 let formacaoAtual = null;
 let timeoutMatricula = null;
 let participacaoEditando = null;
+document.getElementById("btnSalvar").textContent = "Salvar alteração";
 
 // =====================
 // AUTOCOMPLETE MATRÍCULA
@@ -396,6 +397,7 @@ async function salvar(e) {
         if (r.ok) {
             participacaoEditando = null;
             document.getElementById("matricula").disabled = false;
+            document.getElementById("btnSalvar").textContent = "Adicionar";
             limpar();
             carregarTabela();
         }
@@ -433,6 +435,7 @@ async function editar(id) {
             `👤 ${p.nome}<br>Matrícula: ${p.matricula}`;
 
         document.getElementById("lotacao_busca").value = p.lotacao || "";
+        document.getElementById("lotacao").value = p.lotacao_id;
         document.getElementById("aproveitamento").value = p.aproveitamento;
 
     } catch (err) {

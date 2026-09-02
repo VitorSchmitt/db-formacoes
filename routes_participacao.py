@@ -57,6 +57,7 @@ def listar(formacao_id: int, db: Session = Depends(get_db)):
         "id": p.id,
         "matricula": p.matricula,
         "nome": p.servidor.nome if p.servidor else None,
+        "lotacao_id": p.lotacao_id,
         "lotacao": p.lotacao.descricao if p.lotacao else None,
         "aproveitamento": p.aproveitamento
     }

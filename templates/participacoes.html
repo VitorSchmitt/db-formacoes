@@ -103,6 +103,7 @@
 
 let formacaoAtual = null;
 let timeoutMatricula = null;
+let participacaoEditando = null;
 
 // =====================
 // AUTOCOMPLETE MATRÍCULA
@@ -311,6 +312,12 @@ async function carregarTabela() {
                 <td>${p.aproveitamento}</td>
                 <td>
                     <button
+                        class="btn btn-warning btn-sm"
+                        onclick="editar(${p.id})">
+                        ✏️
+                    </button>
+                    
+                    <button
                         class="btn btn-danger btn-sm"
                         onclick="deletar(${p.id})">
                         🗑
@@ -365,8 +372,16 @@ async function salvar(e) {
 
     try {
 
-        let res = await api("/api/participacoes", {
-            method: "POST",
+        let url = participacaoEditando
+            ? `/api/participacoes/${participacaoEditando}`
+            : "/api/participacoes";
+
+        let method = participacaoEditando
+            ? "PUT"
+            : "POST";
+
+        let res = await api(url, {
+            method: method,
             body: JSON.stringify(dados)
         });
 
@@ -379,6 +394,8 @@ async function salvar(e) {
         mostrarMsg(r);
 
         if (r.ok) {
+            participacaoEditando = null;
+            document.getElementById("matricula").disabled = false;
             limpar();
             carregarTabela();
         }
@@ -389,6 +406,41 @@ async function salvar(e) {
     }
 }
 
+// =====================
+// EDITAR
+// =====================
+async function editar(id) {
+
+    try {
+
+        participacaoEditando = id;
+
+        let res = await api(`/api/participacoes/${formacaoAtual}`);
+        let data = await res.json();
+
+        let p = data.find(x => x.id === id);
+
+        if (!p) {
+            return mostrarMsg({ erro: "Participação não encontrada" });
+        }
+
+        document.getElementById("matricula").value = p.matricula;
+        document.getElementById("matricula").disabled = true;
+
+        document.getElementById("servidor").value = p.matricula;
+
+        document.getElementById("nome_servidor").innerHTML =
+            `👤 ${p.nome}<br>Matrícula: ${p.matricula}`;
+
+        document.getElementById("lotacao_busca").value = p.lotacao || "";
+        document.getElementById("aproveitamento").value = p.aproveitamento;
+
+    } catch (err) {
+
+        console.error(err);
+        mostrarMsg({ erro: "Erro ao carregar participação" });
+    }
+}
 // =====================
 // DELETAR
 // =====================

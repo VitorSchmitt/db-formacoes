@@ -104,7 +104,7 @@
 let formacaoAtual = null;
 let timeoutMatricula = null;
 let participacaoEditando = null;
-document.getElementById("btnSalvar").textContent = "Salvar alteração";
+
 
 // =====================
 // AUTOCOMPLETE MATRÍCULA
@@ -416,6 +416,7 @@ async function editar(id) {
     try {
 
         participacaoEditando = id;
+        document.getElementById("btnSalvar").textContent = "Salvar alteração";
 
         let res = await api(`/api/participacoes/${formacaoAtual}`);
         let data = await res.json();

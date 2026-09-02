@@ -353,7 +353,8 @@ def listar_formacoes_ativas(db: Session = Depends(get_db)):
 def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
 
     servidor = db.query(Servidor).filter(
-        Servidor.matricula == matricula
+        Servidor.matricula == matricula,
+        Servidor.ativo == True
     ).first()
 
     if not servidor:
@@ -362,8 +363,7 @@ def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
     return {
         "encontrado": True,
         "matricula": servidor.matricula,
-        "nome": servidor.nome       
-       
+        "nome": servidor.nome
     }
 
 @router.get("/lotacoes")

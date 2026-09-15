@@ -64,9 +64,11 @@ class Servidor(Base):
     matricula = Column(String(20), primary_key=True, index=True)
     nome = Column(String(255), nullable=False, index=True)
     cargo_id = Column(Integer, ForeignKey("cargo.id"))
+    lotacao_id = Column(Integer, ForeignKey("lotacao.id")) 
     criado_em = Column(DateTime, default=datetime.utcnow)
     ativo = Column(Boolean, default=True)
     cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
+    lotacao = relationship("Lotacao",back_populates="servidores",lazy="joined")
     participacoes = relationship("Participacao", back_populates="servidor")
     facilitacoes = relationship("Facilitador", back_populates="servidor")
     usuario = relationship("Usuario",back_populates="servidor",uselist=False)
@@ -177,6 +179,7 @@ class Lotacao(Base):
     tipo = Column(String(100), nullable=False, index=True)
     criado_em = Column(DateTime, default=datetime.utcnow)
     ativo = Column(Boolean, default=True)
+    servidores = relationship("Servidor",back_populates="lotacao")
     participacoes = relationship("Participacao", back_populates="lotacao")
 
 

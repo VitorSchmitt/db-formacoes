@@ -68,7 +68,7 @@ class Servidor(Base):
     criado_em = Column(DateTime, default=datetime.utcnow)
     ativo = Column(Boolean, default=True)
     cargo = relationship("Cargo", back_populates="servidores", lazy="joined")
-    lotacao = relationship("Lotacao",back_populates="servidores",lazy="joined")
+    lotacao = relationship("Lotacao",foreign_keys=[lotacao_id],back_populates="servidores",lazy="joined")
     participacoes = relationship("Participacao", back_populates="servidor")
     facilitacoes = relationship("Facilitador", back_populates="servidor")
     usuario = relationship("Usuario",back_populates="servidor",uselist=False)
@@ -179,7 +179,7 @@ class Lotacao(Base):
     tipo = Column(String(100), nullable=False, index=True)
     criado_em = Column(DateTime, default=datetime.utcnow)
     ativo = Column(Boolean, default=True)
-    servidores = relationship("Servidor",back_populates="lotacao")
+    servidores = relationship("Servidor",foreign_keys="Servidor.lotacao_id",back_populates="lotacao")
     participacoes = relationship("Participacao", back_populates="lotacao")
 
 

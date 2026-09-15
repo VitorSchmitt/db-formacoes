@@ -272,13 +272,12 @@ async function carregarTabela(){
 
                 <tr>
 
-                    <th>Matrícula</th>
+                   <th>Matrícula</th>
                     <th>Nome</th>
                     <th>Cargo</th>
+                    <th>Lotação</th>
                     <th>Status</th>
-                    <th width="180">
-                        Ações
-                    </th>
+                    <th>Ações</th>
 
                 </tr>
 
@@ -309,21 +308,11 @@ async function carregarTabela(){
 
             <tr>
 
-                <td>
-                    ${s.matricula}
-                </td>
-
-                <td>
-                    ${s.nome}
-                </td>
-
-                <td>
-                    ${s.cargo || ""}
-                </td>
-
-                <td>
-                    ${status}
-                </td>
+                <td>${s.matricula}</td>
+                <td>${s.nome}</td>
+                <td>${s.cargo || ""}</td>
+                <td>${s.lotacao || ""}</td>
+                <td>${status}</td>
 
                 <td>
 

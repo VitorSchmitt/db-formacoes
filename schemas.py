@@ -67,12 +67,13 @@ class ServidorCreate(BaseModel):
     matricula: str
     nome: str
     cargo_id: Optional[int] = None
+    lotacao_id: Optional[int] = None
 
 
 class ServidorUpdate(BaseModel):
     nome: Optional[str] = None
     cargo_id: Optional[int] = None
-
+    lotacao_id: Optional[int] = None
 
 # ===============================
 # CARGO

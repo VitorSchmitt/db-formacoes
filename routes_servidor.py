@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 
 from database import SessionLocal
-from models import Servidor, Cargo
+from models import Servidor, Cargo, Lotacao
 from schemas import ServidorCreate, ServidorUpdate
 
 router = APIRouter(
@@ -30,18 +30,23 @@ def get_db():
 def listar(db: Session = Depends(get_db)):
 
     dados = (
-        db.query(Servidor)
-        .options(joinedload(Servidor.cargo))
+    db.query(Servidor)
+        .options(
+            joinedload(Servidor.cargo),
+            joinedload(Servidor.lotacao)
+        )
         .order_by(Servidor.nome)
         .all()
     )
-
+    
     return [
         {
             "matricula": s.matricula,
             "nome": s.nome,
             "cargo": s.cargo.descricao if s.cargo else None,
             "cargo_id": s.cargo_id,
+            "lotacao": s.lotacao.descricao if s.lotacao else None,
+            "lotacao_id": s.lotacao_id,
             "ativo": s.ativo,
         }
         for s in dados
@@ -78,6 +83,11 @@ def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
 
     if not cargo:
         return {"erro": "Cargo inválido"}
+    
+    lotacao = db.get(Lotacao, dados.lotacao_id)
+    
+    if not lotacao:
+        return {"erro": "Lotação inválida"}
 
     try:
 
@@ -85,6 +95,7 @@ def criar(dados: ServidorCreate, db: Session = Depends(get_db)):
             matricula=dados.matricula,
             nome=dados.nome,
             cargo_id=dados.cargo_id,
+            lotacao_id=dados.lotacao_id,
             ativo=True
         )
 
@@ -128,11 +139,17 @@ def atualizar(
 
     if not cargo:
         return {"erro": "Cargo inválido"}
+        
+    lotacao = db.get(Lotacao, dados.lotacao_id)
+
+    if not lotacao:
+        return {"erro": "Lotação inválida"}
 
     try:
 
         s.nome = dados.nome
         s.cargo_id = dados.cargo_id
+        s.lotacao_id = dados.lotacao_id
 
         db.commit()
 

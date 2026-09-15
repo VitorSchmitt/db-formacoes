@@ -45,12 +45,12 @@ from sqlalchemy import select
 def listar(formacao_id: int, db: Session = Depends(get_db)):
 
     dados = db.query(Participacao)\
-        .join(Servidor)\
-        .join(Formacao)\
-        .outerjoin(Lotacao)\
-        .filter(Participacao.formacao_id == formacao_id)\
-        .order_by(Servidor.nome)\
-        .all()
+    .join(Servidor)\
+    .join(Formacao)\
+    .outerjoin(Lotacao, Participacao.lotacao_id == Lotacao.id)\
+    .filter(Participacao.formacao_id == formacao_id)\
+    .order_by(Servidor.nome)\
+    .all()
 
     return [
     {
@@ -84,7 +84,7 @@ def relatorio_pdf(
     participantes = (
         db.query(Participacao)
         .join(Servidor)
-        .outerjoin(Lotacao)
+        .outerjoin(Lotacao, Participacao.lotacao_id == Lotacao.id)
         .filter(
             Participacao.formacao_id == formacao_id,
             Participacao.aproveitamento >= carga_minima

@@ -119,9 +119,10 @@ def gerar_pdf_certificado(
 
     estilo_assinatura = ParagraphStyle(
         "assinatura",
-        parent=styles["BodyText"],
+        parent=styles["BodyText"],       
+        alignment=TA_CENTER,
         fontSize=12,
-        spaceBefore=10
+        spaceBefore=15
     )
 
     # =========================

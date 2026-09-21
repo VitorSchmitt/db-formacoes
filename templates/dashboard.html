@@ -803,6 +803,17 @@ document.addEventListener(
     "DOMContentLoaded",
     async()=>{
 
+        const hoje = new Date();
+
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+
+        document.getElementById("mes_inicio").value =
+            `${ano}-01`;
+
+        document.getElementById("mes_fim").value =
+            `${ano}-${mes}`;
+
         await carregar();
 
     }

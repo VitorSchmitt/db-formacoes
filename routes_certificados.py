@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
-
+from pypdf import PdfWriter
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
@@ -544,6 +544,156 @@ def gerar_certificado_pdf(
         "data_emissao":
             datetime.now().strftime("%d/%m/%Y")
     }
+
+    # =========================
+    # PDF - TODOS OS APROVADOS
+    # =========================
+    
+    @router.get("/api/certificados/pdf-todos/{formacao_id}")
+    def gerar_todos_certificados(
+        formacao_id: int,
+        db: Session = Depends(get_db)
+    ):
+    
+        participacoes = (
+            db.query(Participacao)
+            .filter(
+                Participacao.formacao_id == formacao_id
+            )
+            .all()
+        )
+    
+        aprovados = []
+    
+        for p in participacoes:
+    
+            try:
+                carga_total = float(
+                    p.formacao.carga_horaria or 0
+                )
+            except:
+                carga_total = 0
+    
+            try:
+                carga_realizada = float(
+                    p.aproveitamento or 0
+                )
+            except:
+                carga_realizada = 0
+    
+            percentual = 0
+    
+            if carga_total > 0:
+                percentual = round(
+                    (carga_realizada / carga_total) * 100,
+                    2
+                )
+    
+            if percentual >= 75:
+                aprovados.append(p)
+    
+        if not aprovados:
+            return {
+                "erro": "Não existem participantes aprovados para esta formação."
+            }
+    
+        writer = PdfWriter()
+    
+        arquivos_temp = []
+    
+        try:
+    
+            for participacao in aprovados:
+    
+                carga_total = float(
+                    participacao.formacao.carga_horaria or 0
+                )
+    
+                carga_realizada = float(
+                    participacao.aproveitamento or 0
+                )
+    
+                percentual = round(
+                    (carga_realizada / carga_total) * 100,
+                    2
+                ) if carga_total > 0 else 0
+    
+                codigo = (
+                    f"CERT-{participacao.id:06d}"
+                )
+    
+                dados = {
+                    "nome":
+                        participacao.servidor.nome,
+    
+                    "formacao":
+                        participacao.formacao.descricao,
+    
+                    "fim":
+                        participacao.formacao.data_termino.strftime(
+                            "%d/%m/%Y"
+                        )
+                        if participacao.formacao.data_termino
+                        else "",
+    
+                    "carga_total":
+                        carga_total,
+    
+                    "carga_realizada":
+                        carga_realizada,
+    
+                    "percentual":
+                        percentual,
+    
+                    "codigo":
+                        codigo,
+    
+                    "data_emissao":
+                        datetime.now().strftime("%d/%m/%Y")
+                }
+    
+                temp = NamedTemporaryFile(
+                    delete=False,
+                    suffix=".pdf"
+                )
+    
+                caminho = temp.name
+                temp.close()
+    
+                gerar_pdf_certificado(
+                    dados,
+                    caminho
+                )
+    
+                arquivos_temp.append(caminho)
+    
+                writer.append(caminho)
+    
+            arquivo_final = NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf"
+            )
+    
+            caminho_final = arquivo_final.name
+            arquivo_final.close()
+    
+            writer.write(caminho_final)
+            writer.close()
+    
+            return FileResponse(
+                caminho_final,
+                media_type="application/pdf",
+                filename="certificados_aprovados.pdf"
+            )
+    
+        finally:
+    
+            for arquivo in arquivos_temp:
+    
+                try:
+                    os.remove(arquivo)
+                except:
+                    pass
 
     # =========================
     # ARQUIVO TEMPORÁRIO

@@ -707,7 +707,9 @@ const g2 = document.getElementById("g2");
     // ==========================
     // Eixos
     // ==========================
-
+    const eixos = Array.isArray(data.eixo)
+    ? data.eixo
+    : [];
     Plotly.react("g5", [{
 
         labels: data.eixo.map(

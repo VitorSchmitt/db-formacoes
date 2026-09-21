@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-
+import zipfile
 from database import SessionLocal
 from models import Participacao, Formacao, Servidor
 
@@ -582,6 +582,8 @@ def gerar_certificado_pdf(
     )
 
 
+
+
 # =========================
 # PDF - TODOS OS APROVADOS
 # =========================
@@ -707,6 +709,10 @@ def gerar_todos_certificados(
             .replace(" ", "_")
         )
 
+        nome_pdf = (
+            f"certificado_{nome_arquivo}.pdf"
+        )
+
         # =========================
         # PDF INDIVIDUAL
         # =========================
@@ -726,10 +732,8 @@ def gerar_todos_certificados(
         )
 
         arquivos.append({
-            "nome": p.servidor.nome,
-            "arquivo": caminho_pdf,
-            "nome_arquivo":
-                f"certificado_{nome_arquivo}.pdf"
+            "caminho": caminho_pdf,
+            "nome": nome_pdf
         })
 
     # =========================
@@ -744,24 +748,40 @@ def gerar_todos_certificados(
         }
 
     # =========================
-    # RETORNO
+    # CRIA ZIP
     # =========================
 
-    return {
-        "total": len(arquivos),
+    temp_zip = NamedTemporaryFile(
+        delete=False,
+        suffix=".zip"
+    )
 
-        "certificados": [
-            {
-                "nome":
-                    item["nome"],
+    caminho_zip = temp_zip.name
 
-                "arquivo":
-                    item["arquivo"],
+    temp_zip.close()
 
-                "nome_arquivo":
-                    item["nome_arquivo"]
-            }
+    with zipfile.ZipFile(
+        caminho_zip,
+        "w",
+        zipfile.ZIP_DEFLATED
+    ) as zipf:
 
-            for item in arquivos
-        ]
-    }
+        for arquivo in arquivos:
+
+            zipf.write(
+                arquivo["caminho"],
+                arquivo["nome"]
+            )
+
+    # =========================
+    # RETORNA ZIP
+    # =========================
+
+    return FileResponse(
+
+        caminho_zip,
+
+        media_type="application/zip",
+
+        filename="certificados_aprovados.zip"
+    )

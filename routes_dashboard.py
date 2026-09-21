@@ -687,7 +687,7 @@ def dashboard(
                 Lotacao.tipo.label("lotacao"),
 
                 func.count(
-                    Servidor.id
+                    Servidor.matricula
                 ).label("ativos")
 
             )

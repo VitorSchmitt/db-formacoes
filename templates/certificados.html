@@ -36,15 +36,22 @@
 
                 </div>
 
-                <div class="col-md-4 d-flex align-items-end">
+                <div class="col-md-4 d-flex align-items-end gap-2">
 
                     <button
-                        class="btn btn-primary w-100"
+                        class="btn btn-primary flex-fill"
                         onclick="buscar()"
                     >
                         🔍 Buscar Aptos
                     </button>
-
+                
+                    <button
+                        class="btn btn-success flex-fill"
+                        onclick="imprimirTodos()"
+                    >
+                        🖨️ Todos
+                    </button>
+                
                 </div>
 
             </div>
@@ -338,7 +345,28 @@ function emitir(participacao_id) {
     )
 }
 
+// ==============================
+// IMPRIMIR TODOS OS CERTIFICADOS
+// ==============================
+function imprimirTodos() {
 
+    let formacao_id =
+        document.getElementById("formacao").value
+
+    if (!formacao_id) {
+
+        alert(
+            "Selecione uma formação"
+        )
+
+        return
+    }
+
+    window.open(
+        `/api/certificados/pdf-todos/${formacao_id}`,
+        "_blank"
+    )
+}
 
 // ==============================
 // INIT

@@ -8,7 +8,8 @@ from models import (
     Participacao,
     Formacao,
     Lotacao,
-    PlanoAnual
+    PlanoAnual,
+    Servidor
 )
 
 router = APIRouter()
@@ -575,7 +576,196 @@ def dashboard(
             .all()
         
         )
-        
+        # =====================================
+        # PARTICIPAÇÃO POR LOTAÇÃO
+        # =====================================
+
+        participacao_lotacao = (
+
+            db.query(
+                Lotacao.tipo.label("lotacao"),
+                func.count(
+                    func.distinct(Servidor.matricula)
+                ).label("participantes")
+            )
+
+            .join(
+                Servidor,
+                Servidor.lotacao_id == Lotacao.id
+            )
+
+            .join(
+                Participacao,
+                Participacao.matricula == Servidor.matricula
+            )
+
+            .join(
+                Formacao,
+                Participacao.formacao_id == Formacao.id
+            )
+
+            .outerjoin(
+                PlanoAnual,
+                Formacao.plano_id == PlanoAnual.id
+            )
+
+            .filter(
+                Servidor.ativo == True
+            )
+        )
+
+
+        if mes_inicio:
+
+            participacao_lotacao = participacao_lotacao.filter(
+
+                func.to_char(
+                    Formacao.data_termino,
+                    "YYYY-MM"
+                ) >= mes_inicio
+
+            )
+
+
+        if mes_fim:
+
+            participacao_lotacao = participacao_lotacao.filter(
+
+                func.to_char(
+                    Formacao.data_termino,
+                    "YYYY-MM"
+                ) <= mes_fim
+
+            )
+
+
+        if lotacao:
+
+            participacao_lotacao = participacao_lotacao.filter(
+                Lotacao.tipo == lotacao
+            )
+
+
+        if curso:
+
+            participacao_lotacao = participacao_lotacao.filter(
+                Formacao.descricao == curso
+            )
+
+
+        if eixo:
+
+            participacao_lotacao = participacao_lotacao.filter(
+                PlanoAnual.eixo == eixo
+            )
+
+
+        participacao_lotacao_data = (
+
+            participacao_lotacao
+
+            .group_by(
+                Lotacao.tipo
+            )
+
+            .order_by(
+                Lotacao.tipo
+            )
+
+            .all()
+
+        )
+
+        # =====================================
+        # SERVIDORES ATIVOS POR LOTAÇÃO
+        # =====================================
+
+        servidores_lotacao_data = (
+
+            db.query(
+
+                Lotacao.tipo.label("lotacao"),
+
+                func.count(
+                    Servidor.id
+                ).label("ativos")
+
+            )
+
+            .join(
+
+                Servidor,
+                Servidor.lotacao_id == Lotacao.id
+
+            )
+
+            .filter(
+
+                Servidor.ativo == True
+
+            )
+
+            .group_by(
+
+                Lotacao.tipo
+
+            )
+
+            .order_by(
+
+                Lotacao.tipo
+
+            )
+
+            .all()
+
+        )
+
+
+        servidores_por_lotacao = {
+
+            l.lotacao: l.ativos
+
+            for l in servidores_lotacao_data
+
+        }
+
+
+        # =====================================
+        # PERCENTUAL DE PARTICIPAÇÃO
+        # =====================================
+
+        participacao_por_lotacao = []
+
+        for l in participacao_lotacao_data:
+
+            ativos = servidores_por_lotacao.get(
+                l.lotacao,
+                0
+            )
+
+            participantes = l.participantes
+
+            percentual = (
+
+                round(
+                    (participantes / ativos) * 100,
+                    2
+                )
+
+                if ativos > 0
+                else 0
+
+            )
+
+            participacao_por_lotacao.append({
+
+                "lotacao": l.lotacao,
+                "ativos": ativos,
+                "participantes": participantes,
+                "percentual": percentual
+
+            })
 
         return {
 
@@ -599,6 +789,19 @@ def dashboard(
                 }
 
                 for l in lotacao_data
+            ],
+
+            "participacao_lotacao": [
+
+                {
+                    "lotacao": l["lotacao"],
+                    "ativos": l["ativos"],
+                    "participantes": l["participantes"],
+                    "percentual": l["percentual"]
+                }
+
+                for l in participacao_por_lotacao
+
             ],
 
             "curso":[

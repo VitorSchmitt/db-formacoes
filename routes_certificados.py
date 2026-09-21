@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse
-from pypdf import PdfWriter
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
@@ -9,6 +8,7 @@ from models import Participacao, Formacao, Servidor
 
 from tempfile import NamedTemporaryFile
 from datetime import datetime
+
 from pdf_utils import (
     adicionar_cabecalho,
     criar_documento_pdf,
@@ -129,6 +129,7 @@ def gerar_pdf_certificado(
     # =========================
 
     doc = criar_documento_pdf(caminho_pdf)
+
     elementos = []
 
     adicionar_cabecalho(
@@ -241,6 +242,7 @@ def gerar_pdf_certificado(
     # =========================
 
     estilo_direita = obter_estilo_tabela()
+
     estilo_direita.alignment = 2
 
     adicionar_data_emissao(
@@ -435,7 +437,7 @@ def listar_aptos(
 
 
 # =========================
-# PDF
+# PDF INDIVIDUAL
 # =========================
 
 @router.get(
@@ -603,9 +605,20 @@ def gerar_todos_certificados(
         .all()
     )
 
-    aprovados = []
+    if not participacoes:
+
+        return {
+            "erro":
+                "Nenhum participante encontrado."
+        }
+
+    arquivos = []
 
     for p in participacoes:
+
+        # =========================
+        # CALCULA APROVEITAMENTO
+        # =========================
 
         try:
             carga_total = float(
@@ -632,152 +645,6 @@ def gerar_todos_certificados(
                 2
             )
 
-        if percentual >= 75:
-
-            aprovados.append(p)
-
-    if not aprovados:
-
-        return {
-            "erro":
-                "Não existem participantes aprovados para esta formação."
-        }
-
-    writer = PdfWriter()
-
-    arquivos_temp = []
-
-    try:
-
-        for participacao in aprovados:
-
-            carga_total = float(
-                participacao.formacao.carga_horaria or 0
-            )
-
-            carga_realizada = float(
-                participacao.aproveitamento or 0
-            )
-
-            percentual = round(
-                (carga_realizada / carga_total) * 100,
-                2
-            ) if carga_total > 0 else 0
-
-            codigo = (
-                f"CERT-{participacao.id:06d}"
-            )
-
-            dados = {
-
-                "nome":
-                    participacao.servidor.nome,
-
-                "formacao":
-                    participacao.formacao.descricao,
-
-                "fim":
-                    participacao.formacao.data_termino.strftime(
-                        "%d/%m/%Y"
-                    )
-                    if participacao.formacao.data_termino
-                    else "",
-
-                "carga_total":
-                    carga_total,
-
-                "carga_realizada":
-                    carga_realizada,
-
-                "percentual":
-                    percentual,
-
-                "codigo":
-                    codigo,
-
-                "data_emissao":
-                    datetime.now().strftime("%d/%m/%Y")
-            }
-
-            temp = NamedTemporaryFile(
-                delete=False,
-                suffix=".pdf"
-            )
-
-            caminho = temp.name
-
-            temp.close()
-
-            gerar_pdf_certificado(
-                dados,
-                caminho
-            )
-
-            arquivos_temp.append(caminho)
-
-            writer.append(caminho)
-
-        arquivo_final = NamedTemporaryFile(
-            delete=False,
-            suffix=".pdf"
-        )
-
-        caminho_final = arquivo_final.name
-
-        arquivo_final.close()
-
-        writer.write(caminho_final)
-
-        writer.close()
-
-        return FileResponse(
-            caminho_final,
-            media_type="application/pdf",
-            filename="certificados_aprovados.pdf"
-        )
-
-    finally:# =========================
-# PDF - TODOS OS APROVADOS
-# =========================
-
-@router.get("/api/certificados/pdf-todos/{formacao_id}")
-def gerar_todos_certificados(
-    formacao_id: int,
-    db: Session = Depends(get_db)
-):
-
-    participacoes = (
-        db.query(Participacao)
-        .filter(
-            Participacao.formacao_id == formacao_id
-        )
-        .all()
-    )
-
-    if not participacoes:
-        return {
-            "erro": "Nenhum participante encontrado."
-        }
-
-    arquivos = []
-
-    for p in participacoes:
-
-        # =========================
-        # CALCULA APROVEITAMENTO
-        # =========================
-
-        carga_total = p.formacao.carga_horaria or 0
-        carga_realizada = p.aproveitamento or 0
-
-        if carga_total > 0:
-            percentual = round(
-                (carga_realizada / carga_total) * 100,
-                2
-            )
-        else:
-            percentual = 0
-
         # =========================
         # SOMENTE APTOS
         # =========================
@@ -785,44 +652,84 @@ def gerar_todos_certificados(
         if percentual < 75:
             continue
 
-        servidor = p.servidor
-
-        if not servidor:
+        if not p.servidor:
             continue
 
         # =========================
-        # DADOS DO CERTIFICADO
+        # CÓDIGO
+        # =========================
+
+        codigo = (
+            f"CERT-{p.id:06d}"
+        )
+
+        # =========================
+        # DADOS
         # =========================
 
         dados = {
-            "nome": servidor.nome,
-            "matricula": servidor.matricula,
-            "formacao": p.formacao.nome,
-            "carga_horaria": p.formacao.carga_horaria,
-            "data_inicio": p.formacao.data_inicio,
-            "data_termino": p.formacao.data_termino,
-            "aproveitamento": percentual,
+
+            "nome":
+                p.servidor.nome,
+
+            "formacao":
+                p.formacao.descricao,
+
+            "fim":
+                p.formacao.data_termino.strftime(
+                    "%d/%m/%Y"
+                )
+                if p.formacao.data_termino
+                else "",
+
+            "carga_total":
+                carga_total,
+
+            "carga_realizada":
+                carga_realizada,
+
+            "percentual":
+                percentual,
+
+            "codigo":
+                codigo,
+
+            "data_emissao":
+                datetime.now().strftime("%d/%m/%Y")
         }
 
         # =========================
-        # GERA PDF INDIVIDUAL
+        # NOME DO ARQUIVO
         # =========================
 
-        arquivo = NamedTemporaryFile(
+        nome_arquivo = (
+            p.servidor.nome
+            .replace(" ", "_")
+        )
+
+        # =========================
+        # PDF INDIVIDUAL
+        # =========================
+
+        temp = NamedTemporaryFile(
             delete=False,
             suffix=".pdf"
         )
 
-        arquivo.close()
+        caminho_pdf = temp.name
+
+        temp.close()
 
         gerar_pdf_certificado(
             dados,
-            arquivo.name
+            caminho_pdf
         )
 
         arquivos.append({
-            "nome": servidor.nome,
-            "arquivo": arquivo.name
+            "nome": p.servidor.nome,
+            "arquivo": caminho_pdf,
+            "nome_arquivo":
+                f"certificado_{nome_arquivo}.pdf"
         })
 
     # =========================
@@ -830,29 +737,31 @@ def gerar_todos_certificados(
     # =========================
 
     if not arquivos:
+
         return {
-            "erro": "Nenhum participante apto para certificado."
+            "erro":
+                "Nenhum participante apto para certificado."
         }
 
     # =========================
-    # RETORNA LISTA DOS ARQUIVOS
+    # RETORNO
     # =========================
 
     return {
         "total": len(arquivos),
+
         "certificados": [
             {
-                "nome": item["nome"],
-                "arquivo": item["arquivo"]
+                "nome":
+                    item["nome"],
+
+                "arquivo":
+                    item["arquivo"],
+
+                "nome_arquivo":
+                    item["nome_arquivo"]
             }
+
             for item in arquivos
         ]
     }
-
-        for arquivo in arquivos_temp:
-
-            try:
-                os.remove(arquivo)
-
-            except:
-                pass

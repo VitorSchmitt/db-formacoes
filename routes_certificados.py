@@ -258,26 +258,7 @@ def gerar_pdf_certificado(
     # ASSINATURA
     # =========================
 
-    if os.path.exists(ASSINATURA_IMG):
-
-        assinatura = Image(
-            ASSINATURA_IMG,
-            width=6 * cm,
-            height=2 * cm
-        )
-
-        assinatura.hAlign = "LEFT"
-
-        elementos.append(assinatura)
-
-    else:
-
-        elementos.append(
-            Paragraph(
-                "_" * 40,
-                estilo_texto
-            )
-        )
+    
 
     elementos.append(
         Paragraph(

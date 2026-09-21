@@ -101,6 +101,9 @@
     #g7 {
         height: 350px;
     }
+    #g8 {
+    height: 450px;
+    }
 </style>
 
 <div class="row">
@@ -112,6 +115,7 @@
     <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g5"></div></div></div></div> 
     <div class="col-md-6 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g4"></div></div></div></div>
 </div>
+<div class="row"><div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g8"></div></div></div></div></div>    
 <div class="row">
     <div class="col-md-12 mb-4"><div class="card shadow-sm"><div class="card-body"><div id="g7"></div></div></div></div>
 </div>
@@ -750,7 +754,87 @@ const g2 = document.getElementById("g2");
     
     });
     
+// ==========================
+// Percentual de participação por lotação
+// ==========================
 
+const participacaoLotacao =
+    Array.isArray(data.participacao_lotacao)
+        ? data.participacao_lotacao
+        : [];
+
+const g8 = document.getElementById("g8");
+
+if (participacaoLotacao.length > 0) {
+
+    g8.style.display = "block";
+    g8.style.visibility = "visible";
+    g8.style.height = "450px";
+
+    Plotly.react("g8", [{
+
+        x: participacaoLotacao.map(
+            x => x.lotacao
+        ),
+
+        y: participacaoLotacao.map(
+            x => Number(x.percentual || 0)
+        ),
+
+        text: participacaoLotacao.map(
+            x => `${Number(x.percentual || 0).toFixed(2)}%`
+        ),
+
+        textposition: "outside",
+
+        hovertemplate:
+            "<b>%{x}</b><br>" +
+            "Servidores ativos: %{customdata[0]}<br>" +
+            "Participantes: %{customdata[1]}<br>" +
+            "Percentual: %{y:.2f}%<extra></extra>",
+
+        customdata: participacaoLotacao.map(
+            x => [
+                Number(x.ativos || 0),
+                Number(x.participantes || 0)
+            ]
+        ),
+
+        type: "bar"
+
+    }], {
+
+        title: "Percentual de participação por lotação",
+
+        yaxis: {
+            title: "Percentual (%)",
+            ticksuffix: "%"
+        },
+
+        xaxis: {
+            tickangle: -45,
+            tickfont: {
+                size: 9
+            }
+        },
+
+        margin: {
+            b: 130,
+            t: 60
+        }
+
+    });
+
+    setTimeout(() => {
+        Plotly.Plots.resize(g8);
+    }, 100);
+
+} else {
+
+    g8.style.display = "none";
+    g8.innerHTML = "";
+
+}
 
     // ==========================
     // Comparativo anual

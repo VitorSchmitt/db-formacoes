@@ -736,7 +736,118 @@ def gerar_todos_certificados(
             filename="certificados_aprovados.pdf"
         )
 
-    finally:
+    finally:# =========================
+# PDF - TODOS OS APROVADOS
+# =========================
+
+@router.get("/api/certificados/pdf-todos/{formacao_id}")
+def gerar_todos_certificados(
+    formacao_id: int,
+    db: Session = Depends(get_db)
+):
+
+    participacoes = (
+        db.query(Participacao)
+        .filter(
+            Participacao.formacao_id == formacao_id
+        )
+        .all()
+    )
+
+    if not participacoes:
+        return {
+            "erro": "Nenhum participante encontrado."
+        }
+
+    arquivos = []
+
+    for p in participacoes:
+
+        # =========================
+        # CALCULA APROVEITAMENTO
+        # =========================
+
+        carga_total = p.formacao.carga_horaria or 0
+        carga_realizada = p.aproveitamento or 0
+
+        if carga_total > 0:
+            percentual = round(
+                (carga_realizada / carga_total) * 100,
+                2
+            )
+        else:
+            percentual = 0
+
+        # =========================
+        # SOMENTE APTOS
+        # =========================
+
+        if percentual < 75:
+            continue
+
+        servidor = p.servidor
+
+        if not servidor:
+            continue
+
+        # =========================
+        # DADOS DO CERTIFICADO
+        # =========================
+
+        dados = {
+            "nome": servidor.nome,
+            "matricula": servidor.matricula,
+            "formacao": p.formacao.nome,
+            "carga_horaria": p.formacao.carga_horaria,
+            "data_inicio": p.formacao.data_inicio,
+            "data_termino": p.formacao.data_termino,
+            "aproveitamento": percentual,
+        }
+
+        # =========================
+        # GERA PDF INDIVIDUAL
+        # =========================
+
+        arquivo = NamedTemporaryFile(
+            delete=False,
+            suffix=".pdf"
+        )
+
+        arquivo.close()
+
+        gerar_pdf_certificado(
+            dados,
+            arquivo.name
+        )
+
+        arquivos.append({
+            "nome": servidor.nome,
+            "arquivo": arquivo.name
+        })
+
+    # =========================
+    # NENHUM APTO
+    # =========================
+
+    if not arquivos:
+        return {
+            "erro": "Nenhum participante apto para certificado."
+        }
+
+    # =========================
+    # RETORNA LISTA DOS ARQUIVOS
+    # =========================
+
+    return {
+        "total": len(arquivos),
+        "certificados": [
+            {
+                "nome": item["nome"],
+                "arquivo": item["arquivo"]
+            }
+            for item in arquivos
+        ]
+    }
 
         for arquivo in arquivos_temp:
 

@@ -348,7 +348,7 @@ function emitir(participacao_id) {
 // ==============================
 // IMPRIMIR TODOS OS CERTIFICADOS
 // ==============================
-function imprimirTodos() {
+async function imprimirTodos() {
 
     let formacao_id =
         document.getElementById("formacao").value
@@ -362,10 +362,120 @@ function imprimirTodos() {
         return
     }
 
-    window.open(
-        `/api/certificados/pdf-todos/${formacao_id}`,
-        "_blank"
-    )
+    // ==========================
+    // ABRIR MODAL
+    // ==========================
+
+    let modalElement =
+        document.getElementById("modalProgresso")
+
+    let modal =
+        new bootstrap.Modal(modalElement)
+
+    modal.show()
+
+    let barra =
+        document.getElementById("barraProgresso")
+
+    let texto =
+        document.getElementById("progressoTexto")
+
+    let detalhe =
+        document.getElementById("progressoDetalhe")
+
+    barra.style.width = "0%"
+    barra.innerText = "0%"
+
+    texto.innerText =
+        "Gerando certificados..."
+
+    detalhe.innerText =
+        "Preparando..."
+
+    try {
+
+        // ==========================
+        // INICIA GERAÇÃO
+        // ==========================
+
+        let response = await fetch(
+            `/api/certificados/pdf-todos/${formacao_id}`
+        )
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Erro ao gerar certificados"
+            )
+        }
+
+        let dados =
+            await response.json()
+
+        // ==========================
+        // ATUALIZA PROGRESSO
+        // ==========================
+
+        if (dados.total) {
+
+            barra.style.width = "100%"
+            barra.innerText = "100%"
+
+            texto.innerText =
+                "Certificados gerados!"
+
+            detalhe.innerText =
+                `${dados.total} certificado(s) gerado(s)`
+        }
+
+        // ==========================
+        // DOWNLOAD
+        // ==========================
+
+        if (dados.arquivo) {
+
+            let link =
+                document.createElement("a")
+
+            link.href =
+                dados.arquivo
+
+            link.download =
+                "certificados_aprovados.zip"
+
+            document.body.appendChild(link)
+
+            link.click()
+
+            link.remove()
+
+        } else {
+
+            throw new Error(
+                "Arquivo não foi gerado."
+            )
+        }
+
+        // ==========================
+        // FECHAR MODAL
+        // ==========================
+
+        setTimeout(() => {
+
+            modal.hide()
+
+        }, 1500)
+
+    } catch (error) {
+
+        console.error(error)
+
+        modal.hide()
+
+        alert(
+            "Erro ao gerar os certificados."
+        )
+    }
 }
 
 // ==============================

@@ -209,11 +209,16 @@ def criar(dados: dict, db: Session = Depends(get_db)):
     # 🔎 validar existência
     servidor = db.get(Servidor, dados["matricula"])
     if not servidor:
-        return {"erro": "Servidor não encontrado"}
+        return {"erro": "Servidor não encontrado"}   
 
     lotacao = db.get(Lotacao, dados["lotacao_id"])
     if not lotacao:
         return {"erro": "Lotação inválida"}
+        
+    # 🔄 Atualizar lotação atual do servidor
+    if servidor.lotacao_id != dados["lotacao_id"]:
+        servidor.lotacao_id = dados["lotacao_id"]
+    
 
     # 🚫 evitar duplicidade
     existe = db.query(Participacao).filter_by(
@@ -367,10 +372,13 @@ def buscar_servidor(matricula: str, db: Session = Depends(get_db)):
     }
 
 @router.get("/lotacoes")
-def buscar_lotacoes(termo: str):
+def buscar_lotacoes(
+    termo: str,
+    db: Session = Depends(get_db)
+):
 
     return (
         db.query(Lotacao)
-        .filter(Lotacao.nome.ilike(f"%{termo}%"))
+        .filter(Lotacao.descricao.ilike(f"%{termo}%"))
         .all()
     )

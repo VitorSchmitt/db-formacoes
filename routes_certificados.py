@@ -45,9 +45,9 @@ import os
 # CONFIGURAÇÕES
 # =========================
 
-ASSINANTE = "Jamille de Freitas Serres"
+ASSINANTE = "COORDENAÇÃO DE FORMAÇÃO PERMANENTE"
 
-ASSINATURA_IMG = "static/img/assinatura.png"
+
 
 router = APIRouter()
 

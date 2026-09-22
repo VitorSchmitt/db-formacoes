@@ -332,16 +332,7 @@ def dashboard(
         )
 
 
-        media = (
-
-            round(
-                total/servidores_unicos,
-                2
-            )
-
-            if servidores_unicos
-            else 0
-        )
+        media =servidores_unicos 
 
 
         # =====================================

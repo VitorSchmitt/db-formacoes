@@ -711,7 +711,17 @@ def dashboard(
             .all()
 
         )
-
+        
+        total_servidores_ativos = (
+            
+            db.query(
+                func.count(Servidor.matricula)
+            )
+            .filter(
+                Servidor.ativo == True
+            )
+            .scalar()
+        )
 
         servidores_por_lotacao = {
 
@@ -768,7 +778,7 @@ def dashboard(
                 "taxa_evasao": taxa_evasao,
                 "servidores_unicos": servidores_unicos,
                 "carga_realizada": carga_realizada,
-                "media_por_servidor": servidores_lotacao_data
+                "media_por_servidor": total_servidores_ativos
 
             },
 

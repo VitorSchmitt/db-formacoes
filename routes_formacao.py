@@ -221,20 +221,19 @@ def criar(
 
         nova = Formacao(
 
-            descricao=dados.get("descricao"),
+            descricao=dados.get("descricao", "").upper(),
             data_inicio=dados.get("data_inicio"),
             data_termino=dados.get("data_termino"),            
             carga_horaria=dados.get("carga_horaria"),
             modalidade=dados.get("modalidade"),
-            publico_alvo=dados.get("publico_alvo"),
+            publico_alvo=dados.get("publico_alvo", "").upper(),
             investimento=dados.get("investimento"),
             meta_participantes=dados.get("meta_participantes"),
             status=dados.get("status"),
             plano_id=dados.get("plano_id"),
             ativo=True
-
+        
         )
-
         db.add(nova)
 
         db.commit()
@@ -294,6 +293,8 @@ def atualizar(
             ).items()
 
         ):
+            if campo in ["descricao", "publico_alvo"] and isinstance(valor, str):
+                valor = valor.upper()
 
             setattr(
                 formacao,

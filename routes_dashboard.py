@@ -768,7 +768,7 @@ def dashboard(
                 "taxa_evasao": taxa_evasao,
                 "servidores_unicos": servidores_unicos,
                 "carga_realizada": carga_realizada,
-                "media_por_servidor": media
+                "media_por_servidor": servidores_lotacao_data
 
             },
 

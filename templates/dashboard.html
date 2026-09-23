@@ -900,46 +900,56 @@ if (participacaoLotacao.length > 0) {
 }
 
     // ==========================
-    // Comparativo anual
-    // ==========================
+// Comparativo anual
+// ==========================
 
-    if((data.anual || []).length>0){
+const anual = data.anual || [];
 
-        document.getElementById(
-            "g7"
-        ).style.display="block";
+let mostrarAnual = false;
 
-        Plotly.react("g7",[{
+if (anual.length >= 2) {
 
-            x:data.anual.map(
-                x=>x.ano
-            ),
+    const primeiro = anual[0].qtd;
+    const ultimo = anual[anual.length - 1].qtd;
 
-            y:data.anual.map(
-                x=>x.qtd
-            ),
+    mostrarAnual = primeiro !== ultimo;
+}
 
-            type:"scatter",
+if (mostrarAnual) {
 
-            mode:"lines+markers"
+    document.getElementById(
+        "g7"
+    ).style.display = "block";
 
-        }],{
+    Plotly.react("g7", [{
 
-            title:"Comparativo Anual"
+        x: anual.map(
+            x => x.ano
+        ),
 
-        });
+        y: anual.map(
+            x => x.qtd
+        ),
 
-    }else{
+        type: "scatter",
 
-        document.getElementById(
-            "g7"
-        ).style.display="none";
+        mode: "lines+markers"
 
-        document.getElementById(
-            "g7"
-        ).innerHTML="";
-    }
+    }], {
 
+        title: "Comparativo Anual"
+
+    });
+
+} else {
+
+    document.getElementById(
+        "g7"
+    ).style.display = "none";
+
+    document.getElementById(
+        "g7"
+    ).innerHTML = "";
 }
 
 

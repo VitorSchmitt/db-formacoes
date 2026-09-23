@@ -730,7 +730,14 @@ def dashboard(
             for l in servidores_lotacao_data
 
         }
-
+        percentual_servidores = (
+            round(
+                (servidores_unicos / total_servidores_ativos) * 100,
+                2
+            )
+            if total_servidores_ativos > 0
+            else 0
+        )
 
         # =====================================
         # PERCENTUAL DE PARTICIPAÇÃO

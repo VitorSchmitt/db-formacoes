@@ -20,6 +20,9 @@ from routes_cronograma import router as cronograma_router
 from routes_relatorio_servidor import router as relatorio_router
 from routes_facilitador import router as facilitador_router
 from routes_relatorio_facilitador import router as relatorio_facilitador_router
+from relatorio_formacoes_unidade import router as relatorio_formacoes_unidade_router
+
+
 
 
 # ==========================================
@@ -74,6 +77,7 @@ app.include_router(cronograma_router)
 app.include_router(relatorio_router)
 app.include_router(facilitador_router)
 app.include_router(relatorio_facilitador_router)
+app.include_router(relatorio_formacoes_unidade_router)
 
 
 # ==========================================

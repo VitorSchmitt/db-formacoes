@@ -445,7 +445,7 @@ def relatorio_formacoes_unidade_pdf(
             tabela_formacoes = Table(
                 tabela,
                 colWidths=[
-                    8 * cm,
+                    10.5 * cm,
                     2.3 * cm,
                     2.3 * cm,
                     1.8 * cm

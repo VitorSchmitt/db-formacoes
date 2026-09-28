@@ -194,6 +194,13 @@ def tela_relatorio_facilitador(request: Request):  # Corrigido nome duplicado da
         {"request": request}
     )
 
+@app.get("/web/relatorio_formacoes_unidade")
+def tela_relatorio_formacoes_unidade(request: Request):
+    return templates.TemplateResponse(
+        "relatorio_formacoes_unidade.html",
+        {"request": request}
+    )
+
 # ==========================================
 # NOVA ROTA WEB: Renderiza o HTML da Classificação
 # ==========================================

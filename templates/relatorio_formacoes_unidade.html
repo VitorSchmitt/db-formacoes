@@ -1,0 +1,754 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- TÍTULO -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            📚 Relatório de Formações por Unidade
+        </h2>
+    </div>
+
+
+    <!-- FILTROS -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <!-- UNIDADE -->
+                <div class="col-md-5">
+                    <label for="lotacao_id" class="form-label">
+                        Unidade
+                    </label>
+
+                    <select
+                        id="lotacao_id"
+                        class="form-select"
+                    >
+                        <option value="">
+                            Selecione a unidade
+                        </option>
+                    </select>
+                </div>
+
+
+                <!-- DATA INICIAL -->
+                <div class="col-md-3">
+                    <label for="data_inicio" class="form-label">
+                        Data inicial
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_inicio"
+                        class="form-control"
+                    >
+                </div>
+
+
+                <!-- DATA FINAL -->
+                <div class="col-md-3">
+                    <label for="data_fim" class="form-label">
+                        Data final
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_fim"
+                        class="form-control"
+                    >
+                </div>
+
+
+                <!-- BOTÃO -->
+                <div class="col-md-1 d-flex align-items-end">
+
+                    <button
+                        type="button"
+                        class="btn btn-primary w-100"
+                        onclick="consultarRelatorio()"
+                        title="Consultar"
+                    >
+                        🔎
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- BOTÃO PDF -->
+
+    <div
+        id="areaPDF"
+        class="mb-3"
+        style="display: none;"
+    >
+
+        <button
+            type="button"
+            class="btn btn-danger"
+            onclick="gerarPDF()"
+        >
+            📄 Gerar PDF
+        </button>
+
+    </div>
+
+
+    <!-- RESUMO -->
+
+    <div
+        id="resumo"
+        class="card shadow-sm mb-4"
+        style="display: none;"
+    >
+
+        <div class="card-body">
+
+            <h5 class="card-title">
+                Resumo
+            </h5>
+
+            <div class="row text-center">
+
+                <div class="col-md-2">
+                    <div class="fw-bold fs-4" id="totalServidores">
+                        0
+                    </div>
+                    <small>
+                        Servidores
+                    </small>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="fw-bold fs-4" id="totalComFormacao">
+                        0
+                    </div>
+                    <small>
+                        Com formação
+                    </small>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="fw-bold fs-4" id="totalSemFormacao">
+                        0
+                    </div>
+                    <small>
+                        Sem formação
+                    </small>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="fw-bold fs-4" id="totalParticipacoes">
+                        0
+                    </div>
+                    <small>
+                        Participações
+                    </small>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="fw-bold fs-4" id="totalCargaHoraria">
+                        0 h
+                    </div>
+                    <small>
+                        Carga horária
+                    </small>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESULTADO -->
+
+    <div
+        id="resultado"
+        style="display: none;"
+    >
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <div>
+                        <h5 class="mb-1" id="tituloUnidade"></h5>
+
+                        <small
+                            class="text-muted"
+                            id="tituloPeriodo"
+                        ></small>
+                    </div>
+
+                </div>
+
+
+                <!-- LISTA DE SERVIDORES -->
+
+                <div id="listaServidores"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MENSAGEM -->
+
+    <div
+        id="mensagem"
+        class="alert alert-warning"
+        style="display: none;"
+    ></div>
+
+</div>
+
+
+<script>
+
+    // =====================================================
+    // CARREGAR LOTAÇÕES
+    // =====================================================
+
+    async function carregarLotacoes() {
+
+        try {
+
+            const response = await fetch(
+                "/relatorio-formacoes-unidade/lotacoes"
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Erro ao carregar unidades."
+                );
+            }
+
+            const lotacoes = await response.json();
+
+            const select =
+                document.getElementById("lotacao_id");
+
+            lotacoes.forEach(lotacao => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = lotacao.id;
+                option.textContent = lotacao.descricao;
+
+                select.appendChild(option);
+
+            });
+
+        } catch (erro) {
+
+            mostrarMensagem(
+                "Não foi possível carregar as unidades."
+            );
+
+            console.error(erro);
+        }
+    }
+
+
+    // =====================================================
+    // CONSULTAR
+    // =====================================================
+
+    async function consultarRelatorio() {
+
+        const lotacaoId =
+            document.getElementById("lotacao_id").value;
+
+        const dataInicio =
+            document.getElementById("data_inicio").value;
+
+        const dataFim =
+            document.getElementById("data_fim").value;
+
+
+        if (!lotacaoId) {
+
+            mostrarMensagem(
+                "Selecione uma unidade."
+            );
+
+            return;
+        }
+
+
+        if (!dataInicio || !dataFim) {
+
+            mostrarMensagem(
+                "Informe a data inicial e a data final."
+            );
+
+            return;
+        }
+
+
+        if (dataInicio > dataFim) {
+
+            mostrarMensagem(
+                "A data inicial não pode ser maior que a data final."
+            );
+
+            return;
+        }
+
+
+        esconderMensagem();
+
+
+        const url =
+            `/relatorio-formacoes-unidade/` +
+            `?lotacao_id=${lotacaoId}` +
+            `&data_inicio=${dataInicio}` +
+            `&data_fim=${dataFim}`;
+
+
+        try {
+
+            const response =
+                await fetch(url);
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Erro ao consultar relatório."
+                );
+
+            }
+
+
+            const dados =
+                await response.json();
+
+
+            if (dados.erro) {
+
+                mostrarMensagem(
+                    dados.erro
+                );
+
+                return;
+            }
+
+
+            preencherResumo(dados);
+
+            preencherServidores(dados);
+
+            document.getElementById(
+                "resumo"
+            ).style.display = "block";
+
+
+            document.getElementById(
+                "resultado"
+            ).style.display = "block";
+
+
+            document.getElementById(
+                "areaPDF"
+            ).style.display = "block";
+
+        } catch (erro) {
+
+            console.error(erro);
+
+            mostrarMensagem(
+                "Não foi possível consultar o relatório."
+            );
+        }
+    }
+
+
+    // =====================================================
+    // RESUMO
+    // =====================================================
+
+    function preencherResumo(dados) {
+
+        document.getElementById(
+            "totalServidores"
+        ).textContent =
+            dados.totais.servidores;
+
+
+        document.getElementById(
+            "totalComFormacao"
+        ).textContent =
+            dados.totais.com_formacao;
+
+
+        document.getElementById(
+            "totalSemFormacao"
+        ).textContent =
+            dados.totais.sem_formacao;
+
+
+        document.getElementById(
+            "totalParticipacoes"
+        ).textContent =
+            dados.totais.participacoes;
+
+
+        document.getElementById(
+            "totalCargaHoraria"
+        ).textContent =
+            dados.totais.carga_horaria + " h";
+
+
+        document.getElementById(
+            "tituloUnidade"
+        ).textContent =
+            dados.lotacao.descricao;
+
+
+        document.getElementById(
+            "tituloPeriodo"
+        ).textContent =
+            "Período: " +
+            formatarData(dados.periodo.data_inicio) +
+            " a " +
+            formatarData(dados.periodo.data_fim);
+    }
+
+
+    // =====================================================
+    // SERVIDORES
+    // =====================================================
+
+    function preencherServidores(dados) {
+
+        const container =
+            document.getElementById(
+                "listaServidores"
+            );
+
+
+        container.innerHTML = "";
+
+
+        dados.servidores.forEach(
+            servidor => {
+
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "card mb-3";
+
+
+                let html = `
+
+                    <div class="card-header">
+
+                        <strong>
+                            ${escapeHtml(
+                                servidor.matricula
+                            )}
+                        </strong>
+
+                        -
+                        
+                        ${escapeHtml(
+                            servidor.nome
+                        )}
+
+                    </div>
+
+                    <div class="card-body p-0">
+                `;
+
+
+                if (
+                    !servidor.formacoes ||
+                    servidor.formacoes.length === 0
+                ) {
+
+                    html += `
+
+                        <div class="p-3 text-muted">
+
+                            <strong>
+                                Não realizou formação
+                            </strong>
+                            
+                            no período.
+
+                        </div>
+                    `;
+
+                } else {
+
+                    html += `
+
+                        <div class="table-responsive">
+
+                            <table class="table table-sm table-hover mb-0">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Formação
+                                        </th>
+
+                                        <th>
+                                            Início
+                                        </th>
+
+                                        <th>
+                                            Término
+                                        </th>
+
+                                        <th class="text-center">
+                                            Carga horária
+                                        </th>
+
+                                        <th class="text-center">
+                                            Aproveitamento
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+                    `;
+
+
+                    servidor.formacoes.forEach(
+                        formacao => {
+
+                            let aproveitamento =
+                                formacao.aproveitamento !== null &&
+                                formacao.aproveitamento !== undefined
+                                    ? formacao.aproveitamento + "%"
+                                    : "-";
+
+
+                            html += `
+
+                                <tr>
+
+                                    <td>
+                                        ${escapeHtml(
+                                            formacao.descricao
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${
+                                            formacao.data_inicio
+                                                ? formatarData(
+                                                    formacao.data_inicio
+                                                )
+                                                : "-"
+                                        }
+                                    </td>
+
+                                    <td>
+                                        ${
+                                            formacao.data_termino
+                                                ? formatarData(
+                                                    formacao.data_termino
+                                                )
+                                                : "-"
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        ${
+                                            formacao.carga_horaria || 0
+                                        } h
+                                    </td>
+
+                                    <td class="text-center">
+                                        ${aproveitamento}
+                                    </td>
+
+                                </tr>
+
+                            `;
+                        }
+                    );
+
+
+                    html += `
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    `;
+                }
+
+
+                html += `
+                    </div>
+                `;
+
+
+                card.innerHTML = html;
+
+                container.appendChild(card);
+
+            }
+        );
+    }
+
+
+    // =====================================================
+    // PDF
+    // =====================================================
+
+    function gerarPDF() {
+
+        const lotacaoId =
+            document.getElementById(
+                "lotacao_id"
+            ).value;
+
+        const dataInicio =
+            document.getElementById(
+                "data_inicio"
+            ).value;
+
+        const dataFim =
+            document.getElementById(
+                "data_fim"
+            ).value;
+
+
+        if (
+            !lotacaoId ||
+            !dataInicio ||
+            !dataFim
+        ) {
+
+            mostrarMensagem(
+                "Informe a unidade e o período antes de gerar o PDF."
+            );
+
+            return;
+        }
+
+
+        const url =
+            `/relatorio-formacoes-unidade/pdf` +
+            `?lotacao_id=${lotacaoId}` +
+            `&data_inicio=${dataInicio}` +
+            `&data_fim=${dataFim}`;
+
+
+        window.open(
+            url,
+            "_blank"
+        );
+    }
+
+
+    // =====================================================
+    // UTILITÁRIOS
+    // =====================================================
+
+    function formatarData(data) {
+
+        if (!data) {
+            return "-";
+        }
+
+        const partes =
+            data.split("-");
+
+        if (partes.length !== 3) {
+            return data;
+        }
+
+        return (
+            partes[2] +
+            "/" +
+            partes[1] +
+            "/" +
+            partes[0]
+        );
+    }
+
+
+    function escapeHtml(texto) {
+
+        if (texto === null || texto === undefined) {
+            return "";
+        }
+
+        return String(texto)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    function mostrarMensagem(texto) {
+
+        const mensagem =
+            document.getElementById(
+                "mensagem"
+            );
+
+        mensagem.textContent =
+            texto;
+
+        mensagem.style.display =
+            "block";
+    }
+
+
+    function esconderMensagem() {
+
+        document.getElementById(
+            "mensagem"
+        ).style.display = "none";
+    }
+
+
+    // =====================================================
+    // INICIALIZAÇÃO
+    // =====================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            carregarLotacoes();
+
+        }
+    );
+
+</script>
+
+{% endblock %}

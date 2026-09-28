@@ -126,14 +126,20 @@ def relatorio_formacoes_unidade(
         for participacao in participacoes:
 
             formacao = participacao.formacao
-
+        
+            aproveitamento = (
+                (participacao.aproveitamento / formacao.carga_horaria) * 100
+                if formacao.carga_horaria
+                else 0
+            )
+        
             formacoes.append({
                 "id": formacao.id,
                 "descricao": formacao.descricao,
                 "data_inicio": formacao.data_inicio,
                 "data_termino": formacao.data_termino,
                 "carga_horaria": formacao.carga_horaria or 0,
-                "aproveitamento": participacao.aproveitamento
+                "aproveitamento": aproveitamento
             })
 
         if formacoes:

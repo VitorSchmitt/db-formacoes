@@ -400,24 +400,46 @@ def relatorio_formacoes_unidade_pdf(
 
         else:
 
+            estilo_tabela = styles["Normal"]
+            estilo_tabela.fontName = "Helvetica"
+            estilo_tabela.fontSize = 7.5
+            estilo_tabela.leading = 9
+            
+            estilo_cabecalho = styles["Normal"]
+            estilo_cabecalho.fontName = "Helvetica-Bold"
+            estilo_cabecalho.fontSize = 7.5
+            estilo_cabecalho.leading = 9
+            
             tabela = [
                 [
-                    "Formação",
-                    "Início",
-                    "Término",
-                    "Carga"
+                    Paragraph("Formação", estilo_cabecalho),
+                    Paragraph("Início", estilo_cabecalho),
+                    Paragraph("Término", estilo_cabecalho),
+                    Paragraph("Carga", estilo_cabecalho)
                 ]
             ]
-
+            
             for formacao in servidor["formacoes"]:
-
+            
                 tabela.append([
-                    formacao["descricao"],
-                    formacao["data_inicio"].strftime("%d/%m/%Y")
-                    if formacao["data_inicio"] else "",
-                    formacao["data_termino"].strftime("%d/%m/%Y")
-                    if formacao["data_termino"] else "",
-                    f"{formacao['carga_horaria']} h"
+                    Paragraph(
+                        str(formacao["descricao"]),
+                        estilo_tabela
+                    ),
+                    Paragraph(
+                        formacao["data_inicio"].strftime("%d/%m/%Y")
+                        if formacao["data_inicio"] else "",
+                        estilo_tabela
+                    ),
+                    Paragraph(
+                        formacao["data_termino"].strftime("%d/%m/%Y")
+                        if formacao["data_termino"] else "",
+                        estilo_tabela
+                    ),
+                    Paragraph(
+                        f"{formacao['carga_horaria']} h",
+                        estilo_tabela
+                    )
                 ])
 
             tabela_formacoes = Table(

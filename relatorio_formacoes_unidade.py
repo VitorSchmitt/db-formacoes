@@ -184,7 +184,7 @@ def relatorio_formacoes_unidade(
 
         "servidores": resultado
     }
-}
+
 
 
 # =========================================================
